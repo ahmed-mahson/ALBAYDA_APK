@@ -146,25 +146,29 @@ object PdfReport {
         src.render(bmp, null, null, PdfRenderer.Page.RENDER_MODE_FOR_PRINT)
         src.close()
         val c = Canvas(bmp)
-        val p = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        val sx = w / 595.32f
+        val sy = h / 841.92f
+        val pCenter = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.BLACK
             textAlign = Paint.Align.CENTER
             typeface = tf ?: typeface
-            textSize = 28f * (h / 842f)
+            textSize = 24f * sy
         }
-        val sx = w / 595.32f
-        val sy = h / 842f
+        val pRight = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.BLACK
+            textAlign = Paint.Align.RIGHT
+            typeface = tf ?: typeface
+            textSize = 18f * sy
+        }
         val plaintiff = data["المدعي"] ?: data["الطاعن"] ?: "-"
         val defendant = data["المدعى عليه"] ?: data["المطعون ضده"] ?: "-"
         val date = data["تاريخ الجلسة"] ?: "-"
         val judge = data["القاضي"] ?: data["اسم القاضي"] ?: data["القاضي المختص"] ?: "-"
-        val caseNo = data["رقم القضية"] ?: "-"
-        // Approximate positions for attendance template (tuned for common layout)
-        drawFittedText(c, p, plaintiff, 360f * sx, h - 648f * sy, 320f * sx)
-        drawFittedText(c, p, defendant, 360f * sx, h - 603f * sy, 320f * sx)
-        drawFittedText(c, p, caseNo, 380f * sx, h - 560f * sy, 200f * sx)
-        drawFittedText(c, p, date, 300f * sx, h - 520f * sy, 180f * sx)
-        drawFittedText(c, p, judge, 210f * sx, h - 382f * sy, 220f * sx)
+        // Positions aligned with bot logic where possible
+        drawFittedText(c, pCenter, plaintiff, 380f * sx, h - 648f * sy, 205f * sx)
+        drawFittedText(c, pCenter, defendant, 380f * sx, h - 603f * sy, 205f * sx)
+        drawFittedText(c, pCenter, date, 310f * sx, h - 521.47f * sy, 180f * sx)
+        drawFittedText(c, pRight, judge, 211.25f * sx, h - 382.49f * sy, 150f * sx)
         val page = outDoc.startPage(PdfDocument.PageInfo.Builder(w, h, 1).create())
         page.canvas.drawBitmap(bmp, 0f, 0f, null)
         outDoc.finishPage(page)
@@ -339,8 +343,8 @@ object PdfReport {
                 for (i in chunk.indices) {
                     val value = chunk[i].getOrNull(1) ?: "-"
                     val y = h - baselines.getOrElse(i) { 200f } * sy
-                    p.textSize = 26f * sy
-                    drawFittedText(c, p, value, 216f * sx, y, 320f * sx)
+                    p.textSize = 28f * sy
+                    drawFittedText(c, p, value, 216f * sx, y, 330f * sx)
                 }
                 val page = outDoc.startPage(PdfDocument.PageInfo.Builder(w, h, idx + 1).create())
                 page.canvas.drawBitmap(bmp, 0f, 0f, null)
