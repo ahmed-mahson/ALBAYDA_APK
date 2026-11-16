@@ -13,7 +13,7 @@ class NewsTicker @JvmOverloads constructor(
 
     init {
         isSingleLine = true
-        isHorizontallyScrolling = true
+        setHorizontallyScrolling(true)
     }
 
     fun setNews(items: List<String>) {

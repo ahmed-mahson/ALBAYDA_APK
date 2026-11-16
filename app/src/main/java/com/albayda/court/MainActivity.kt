@@ -27,15 +27,15 @@ class MainActivity : AppCompatActivity() {
         }
 
         // تعيين الأيقونات والعناوين للبطاقات
-        setupCard(binding.cardCase, android.R.drawable.ic_search, "الاستعلام عن قضية")
-        setupCard(binding.cardAttendance, android.R.drawable.ic_menu_edit, "إنشاء إعلان حضور")
-        setupCard(binding.cardSessions, android.R.drawable.ic_menu_my_calendar, "الجلسات اليومية")
-        setupCard(binding.cardSupreme, android.R.drawable.ic_menu_compass, "المحكمة العليا")
+        setupCard(binding.cardCase.root, android.R.drawable.ic_menu_search, "الاستعلام عن قضية")
+        setupCard(binding.cardAttendance.root, android.R.drawable.ic_menu_edit, "إنشاء إعلان حضور")
+        setupCard(binding.cardSessions.root, android.R.drawable.ic_menu_my_calendar, "الجلسات اليومية")
+        setupCard(binding.cardSupreme.root, android.R.drawable.ic_menu_compass, "المحكمة العليا")
 
-        binding.cardCase.setOnClickListener { openSearch("case") }
-        binding.cardAttendance.setOnClickListener { openSearch("attendance") }
-        binding.cardSessions.setOnClickListener { openSearch("sessions") }
-        binding.cardSupreme.setOnClickListener { openSearch("supreme") }
+        binding.cardCase.root.setOnClickListener { openSearch("case") }
+        binding.cardAttendance.root.setOnClickListener { openSearch("attendance") }
+        binding.cardSessions.root.setOnClickListener { openSearch("sessions") }
+        binding.cardSupreme.root.setOnClickListener { openSearch("supreme") }
 
         binding.tvLogout.setOnClickListener {
             AuthManager.clearSession()

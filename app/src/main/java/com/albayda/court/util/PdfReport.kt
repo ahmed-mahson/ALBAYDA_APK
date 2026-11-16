@@ -24,9 +24,7 @@ object PdfReport {
         val pageInfo = PdfDocument.PageInfo.Builder(W.toInt(), H.toInt(), 1).create()
         val page = doc.startPage(pageInfo)
         val c = page.canvas
-        val p = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            textDirection = Paint.TEXT_DIRECTION_RTL
-        }
+        val p = Paint(Paint.ANTI_ALIAS_FLAG)
 
         // رأس الصفحة
         p.color = Color.rgb(8, 32, 79)
