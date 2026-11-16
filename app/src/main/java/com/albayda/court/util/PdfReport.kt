@@ -140,12 +140,13 @@ object PdfReport {
         }
         if (assetPath.contains("attendance")) {
             p.textAlign = Paint.Align.CENTER; p.textSize = 28f * sy; p.color = Color.BLACK
-            val map = rows.associate { (it.getOrNull(0)?:"") to (it.getOrNull(1)?:"") }
+            val map = rows.associate { (it.getOrNull(0)?:"").trim() to (it.getOrNull(1)?:"") }
             c.drawText(map["المدعي"] ?: "", 380f * sx, h - 648f * sy, p)
             c.drawText(map["المدعى عليه"] ?: "", 380f * sx, h - 603f * sy, p)
-            c.drawText(map["تاريخ الجلسة"] ?: "", 310f * sx, h - 521f * sy, p)
-            c.drawText(map["القاضي"] ?: "", 211f * sx, h - 382f * sy, p)
             c.drawText(map["رقم القضية"] ?: "", 400f * sx, h - 560f * sy, p)
+            c.drawText(map["تاريخ الجلسة"] ?: "", 310f * sx, h - 521f * sy, p)
+            c.drawText(map["القاضي"] ?: map["اسم القاضي"] ?: "", 211f * sx, h - 382f * sy, p)
+            c.drawText(map["نوع القضية"] ?: "", 380f * sx, h - 560f * sy, p)
             return
         }
         // generic overlay for other templates

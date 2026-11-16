@@ -28,25 +28,18 @@ data class CaseRecord(
 object CaseRecordsRepository {
     private const val DRIVE_FILE_ID = "1wxYp5pvVh-8fWkW8OV1zMqWz90q59j8H"
     private const val DRIVE_URL = "https://drive.google.com/uc?export=download&id=$DRIVE_FILE_ID"
-    private var cache: List<CaseRecord> = emptyList()
-    private var cacheAt: Long = 0
-    private const val CACHE_MS = 5 * 60 * 1000L
-
+    // Always fetch fresh data from Drive on each request as requested
     suspend fun loadRecords(force: Boolean = false): List<CaseRecord> = withContext(Dispatchers.IO) {
-        val now = System.currentTimeMillis()
-        if (!force && cache.isNotEmpty() && now - cacheAt < CACHE_MS) return@withContext cache
         val conn = (URL(DRIVE_URL).openConnection() as HttpURLConnection).apply {
-            connectTimeout = 20000
-            readTimeout = 20000
+            connectTimeout = 25000
+            readTimeout = 25000
             setRequestProperty("User-Agent", "AlbaydaCourtApp/1.0")
+            useCaches = false
         }
         try {
             val bytes = conn.inputStream.use { it.readBytes() }
             val text = try { String(bytes, Charsets.UTF_8) } catch (_: Exception) { String(bytes, charset("windows-1256")) }
-            val records = parseCsv(text)
-            cache = records
-            cacheAt = now
-            records
+            parseCsv(text)
         } finally {
             conn.disconnect()
         }

@@ -6,6 +6,7 @@
         <item name="android:statusBarColor">@color/navy_900</item>
         <item name="android:navigationBarColor">@color/white</item>
         <item name="android:windowLightNavigationBar">true</item>
-        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:fontFamily">@font/sultan_medium</item>
+        <item name="fontFamily">@font/sultan_medium</item>
     </style>
 </resources>

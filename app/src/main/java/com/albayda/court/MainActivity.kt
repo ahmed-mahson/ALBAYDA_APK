@@ -28,8 +28,9 @@ class MainActivity : AppCompatActivity() {
         binding.navAdmin.visibility = if (isAdmin) View.VISIBLE else View.GONE
 
         val news = getSharedPreferences("app_prefs", MODE_PRIVATE)
-            .getString("news_item", "مرحباً بكم في محكمة البيضاء الابتدائية") ?: ""
-        binding.newsTicker.setNews(listOf(news))
+            .getString("news_item", "مرحباً بكم في محكمة البيضاء الابتدائية") ?: "مرحباً بكم في محكمة البيضاء الابتدائية"
+        binding.newsTicker.speedPxPerSec = 80f
+        binding.newsTicker.setNewsText(news)
 
         // Order in grid: sessions, case, supreme, attendance
         setupCard(binding.cardSessions.root, android.R.drawable.ic_menu_my_calendar, "الاستعلام عن الجلسات اليومية")

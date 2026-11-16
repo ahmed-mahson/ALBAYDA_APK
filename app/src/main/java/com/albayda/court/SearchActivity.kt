@@ -1,5 +1,6 @@
 package com.albayda.court
 
+import android.app.DatePickerDialog
 import android.os.Bundle
 import android.view.View
 import android.widget.ArrayAdapter
@@ -13,6 +14,8 @@ import com.albayda.court.data.SupremeCourtRepository
 import com.albayda.court.databinding.ActivitySearchBinding
 import com.albayda.court.util.PdfReport
 import kotlinx.coroutines.*
+import java.util.Calendar
+import java.util.Locale
 
 class SearchActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySearchBinding
@@ -32,9 +35,22 @@ class SearchActivity : AppCompatActivity() {
             "attendance" -> "إنشاء إعلان حضور"
             else -> "بحث"
         }
+        setupDatePicker()
         configureFields()
 
         binding.btnSearch.setOnClickListener { performSearch() }
+    }
+
+    private fun setupDatePicker() {
+        val openPicker = {
+            val cal = Calendar.getInstance()
+            DatePickerDialog(this, { _, y, m, d ->
+                binding.etDate.setText(String.format(Locale.US, "%04d-%02d-%02d", y, m + 1, d))
+            }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)).show()
+        }
+        binding.etDate.isFocusable = false
+        binding.etDate.isClickable = true
+        binding.etDate.setOnClickListener { openPicker() }
     }
 
     private fun configureFields() {
@@ -44,23 +60,27 @@ class SearchActivity : AppCompatActivity() {
                 v(binding.etCaseNumber, true); v(binding.etPlaintiff, true); v(binding.etDefendant, true)
                 v(binding.spCaseType, true); v(binding.spJudge, true); v(binding.etDate, false); v(binding.etQuery, true)
                 binding.etQuery.hint = "بحث عام (رقم/اسم)"
+                binding.btnSearch.text = "بحث"
                 loadDropdowns(loadCaseTypes = true, loadJudges = true)
             }
             "sessions" -> {
                 v(binding.etCaseNumber, false); v(binding.etPlaintiff, false); v(binding.etDefendant, false)
                 v(binding.spCaseType, false); v(binding.spJudge, true); v(binding.etDate, true); v(binding.etQuery, false)
-                binding.etDate.hint = "تاريخ الجلسة (YYYY-MM-DD)"
+                binding.etDate.hint = "اختر تاريخ الجلسة"
+                binding.btnSearch.text = "بحث"
                 loadDropdowns(loadCaseTypes = false, loadJudges = true)
             }
             "supreme" -> {
                 v(binding.etCaseNumber, false); v(binding.etPlaintiff, false); v(binding.etDefendant, false)
                 v(binding.spCaseType, false); v(binding.spJudge, false); v(binding.etDate, false); v(binding.etQuery, true)
                 binding.etQuery.hint = "اسم الطاعن / الملتمس"
+                binding.btnSearch.text = "بحث"
             }
             "attendance" -> {
                 v(binding.etCaseNumber, true); v(binding.etPlaintiff, true); v(binding.etDefendant, true)
                 v(binding.spCaseType, true); v(binding.spJudge, true); v(binding.etDate, true); v(binding.etQuery, false)
-                binding.etDate.hint = "تاريخ الجلسة (YYYY-MM-DD)"
+                binding.etDate.hint = "اختر تاريخ الجلسة"
+                binding.btnSearch.text = "تنزيل الاعلان pdf"
                 loadDropdowns(loadCaseTypes = true, loadJudges = true)
             }
             else -> {}
@@ -72,11 +92,11 @@ class SearchActivity : AppCompatActivity() {
             try {
                 val records = CaseRecordsRepository.loadRecords()
                 if (loadCaseTypes) {
-                    val types = listOf("الكل") + records.map { it.caseType.trim() }.filter { it.isNotBlank() }.distinct().sorted()
+                    val types = listOf("نوع القضية (الكل)") + records.map { it.caseType.trim() }.filter { it.isNotBlank() }.distinct().sorted()
                     binding.spCaseType.adapter = ArrayAdapter(this@SearchActivity, android.R.layout.simple_spinner_dropdown_item, types)
                 }
                 if (loadJudges) {
-                    val judges = listOf("الكل") + records.map { it.judge.trim() }.filter { it.isNotBlank() }.distinct().sorted()
+                    val judges = listOf("اسم القاضي (الكل)") + records.map { it.judge.trim() }.filter { it.isNotBlank() }.distinct().sorted()
                     binding.spJudge.adapter = ArrayAdapter(this@SearchActivity, android.R.layout.simple_spinner_dropdown_item, judges)
                 }
             } catch (_: Exception) {
@@ -106,7 +126,9 @@ class SearchActivity : AppCompatActivity() {
         }
     }
 
-    private fun selected(sp: android.widget.Spinner): String = sp.selectedItem?.toString()?.let { if (it == "الكل") "" else it } ?: ""
+    private fun selected(sp: android.widget.Spinner): String = sp.selectedItem?.toString()?.let {
+        if (it == "الكل" || it.contains("(الكل)")) "" else it
+    } ?: ""
 
     private suspend fun searchCase() {
         val records = CaseRecordsRepository.loadRecords()
@@ -149,6 +171,7 @@ class SearchActivity : AppCompatActivity() {
 
     private fun buildAttendance() {
         val caseNo = binding.etCaseNumber.text.toString().trim()
+        val caseType = selected(binding.spCaseType).ifBlank { "غير متوفر" }
         val plaintiff = binding.etPlaintiff.text.toString().trim().ifBlank { "غير متوفر" }
         val defendant = binding.etDefendant.text.toString().trim().ifBlank { "غير متوفر" }
         val judge = selected(binding.spJudge).ifBlank { "غير متوفر" }
@@ -156,9 +179,10 @@ class SearchActivity : AppCompatActivity() {
         if (caseNo.isBlank() || date.isBlank()) { addResultText("يرجى إدخال رقم القضية وتاريخ الجلسة."); return }
         val data = linkedMapOf(
             "رقم القضية" to caseNo,
+            "نوع القضية" to caseType,
             "المدعي" to plaintiff,
             "المدعى عليه" to defendant,
-            "القاضي" to judge,
+            "اسم القاضي" to judge,
             "تاريخ الجلسة" to date
         )
         addResultText("تم تجهيز بيانات إعلان الحضور:")

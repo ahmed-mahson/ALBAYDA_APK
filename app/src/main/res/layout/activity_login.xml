@@ -36,7 +36,7 @@
             android:id="@+id/etIdentifier"
             android:layout_width="match_parent"
             android:layout_height="52dp"
-            android:hint="رقم الهاتف أو البريد الإلكتروني"
+            android:hint="اسم المستخدم أو رقم الجوال"
             android:background="@drawable/bg_input"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"

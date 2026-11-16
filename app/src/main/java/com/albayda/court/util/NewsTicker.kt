@@ -10,6 +10,7 @@ class NewsTicker @JvmOverloads constructor(
 ) : AppCompatTextView(context, attrs) {
 
     private var animator: ValueAnimator? = null
+    var speedPxPerSec: Float = 80f
 
     init {
         isSingleLine = true
@@ -18,25 +19,30 @@ class NewsTicker @JvmOverloads constructor(
 
     fun setNews(items: List<String>) {
         val text = if (items.isEmpty())
-            "مرحباً بكم في البوابة الإلكترونية لمحكمة البيضاء الابتدائية"
+            "مرحباً بكم في محكمة البيضاء الابتدائية"
         else items.joinToString("   ✦   ")
         setText(text)
         post { startLoop() }
     }
 
+    fun setNewsText(text: String) {
+        setText(text.ifBlank { "مرحباً بكم في محكمة البيضاء الابتدائية" })
+        post { startLoop() }
+    }
+
     private fun startLoop() {
         animator?.cancel()
-        val w = width.toFloat()
+        val parentW = (parent as? android.view.View)?.width?.toFloat() ?: width.toFloat()
         val tw = paint.measureText(text.toString())
-        if (w <= 0f || tw <= 0f) {
+        if (parentW <= 0f || tw <= 0f) {
             postDelayed({ startLoop() }, 100)
             return
         }
-        val from = w
+        val from = parentW
         val to = -tw
         val dist = Math.abs(to - from)
         animator = ValueAnimator.ofFloat(from, to).apply {
-            duration = (dist / 40f * 1000).toLong().coerceAtLeast(1000L)
+            duration = (dist / speedPxPerSec * 1000).toLong().coerceAtLeast(1000L)
             repeatMode = ValueAnimator.RESTART
             repeatCount = ValueAnimator.INFINITE
             addUpdateListener { translationX = it.animatedValue as Float }
@@ -44,4 +50,8 @@ class NewsTicker @JvmOverloads constructor(
         }
     }
 
+    override fun onDetachedFromWindow() {
+        animator?.cancel()
+        super.onDetachedFromWindow()
+    }
 }

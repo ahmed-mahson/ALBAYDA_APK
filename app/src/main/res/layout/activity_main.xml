@@ -88,15 +88,44 @@
             </FrameLayout>
 
             <!-- News ticker -->
-            <com.albayda.court.util.NewsTicker
-                android:id="@+id/newsTicker"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="40dp"
                 android:layout_marginTop="12dp"
-                android:padding="10dp"
+                android:orientation="horizontal"
                 android:background="@color/navy_800"
-                android:textColor="@color/gold_light"
-                android:textSize="14sp" />
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/tvNewsTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:paddingStart="14dp"
+                    android:paddingEnd="14dp"
+                    android:text="آخر الأخبار"
+                    android:textColor="@color/white"
+                    android:textStyle="bold"
+                    android:textSize="13sp"
+                    android:background="@color/gold_sand" />
+
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:clipChildren="true"
+                    android:clipToPadding="true">
+                    <com.albayda.court.util.NewsTicker
+                        android:id="@+id/newsTicker"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:textColor="@color/white"
+                        android:textSize="14sp" />
+                </FrameLayout>
+            </LinearLayout>
 
             <!-- Services grid -->
             <GridLayout
