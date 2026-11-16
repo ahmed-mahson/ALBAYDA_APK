@@ -11,7 +11,6 @@
         android:layout_height="wrap_content"
         android:background="@color/navy_900"
         android:padding="16dp">
-
         <TextView
             android:id="@+id/tvTitle"
             android:layout_width="wrap_content"
@@ -21,37 +20,89 @@
             android:textStyle="bold" />
     </LinearLayout>
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="16dp"
-        android:background="@color/white"
-        android:elevation="2dp">
-
-        <EditText
-            android:id="@+id/etQuery"
-            android:layout_width="0dp"
+        android:layout_height="wrap_content">
+        <LinearLayout
+            android:id="@+id/formContainer"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:hint="أدخل رقم القضية أو الاسم"
-            android:inputType="text" />
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:background="@color/white">
 
-        <Button
-            android:id="@+id/btnSearch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="بحث"
-            android:layout_marginStart="8dp"
-            android:backgroundTint="@color/navy_700" />
-    </LinearLayout>
+            <EditText
+                android:id="@+id/etCaseNumber"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="رقم القضية"
+                android:inputType="text" />
+
+            <EditText
+                android:id="@+id/etPlaintiff"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="اسم المدعي"
+                android:layout_marginTop="8dp"
+                android:inputType="textPersonName" />
+
+            <EditText
+                android:id="@+id/etDefendant"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="اسم المدعى عليه"
+                android:layout_marginTop="8dp"
+                android:inputType="textPersonName" />
+
+            <EditText
+                android:id="@+id/etCaseType"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="نوع القضية"
+                android:layout_marginTop="8dp"
+                android:inputType="text" />
+
+            <EditText
+                android:id="@+id/etJudge"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="اسم القاضي"
+                android:layout_marginTop="8dp"
+                android:inputType="textPersonName" />
+
+            <EditText
+                android:id="@+id/etDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="التاريخ (YYYY-MM-DD) للجلسات/الإعلان"
+                android:layout_marginTop="8dp"
+                android:inputType="date" />
+
+            <EditText
+                android:id="@+id/etQuery"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="بحث عام / اسم الطاعن (للمحكمة العليا)"
+                android:layout_marginTop="8dp"
+                android:inputType="text" />
+
+            <Button
+                android:id="@+id/btnSearch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="بحث"
+                android:layout_marginTop="12dp"
+                android:backgroundTint="@color/navy_700"
+                android:textColor="@color/white" />
+        </LinearLayout>
+    </ScrollView>
 
     <ProgressBar
         android:id="@+id/pb"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="16dp"
         android:visibility="gone" />
 
     <ScrollView
@@ -59,7 +110,6 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:fillViewport="true">
-
         <LinearLayout
             android:id="@+id/resultsContainer"
             android:layout_width="match_parent"

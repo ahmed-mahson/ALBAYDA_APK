@@ -1,7 +1,9 @@
 package com.albayda.court
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -17,16 +19,17 @@ class MainActivity : AppCompatActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        AuthManager.init(this)
+
+        val session = AuthManager.getSession()
+        val isAdmin = AuthManager.isPrimaryAdmin(session)
+        binding.tvAdmin.visibility = if (isAdmin) View.VISIBLE else View.GONE
+        binding.tvAdmin.setOnClickListener { startActivity(Intent(this, AdminActivity::class.java)) }
 
         val news = getSharedPreferences("app_prefs", MODE_PRIVATE)
             .getString("news_item", "مرحباً بكم في محكمة البيضاء الابتدائية") ?: ""
         binding.newsTicker.setNews(listOf(news))
-        binding.newsTicker.setOnLongClickListener {
-            startActivity(Intent(this, AdminActivity::class.java))
-            true
-        }
 
-        // تعيين الأيقونات والعناوين للبطاقات
         setupCard(binding.cardCase.root, android.R.drawable.ic_menu_search, "الاستعلام عن قضية")
         setupCard(binding.cardAttendance.root, android.R.drawable.ic_menu_edit, "إنشاء إعلان حضور")
         setupCard(binding.cardSessions.root, android.R.drawable.ic_menu_my_calendar, "الجلسات اليومية")
@@ -42,9 +45,16 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, LoginActivity::class.java))
             finish()
         }
+
+        binding.tvWhatsapp.setOnClickListener {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://wa.me/qr/QIQRW7LA325GG1")))
+        }
+        binding.tvTelegram.setOnClickListener {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/Ahmed_Mahson")))
+        }
     }
 
-    private fun setupCard(card: android.view.View, iconRes: Int, title: String) {
+    private fun setupCard(card: View, iconRes: Int, title: String) {
         card.findViewById<ImageView>(R.id.ivIcon).setImageResource(iconRes)
         card.findViewById<TextView>(R.id.tvTitle).text = title
     }

@@ -3,54 +3,89 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/bg_light"
-    android:padding="16dp">
+    android:background="@color/bg_light">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="لوحة مدير النظام"
-        android:textSize="22sp"
-        android:textStyle="bold"
-        android:textColor="@color/navy_700" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="المستخدمون بانتظار الموافقة"
-        android:textSize="16sp"
-        android:textColor="@color/text_blue"
-        android:layout_marginTop="16dp" />
-
-    <ListView
-        android:id="@+id/lvUsers"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_marginTop="8dp" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="إضافة خبر للشريط الإخباري"
-        android:textSize="16sp"
-        android:textColor="@color/text_blue"
-        android:layout_marginTop="16dp" />
-
-    <EditText
-        android:id="@+id/etNews"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="نص الخبر"
-        android:inputType="textMultiLine"
-        android:minLines="2" />
+        android:background="@color/navy_900"
+        android:padding="16dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="لوحة إدارة النظام"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+    </LinearLayout>
 
-    <Button
-        android:id="@+id/btnAddNews"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="إضافة الخبر"
-        android:backgroundTint="@color/gold"
-        android:textColor="@color/navy_900"
-        android:textStyle="bold" />
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="الشريط الإخباري والتنبيهات"
+                android:textStyle="bold"
+                android:textColor="@color/navy_700"
+                android:textSize="16sp" />
+            <EditText
+                android:id="@+id/etNews"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="اكتب الخبر/التنبيه"
+                android:inputType="textMultiLine"
+                android:minLines="2"
+                android:layout_marginTop="8dp" />
+            <Button
+                android:id="@+id/btnAddNews"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="تحديث الشريط الإخباري"
+                android:layout_marginTop="8dp"
+                android:backgroundTint="@color/gold"
+                android:textColor="@color/navy_900" />
+
+            <TextView
+                android:id="@+id/tvPendingTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="تنبيهات المستخدمين الجدد (بانتظار الموافقة)"
+                android:textStyle="bold"
+                android:textColor="@color/navy_700"
+                android:textSize="16sp"
+                android:layout_marginTop="20dp" />
+            <ListView
+                android:id="@+id/lvPending"
+                android:layout_width="match_parent"
+                android:layout_height="220dp"
+                android:layout_marginTop="8dp"
+                android:dividerHeight="1dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="سجل المستخدمين والإجراءات"
+                android:textStyle="bold"
+                android:textColor="@color/navy_700"
+                android:textSize="16sp"
+                android:layout_marginTop="20dp" />
+            <TextView
+                android:id="@+id/tvLogs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textColor="@color/text_muted"
+                android:textSize="13sp"
+                android:background="@color/white"
+                android:padding="12dp" />
+        </LinearLayout>
+    </ScrollView>
 </LinearLayout>

@@ -28,6 +28,8 @@ class LoginActivity : AppCompatActivity() {
             return
         }
 
+        binding.btnBiometric.isEnabled = AuthManager.isBiometricEnabled() || session?.isApproved == true
+
         binding.btnLogin.setOnClickListener {
             val id = binding.etIdentifier.text.toString().trim()
             val pass = binding.etPassword.text.toString().trim()
@@ -54,7 +56,7 @@ class LoginActivity : AppCompatActivity() {
         binding.btnBiometric.setOnClickListener {
             if (BiometricManager.from(this).canAuthenticate(
                     BiometricManager.Authenticators.BIOMETRIC_WEAK or
-                    BiometricManager.Authenticators.DEVICE_CREDENTIAL
+                        BiometricManager.Authenticators.DEVICE_CREDENTIAL
                 ) == BiometricManager.BIOMETRIC_SUCCESS
             ) {
                 val prompt = BiometricPrompt.PromptInfo.Builder()
@@ -62,7 +64,7 @@ class LoginActivity : AppCompatActivity() {
                     .setSubtitle("محكمة البيضاء الابتدائية")
                     .setAllowedAuthenticators(
                         BiometricManager.Authenticators.BIOMETRIC_WEAK or
-                        BiometricManager.Authenticators.DEVICE_CREDENTIAL
+                            BiometricManager.Authenticators.DEVICE_CREDENTIAL
                     )
                     .build()
                 BiometricPrompt(this, ContextCompat.getMainExecutor(this),
@@ -75,7 +77,7 @@ class LoginActivity : AppCompatActivity() {
                             } else {
                                 Toast.makeText(
                                     this@LoginActivity,
-                                    "سجل الدخول بكلمة المرور أولاً لتفعيل البصمة",
+                                    "سجل الدخول بكلمة المرور واحفظ البيانات أولاً لتفعيل البصمة",
                                     Toast.LENGTH_SHORT
                                 ).show()
                             }
