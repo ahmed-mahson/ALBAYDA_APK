@@ -21,14 +21,18 @@ object AuthManager {
     private val gson = Gson()
 
     fun init(context: Context) {
-        val masterKey = MasterKey.Builder(context)
-            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-            .build()
-        prefs = EncryptedSharedPreferences.create(
-            context, PREF_NAME, masterKey,
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        )
+        try {
+            val masterKey = MasterKey.Builder(context)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+            prefs = EncryptedSharedPreferences.create(
+                context, PREF_NAME, masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+        } catch (e: Exception) {
+            prefs = context.getSharedPreferences(PREF_NAME + "_fallback", Context.MODE_PRIVATE)
+        }
 
         if (getUsers().isEmpty()) {
             val admin = User(
@@ -41,6 +45,7 @@ object AuthManager {
             saveUsers(listOf(admin))
         }
     }
+
 
     private fun hashPassword(password: String): String {
         val bytes = MessageDigest.getInstance("SHA-256").digest(password.toByteArray())

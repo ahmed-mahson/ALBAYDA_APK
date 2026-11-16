@@ -28,14 +28,20 @@ class NewsTicker @JvmOverloads constructor(
         animator?.cancel()
         val w = width.toFloat()
         val tw = paint.measureText(text.toString())
+        if (w <= 0f || tw <= 0f) {
+            postDelayed({ startLoop() }, 100)
+            return
+        }
         val from = w
         val to = -tw
+        val dist = Math.abs(to - from)
         animator = ValueAnimator.ofFloat(from, to).apply {
-            duration = (Math.abs(to - from) / 40f * 1000).toLong()
+            duration = (dist / 40f * 1000).toLong().coerceAtLeast(1000L)
             repeatMode = ValueAnimator.RESTART
             repeatCount = ValueAnimator.INFINITE
             addUpdateListener { translationX = it.animatedValue as Float }
             start()
         }
     }
+
 }
