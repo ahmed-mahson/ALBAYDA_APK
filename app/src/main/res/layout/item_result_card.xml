@@ -29,29 +29,14 @@
             android:textSize="14sp"
             android:layout_marginTop="4dp" />
 
-        <LinearLayout
+        <Button
+            android:id="@+id/btnDownloadPdf"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
             android:layout_marginTop="16dp"
-            android:gravity="end">
-
-            <Button
-                android:id="@+id/btnDownloadPdf"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="تحميل PDF"
-                style="@style/Widget.Material3.Button"
-                android:backgroundTint="@color/navy_700" />
-
-            <Button
-                android:id="@+id/btnPrint"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="طباعة"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_marginStart="8dp"
-                android:textColor="@color/navy_700" />
-        </LinearLayout>
+            android:text="تحميل PDF"
+            style="@style/Widget.Material3.Button"
+            android:backgroundTint="@color/navy_700"
+            android:textColor="@color/white" />
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

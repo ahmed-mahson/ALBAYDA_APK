@@ -54,21 +54,17 @@
                 android:layout_marginTop="8dp"
                 android:inputType="textPersonName" />
 
-            <EditText
-                android:id="@+id/etCaseType"
+            <Spinner
+                android:id="@+id/spCaseType"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="نوع القضية"
-                android:layout_marginTop="8dp"
-                android:inputType="text" />
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp" />
 
-            <EditText
-                android:id="@+id/etJudge"
+            <Spinner
+                android:id="@+id/spJudge"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="اسم القاضي"
-                android:layout_marginTop="8dp"
-                android:inputType="textPersonName" />
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp" />
 
             <EditText
                 android:id="@+id/etDate"

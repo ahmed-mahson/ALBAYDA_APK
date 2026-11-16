@@ -199,16 +199,17 @@ object PdfReport {
     }
 
     fun saveToDownloads(context: Context, pdf: ByteArray, fileName: String) {
-        val safe = "report_${System.currentTimeMillis()}.pdf"
+        val base = fileName.replace(Regex("[\\\\/:*?\"<>|]"), "_").trim().ifBlank { "report" }
+        val display = if (base.endsWith(".pdf", true)) base else "$base.pdf"
         val values = ContentValues().apply {
-            put(MediaStore.Downloads.DISPLAY_NAME, safe)
+            put(MediaStore.Downloads.DISPLAY_NAME, display)
             put(MediaStore.Downloads.MIME_TYPE, "application/pdf")
-            put(MediaStore.Downloads.TITLE, fileName)
+            put(MediaStore.Downloads.TITLE, base)
         }
         val uri = context.contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)
         try {
             context.contentResolver.openOutputStream(uri!!)?.use { it.write(pdf) }
-            Toast.makeText(context, "✓ تم حفظ التقرير في التنزيلات", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "✓ تم حفظ الملف: $display", Toast.LENGTH_LONG).show()
         } catch (e: Exception) {
             Toast.makeText(context, "تعذر الحفظ: ${e.message}", Toast.LENGTH_LONG).show()
         }

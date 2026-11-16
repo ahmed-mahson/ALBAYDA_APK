@@ -1,84 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/bg_light">
 
+    <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
+        android:orientation="horizontal"
         android:background="@color/navy_900"
         android:padding="16dp"
+        android:gravity="center_vertical"
         android:fitsSystemWindows="true">
 
+        <ImageView
+            android:id="@+id/ivBell"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:src="@android:drawable/ic_popup_reminder"
+            app:tint="@color/white"
+            android:contentDescription="الإشعارات" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-
-            <ImageView
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:src="@drawable/logo_court"
-                android:contentDescription="الشعار" />
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="تقنية معلومات محكمة البيضاء الابتدائية"
-                    android:textColor="@color/white"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="البوابة الإلكترونية للاستعلام والخدمات"
-                    android:textColor="@color/gold_light"
-                    android:textSize="12sp" />
-            </LinearLayout>
-
+            android:orientation="vertical"
+            android:gravity="end">
             <TextView
-                android:id="@+id/tvAdmin"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="الإدارة"
-                android:textColor="@color/gold_light"
-                android:textStyle="bold"
-                android:padding="8dp"
-                android:visibility="gone" />
-
+                android:text="مرحباً بك"
+                android:textColor="@color/white"
+                android:textSize="14sp" />
             <TextView
-                android:id="@+id/tvLogout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="خروج"
+                android:text="في محكمة البيضاء الابتدائية"
                 android:textColor="@color/gold_light"
-                android:textStyle="bold"
-                android:padding="8dp" />
+                android:textSize="13sp"
+                android:textStyle="bold" />
         </LinearLayout>
 
-        <com.albayda.court.util.NewsTicker
-            android:id="@+id/newsTicker"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:padding="8dp"
-            android:background="#0D2B5C"
-            android:textColor="@color/gold_light"
-            android:textSize="14sp" />
+        <ImageView
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginStart="10dp"
+            android:src="@drawable/logo_court"
+            android:contentDescription="الملف" />
     </LinearLayout>
 
     <ScrollView
+        android:id="@+id/mainScroll"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
@@ -90,77 +70,90 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="الخدمات الإلكترونية"
-                android:textColor="@color/navy_700"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="16dp" />
+            <!-- Banner -->
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="140dp"
+                android:background="@color/navy_700"
+                android:foregroundGravity="center">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:text="الخدمات الإلكترونية"
+                    android:textColor="@color/white"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    android:background="#334A6FA5" />
+            </FrameLayout>
 
-            <GridLayout
+            <!-- News ticker -->
+            <com.albayda.court.util.NewsTicker
+                android:id="@+id/newsTicker"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:padding="10dp"
+                android:background="@color/navy_800"
+                android:textColor="@color/gold_light"
+                android:textSize="14sp" />
+
+            <!-- Services grid -->
+            <GridLayout
+                android:id="@+id/servicesGrid"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
                 android:columnCount="2">
 
-                <include android:id="@+id/cardCase" layout="@layout/card_service" android:layout_width="0dp" android:layout_height="120dp" android:layout_columnWeight="1" android:layout_margin="8dp" />
-                <include android:id="@+id/cardAttendance" layout="@layout/card_service" android:layout_width="0dp" android:layout_height="120dp" android:layout_columnWeight="1" android:layout_margin="8dp" />
-                <include android:id="@+id/cardSessions" layout="@layout/card_service" android:layout_width="0dp" android:layout_height="120dp" android:layout_columnWeight="1" android:layout_margin="8dp" />
-                <include android:id="@+id/cardSupreme" layout="@layout/card_service" android:layout_width="0dp" android:layout_height="120dp" android:layout_columnWeight="1" android:layout_margin="8dp" />
+                <include android:id="@+id/cardSessions" layout="@layout/card_service" android:layout_width="0dp" android:layout_height="140dp" android:layout_columnWeight="1" android:layout_margin="6dp" />
+                <include android:id="@+id/cardCase" layout="@layout/card_service" android:layout_width="0dp" android:layout_height="140dp" android:layout_columnWeight="1" android:layout_margin="6dp" />
+                <include android:id="@+id/cardSupreme" layout="@layout/card_service" android:layout_width="0dp" android:layout_height="140dp" android:layout_columnWeight="1" android:layout_margin="6dp" />
+                <include android:id="@+id/cardAttendance" layout="@layout/card_service" android:layout_width="0dp" android:layout_height="140dp" android:layout_columnWeight="1" android:layout_margin="6dp" />
             </GridLayout>
 
+            <!-- Contact -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
+                android:orientation="horizontal"
                 android:gravity="center"
-                android:padding="16dp"
-                android:layout_marginTop="24dp"
-                android:background="@color/navy_900">
-
+                android:layout_marginTop="20dp">
                 <TextView
+                    android:id="@+id/tvWhatsapp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/gold"
+                    android:text="واتساب"
+                    android:textColor="@color/navy_700"
                     android:textStyle="bold"
-                    android:textSize="14sp"
-                    android:text="برمجة وتصميم/احمد حسين محسون" />
-
+                    android:padding="10dp" />
                 <TextView
+                    android:id="@+id/tvTelegram"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/white"
-                    android:textSize="12sp"
-                    android:text="للتواصل والدعم الفني"
-                    android:layout_marginTop="6dp" />
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="8dp">
-                    <TextView
-                        android:id="@+id/tvWhatsapp"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="WhatsApp"
-                        android:textColor="@color/gold_light"
-                        android:textStyle="bold"
-                        android:padding="8dp"
-                        android:background="#1AFFFFFF" />
-                    <TextView
-                        android:id="@+id/tvTelegram"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Telegram"
-                        android:textColor="@color/gold_light"
-                        android:textStyle="bold"
-                        android:padding="8dp"
-                        android:layout_marginStart="12dp"
-                        android:background="#1AFFFFFF" />
-                </LinearLayout>
+                    android:text="تيليجرام"
+                    android:textColor="@color/navy_700"
+                    android:textStyle="bold"
+                    android:padding="10dp"
+                    android:layout_marginStart="16dp" />
             </LinearLayout>
         </LinearLayout>
     </ScrollView>
+
+    <!-- Bottom Navigation -->
+    <LinearLayout
+        android:id="@+id/bottomNav"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:orientation="horizontal"
+        android:background="@color/white"
+        android:elevation="8dp"
+        android:weightSum="5">
+
+        <TextView android:id="@+id/navHome" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:text="الرئيسية" android:textColor="@color/navy_700" android:textStyle="bold" android:textSize="12sp" />
+        <TextView android:id="@+id/navServices" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:text="الخدمات" android:textColor="@color/text_muted" android:textSize="12sp" />
+        <TextView android:id="@+id/navNotifications" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:text="الإشعارات" android:textColor="@color/text_muted" android:textSize="12sp" />
+        <TextView android:id="@+id/navAccount" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:text="حسابي" android:textColor="@color/text_muted" android:textSize="12sp" />
+        <TextView android:id="@+id/navAdmin" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:text="الإدارة" android:textColor="@color/text_muted" android:textSize="12sp" android:visibility="gone" />
+    </LinearLayout>
 </LinearLayout>

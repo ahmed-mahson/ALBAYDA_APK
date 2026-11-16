@@ -6,6 +6,8 @@ import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import com.albayda.court.data.AuthManager
@@ -23,28 +25,22 @@ class MainActivity : AppCompatActivity() {
 
         val session = AuthManager.getSession()
         val isAdmin = AuthManager.isPrimaryAdmin(session)
-        binding.tvAdmin.visibility = if (isAdmin) View.VISIBLE else View.GONE
-        binding.tvAdmin.setOnClickListener { startActivity(Intent(this, AdminActivity::class.java)) }
+        binding.navAdmin.visibility = if (isAdmin) View.VISIBLE else View.GONE
 
         val news = getSharedPreferences("app_prefs", MODE_PRIVATE)
             .getString("news_item", "مرحباً بكم في محكمة البيضاء الابتدائية") ?: ""
         binding.newsTicker.setNews(listOf(news))
 
+        // Order in grid: sessions, case, supreme, attendance
+        setupCard(binding.cardSessions.root, android.R.drawable.ic_menu_my_calendar, "الاستعلام عن الجلسات اليومية")
         setupCard(binding.cardCase.root, android.R.drawable.ic_menu_search, "الاستعلام عن قضية")
+        setupCard(binding.cardSupreme.root, android.R.drawable.ic_menu_compass, "الاستعلام عن القضايا بالمحكمة العليا")
         setupCard(binding.cardAttendance.root, android.R.drawable.ic_menu_edit, "إنشاء إعلان حضور")
-        setupCard(binding.cardSessions.root, android.R.drawable.ic_menu_my_calendar, "الجلسات اليومية")
-        setupCard(binding.cardSupreme.root, android.R.drawable.ic_menu_compass, "المحكمة العليا")
 
         binding.cardCase.root.setOnClickListener { openSearch("case") }
         binding.cardAttendance.root.setOnClickListener { openSearch("attendance") }
         binding.cardSessions.root.setOnClickListener { openSearch("sessions") }
         binding.cardSupreme.root.setOnClickListener { openSearch("supreme") }
-
-        binding.tvLogout.setOnClickListener {
-            AuthManager.clearSession()
-            startActivity(Intent(this, LoginActivity::class.java))
-            finish()
-        }
 
         binding.tvWhatsapp.setOnClickListener {
             startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://wa.me/qr/QIQRW7LA325GG1")))
@@ -52,6 +48,40 @@ class MainActivity : AppCompatActivity() {
         binding.tvTelegram.setOnClickListener {
             startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/Ahmed_Mahson")))
         }
+
+        binding.ivBell.setOnClickListener { showNotifications() }
+        binding.navHome.setOnClickListener { binding.mainScroll.smoothScrollTo(0, 0); selectTab(binding.navHome) }
+        binding.navServices.setOnClickListener { binding.mainScroll.smoothScrollTo(0, binding.servicesGrid.top); selectTab(binding.navServices) }
+        binding.navNotifications.setOnClickListener { showNotifications(); selectTab(binding.navNotifications) }
+        binding.navAccount.setOnClickListener { showAccount(session?.username ?: "مستخدم"); selectTab(binding.navAccount) }
+        binding.navAdmin.setOnClickListener { startActivity(Intent(this, AdminActivity::class.java)) }
+    }
+
+    private fun selectTab(active: TextView) {
+        val tabs = listOf(binding.navHome, binding.navServices, binding.navNotifications, binding.navAccount, binding.navAdmin)
+        tabs.forEach { it.setTextColor(getColor(if (it == active) R.color.navy_700 else R.color.text_muted)) }
+    }
+
+    private fun showNotifications() {
+        val news = getSharedPreferences("app_prefs", MODE_PRIVATE).getString("news_item", "") ?: ""
+        AlertDialog.Builder(this)
+            .setTitle("الإشعارات والتنبيهات")
+            .setMessage(if (news.isBlank()) "لا توجد إشعارات حالياً." else news)
+            .setPositiveButton("إغلاق", null)
+            .show()
+    }
+
+    private fun showAccount(name: String) {
+        AlertDialog.Builder(this)
+            .setTitle("حسابي")
+            .setMessage("المستخدم: $name")
+            .setPositiveButton("تسجيل الخروج") { _, _ ->
+                AuthManager.clearSession()
+                startActivity(Intent(this, LoginActivity::class.java))
+                finish()
+            }
+            .setNegativeButton("إغلاق", null)
+            .show()
     }
 
     private fun setupCard(card: View, iconRes: Int, title: String) {

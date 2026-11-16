@@ -2,6 +2,7 @@ package com.albayda.court
 
 import android.os.Bundle
 import android.view.View
+import android.widget.ArrayAdapter
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -41,25 +42,47 @@ class SearchActivity : AppCompatActivity() {
         when (mode) {
             "case" -> {
                 v(binding.etCaseNumber, true); v(binding.etPlaintiff, true); v(binding.etDefendant, true)
-                v(binding.etCaseType, true); v(binding.etJudge, true); v(binding.etDate, false); v(binding.etQuery, true)
+                v(binding.spCaseType, true); v(binding.spJudge, true); v(binding.etDate, false); v(binding.etQuery, true)
                 binding.etQuery.hint = "بحث عام (رقم/اسم)"
+                loadDropdowns(loadCaseTypes = true, loadJudges = true)
             }
             "sessions" -> {
                 v(binding.etCaseNumber, false); v(binding.etPlaintiff, false); v(binding.etDefendant, false)
-                v(binding.etCaseType, false); v(binding.etJudge, true); v(binding.etDate, true); v(binding.etQuery, false)
+                v(binding.spCaseType, false); v(binding.spJudge, true); v(binding.etDate, true); v(binding.etQuery, false)
                 binding.etDate.hint = "تاريخ الجلسة (YYYY-MM-DD)"
+                loadDropdowns(loadCaseTypes = false, loadJudges = true)
             }
             "supreme" -> {
                 v(binding.etCaseNumber, false); v(binding.etPlaintiff, false); v(binding.etDefendant, false)
-                v(binding.etCaseType, false); v(binding.etJudge, false); v(binding.etDate, false); v(binding.etQuery, true)
+                v(binding.spCaseType, false); v(binding.spJudge, false); v(binding.etDate, false); v(binding.etQuery, true)
                 binding.etQuery.hint = "اسم الطاعن / الملتمس"
             }
             "attendance" -> {
                 v(binding.etCaseNumber, true); v(binding.etPlaintiff, true); v(binding.etDefendant, true)
-                v(binding.etCaseType, false); v(binding.etJudge, true); v(binding.etDate, true); v(binding.etQuery, false)
+                v(binding.spCaseType, true); v(binding.spJudge, true); v(binding.etDate, true); v(binding.etQuery, false)
                 binding.etDate.hint = "تاريخ الجلسة (YYYY-MM-DD)"
+                loadDropdowns(loadCaseTypes = true, loadJudges = true)
             }
             else -> {}
+        }
+    }
+
+    private fun loadDropdowns(loadCaseTypes: Boolean, loadJudges: Boolean) {
+        scope.launch {
+            try {
+                val records = CaseRecordsRepository.loadRecords()
+                if (loadCaseTypes) {
+                    val types = listOf("الكل") + records.map { it.caseType.trim() }.filter { it.isNotBlank() }.distinct().sorted()
+                    binding.spCaseType.adapter = ArrayAdapter(this@SearchActivity, android.R.layout.simple_spinner_dropdown_item, types)
+                }
+                if (loadJudges) {
+                    val judges = listOf("الكل") + records.map { it.judge.trim() }.filter { it.isNotBlank() }.distinct().sorted()
+                    binding.spJudge.adapter = ArrayAdapter(this@SearchActivity, android.R.layout.simple_spinner_dropdown_item, judges)
+                }
+            } catch (_: Exception) {
+                if (loadCaseTypes) binding.spCaseType.adapter = ArrayAdapter(this@SearchActivity, android.R.layout.simple_spinner_dropdown_item, listOf("الكل"))
+                if (loadJudges) binding.spJudge.adapter = ArrayAdapter(this@SearchActivity, android.R.layout.simple_spinner_dropdown_item, listOf("الكل"))
+            }
         }
     }
 
@@ -83,6 +106,8 @@ class SearchActivity : AppCompatActivity() {
         }
     }
 
+    private fun selected(sp: android.widget.Spinner): String = sp.selectedItem?.toString()?.let { if (it == "الكل") "" else it } ?: ""
+
     private suspend fun searchCase() {
         val records = CaseRecordsRepository.loadRecords()
         val results = CaseRecordsRepository.search(
@@ -90,8 +115,8 @@ class SearchActivity : AppCompatActivity() {
             caseNumber = binding.etCaseNumber.text.toString(),
             plaintiff = binding.etPlaintiff.text.toString(),
             defendant = binding.etDefendant.text.toString(),
-            caseType = binding.etCaseType.text.toString(),
-            judge = binding.etJudge.text.toString(),
+            caseType = selected(binding.spCaseType),
+            judge = selected(binding.spJudge),
             query = binding.etQuery.text.toString()
         )
         if (results.isEmpty()) { addResultText("لا توجد نتائج مطابقة."); return }
@@ -101,7 +126,7 @@ class SearchActivity : AppCompatActivity() {
 
     private suspend fun searchSessions() {
         val date = binding.etDate.text.toString().trim()
-        val judge = binding.etJudge.text.toString().trim()
+        val judge = selected(binding.spJudge)
         if (date.isBlank()) { addResultText("يرجى إدخال تاريخ الجلسة."); return }
         val records = CaseRecordsRepository.loadRecords()
         val results = records.filter { it.nextSession.trim() == date && (judge.isBlank() || it.judge.contains(judge)) }.take(100)
@@ -126,7 +151,7 @@ class SearchActivity : AppCompatActivity() {
         val caseNo = binding.etCaseNumber.text.toString().trim()
         val plaintiff = binding.etPlaintiff.text.toString().trim().ifBlank { "غير متوفر" }
         val defendant = binding.etDefendant.text.toString().trim().ifBlank { "غير متوفر" }
-        val judge = binding.etJudge.text.toString().trim().ifBlank { "غير متوفر" }
+        val judge = selected(binding.spJudge).ifBlank { "غير متوفر" }
         val date = binding.etDate.text.toString().trim()
         if (caseNo.isBlank() || date.isBlank()) { addResultText("يرجى إدخال رقم القضية وتاريخ الجلسة."); return }
         val data = linkedMapOf(
@@ -171,17 +196,31 @@ class SearchActivity : AppCompatActivity() {
         val sub = listOfNotNull(data["المدعي"], data["المدعى عليه"], data["القاضي"], data["حالة القضية"]).filter { it.isNotBlank() }.joinToString(" | ")
         card.findViewById<TextView>(R.id.tvSub).text = sub.ifBlank { data.entries.take(2).joinToString(" | ") { "${it.key}: ${it.value}" } }
 
+        val fileName = buildPdfFileName(title, data)
         card.findViewById<View>(R.id.btnDownloadPdf).setOnClickListener {
             val rows = data.map { arrayOf(it.key, it.value) }
-            val pdf = PdfReport.build(this, title, rows)
-            PdfReport.saveToDownloads(this, pdf, "تقرير_${System.currentTimeMillis()}.pdf")
-        }
-        card.findViewById<View>(R.id.btnPrint).setOnClickListener {
-            val rows = data.map { arrayOf(it.key, it.value) }
-            val pdf = PdfReport.build(this, title, rows)
-            PdfReport.print(this, pdf, "طباعة تقرير المحكمة")
+            val pdfTitle = when (mode) {
+                "supreme" -> "نتائج المحكمة العليا"
+                "sessions" -> "قائمة الجلسات"
+                "attendance" -> "إعلان حضور جلسة"
+                else -> "معلومات القضية"
+            }
+            val pdf = PdfReport.build(this, pdfTitle, rows)
+            PdfReport.saveToDownloads(this, pdf, fileName)
         }
         binding.resultsContainer.addView(card)
+    }
+
+    private fun buildPdfFileName(title: String, data: Map<String, String>): String {
+        fun safe(s: String) = s.replace("/", "-").replace("\\", "-").replace(":", "-").trim()
+        val caseNo = data["رقم القضية"] ?: data["الرقم الخاص بخدمة الرسائل القصيرة"] ?: title
+        val date = data["تاريخ الجلسة"] ?: data["الجلسة القادمة"] ?: binding.etDate.text.toString().trim()
+        return when (mode) {
+            "sessions" -> "قائمة جلسات ${safe(if (date.isNotBlank()) date else "اليوم")}"
+            "attendance" -> "اعلان حضور القضية رقم ${safe(caseNo)}"
+            "supreme" -> "معلومات القضية ${safe(caseNo)} بالمحكمة العليا"
+            else -> "معلومات القضية ${safe(caseNo)}"
+        }
     }
 
     override fun onDestroy() {
