@@ -27,6 +27,9 @@ class MainActivity : AppCompatActivity() {
         val isAdmin = AuthManager.isPrimaryAdmin(session)
         binding.navAdmin.visibility = if (isAdmin) View.VISIBLE else View.GONE
 
+        val userName = session?.username?.ifBlank { "مستخدم" } ?: "مستخدم"
+        binding.tvWelcome.text = "مرحباً بك  $userName"
+
         val news = getSharedPreferences("app_prefs", MODE_PRIVATE)
             .getString("news_item", "مرحباً بكم في محكمة البيضاء الابتدائية") ?: "مرحباً بكم في محكمة البيضاء الابتدائية"
         binding.newsTicker.speedPxPerSec = 80f
@@ -56,11 +59,15 @@ class MainActivity : AppCompatActivity() {
         binding.navNotifications.setOnClickListener { showNotifications(); selectTab(binding.navNotifications) }
         binding.navAccount.setOnClickListener { showAccount(session?.username ?: "مستخدم"); selectTab(binding.navAccount) }
         binding.navAdmin.setOnClickListener { startActivity(Intent(this, AdminActivity::class.java)) }
+        selectTab(binding.navHome)
     }
 
-    private fun selectTab(active: TextView) {
+    private fun selectTab(active: View) {
         val tabs = listOf(binding.navHome, binding.navServices, binding.navNotifications, binding.navAccount, binding.navAdmin)
-        tabs.forEach { it.setTextColor(getColor(if (it == active) R.color.navy_700 else R.color.text_muted)) }
+        tabs.forEach { tab ->
+            tab.alpha = if (tab == active) 1.0f else 0.75f
+            tab.setBackgroundColor(if (tab == active) getColor(R.color.navy_800) else android.graphics.Color.TRANSPARENT)
+        }
     }
 
     private fun showNotifications() {

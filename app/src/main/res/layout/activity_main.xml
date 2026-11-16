@@ -12,14 +12,17 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:background="@color/navy_900"
-        android:padding="16dp"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:paddingTop="14dp"
+        android:paddingBottom="14dp"
         android:gravity="center_vertical"
         android:fitsSystemWindows="true">
 
         <ImageView
             android:id="@+id/ivBell"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:src="@android:drawable/ic_popup_reminder"
             app:tint="@color/white"
             android:contentDescription="الإشعارات" />
@@ -33,28 +36,71 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:gravity="end">
+            android:gravity="end"
+            android:layout_marginEnd="10dp">
             <TextView
+                android:id="@+id/tvHeaderTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="تقنية معلومات محكمة البيضاء الابتدائية"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/tvWelcome"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="مرحباً بك"
-                android:textColor="@color/white"
-                android:textSize="14sp" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="في محكمة البيضاء الابتدائية"
                 android:textColor="@color/gold_light"
-                android:textSize="13sp"
-                android:textStyle="bold" />
+                android:textSize="14sp"
+                android:layout_marginTop="2dp" />
         </LinearLayout>
 
         <ImageView
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_marginStart="10dp"
+            android:id="@+id/ivLogoHeader"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
             android:src="@drawable/logo_court"
-            android:contentDescription="الملف" />
+            android:contentDescription="شعار المحكمة" />
+    </LinearLayout>
+
+    <!-- News ticker (directly under header) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="42dp"
+        android:orientation="horizontal"
+        android:background="@color/navy_800"
+        android:gravity="center_vertical">
+
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:clipChildren="true"
+            android:clipToPadding="true">
+            <com.albayda.court.util.NewsTicker
+                android:id="@+id/newsTicker"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:textColor="@color/white"
+                android:textSize="14sp" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/tvNewsTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
+            android:text="آخر الأخبار"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:textSize="13sp"
+            android:background="@color/gold_sand" />
     </LinearLayout>
 
     <ScrollView
@@ -73,59 +119,22 @@
             <!-- Banner -->
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="140dp"
+                android:layout_height="150dp"
                 android:background="@color/navy_700"
-                android:foregroundGravity="center">
+                android:layout_marginTop="4dp">
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#334A6FA5" />
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center"
                     android:text="الخدمات الإلكترونية"
                     android:textColor="@color/white"
-                    android:textSize="24sp"
-                    android:textStyle="bold"
-                    android:background="#334A6FA5" />
+                    android:textSize="26sp"
+                    android:textStyle="bold" />
             </FrameLayout>
-
-            <!-- News ticker -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_marginTop="12dp"
-                android:orientation="horizontal"
-                android:background="@color/navy_800"
-                android:gravity="center_vertical">
-
-                <TextView
-                    android:id="@+id/tvNewsTitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:paddingStart="14dp"
-                    android:paddingEnd="14dp"
-                    android:text="آخر الأخبار"
-                    android:textColor="@color/white"
-                    android:textStyle="bold"
-                    android:textSize="13sp"
-                    android:background="@color/gold_sand" />
-
-                <FrameLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:clipChildren="true"
-                    android:clipToPadding="true">
-                    <com.albayda.court.util.NewsTicker
-                        android:id="@+id/newsTicker"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center_vertical"
-                        android:paddingStart="10dp"
-                        android:paddingEnd="10dp"
-                        android:textColor="@color/white"
-                        android:textSize="14sp" />
-                </FrameLayout>
-            </LinearLayout>
 
             <!-- Services grid -->
             <GridLayout
@@ -141,31 +150,42 @@
                 <include android:id="@+id/cardAttendance" layout="@layout/card_service" android:layout_width="0dp" android:layout_height="140dp" android:layout_columnWeight="1" android:layout_margin="6dp" />
             </GridLayout>
 
-            <!-- Contact -->
+            <!-- Contact icons -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center"
-                android:layout_marginTop="20dp">
-                <TextView
+                android:layout_marginTop="18dp">
+                <ImageView
                     android:id="@+id/tvWhatsapp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="واتساب"
-                    android:textColor="@color/navy_700"
-                    android:textStyle="bold"
-                    android:padding="10dp" />
-                <TextView
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:src="@drawable/ic_whatsapp"
+                    android:contentDescription="واتساب"
+                    android:padding="4dp" />
+                <ImageView
                     android:id="@+id/tvTelegram"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="تيليجرام"
-                    android:textColor="@color/navy_700"
-                    android:textStyle="bold"
-                    android:padding="10dp"
-                    android:layout_marginStart="16dp" />
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:layout_marginStart="20dp"
+                    android:src="@drawable/ic_telegram"
+                    android:contentDescription="تيليجرام"
+                    android:padding="4dp" />
             </LinearLayout>
+
+            <!-- Footer credit -->
+            <TextView
+                android:id="@+id/tvFooterCredit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"
+                android:gravity="center"
+                android:text="تصميم وبرمجة المهندس/احمد حسين محسون  تلفون 771421919 - 734840710"
+                android:textColor="@color/navy_700"
+                android:textSize="13sp"
+                android:textStyle="bold" />
         </LinearLayout>
     </ScrollView>
 
@@ -175,14 +195,29 @@
         android:layout_width="match_parent"
         android:layout_height="64dp"
         android:orientation="horizontal"
-        android:background="@color/white"
+        android:background="@color/navy_900"
         android:elevation="8dp"
         android:weightSum="5">
 
-        <TextView android:id="@+id/navHome" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:text="الرئيسية" android:textColor="@color/navy_700" android:textStyle="bold" android:textSize="12sp" />
-        <TextView android:id="@+id/navServices" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:text="الخدمات" android:textColor="@color/text_muted" android:textSize="12sp" />
-        <TextView android:id="@+id/navNotifications" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:text="الإشعارات" android:textColor="@color/text_muted" android:textSize="12sp" />
-        <TextView android:id="@+id/navAccount" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:text="حسابي" android:textColor="@color/text_muted" android:textSize="12sp" />
-        <TextView android:id="@+id/navAdmin" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:text="الإدارة" android:textColor="@color/text_muted" android:textSize="12sp" android:visibility="gone" />
+        <LinearLayout android:id="@+id/navHome" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:orientation="vertical" android:padding="4dp">
+            <ImageView android:layout_width="22dp" android:layout_height="22dp" android:src="@android:drawable/ic_menu_view" app:tint="@color/white" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="الرئيسية" android:textColor="@color/white" android:textSize="11sp" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/navServices" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:orientation="vertical" android:padding="4dp">
+            <ImageView android:layout_width="22dp" android:layout_height="22dp" android:src="@android:drawable/ic_menu_agenda" app:tint="@color/white" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="الخدمات" android:textColor="@color/white" android:textSize="11sp" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/navNotifications" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:orientation="vertical" android:padding="4dp">
+            <ImageView android:layout_width="22dp" android:layout_height="22dp" android:src="@android:drawable/ic_popup_reminder" app:tint="@color/white" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="الإشعارات" android:textColor="@color/white" android:textSize="11sp" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/navAccount" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:orientation="vertical" android:padding="4dp">
+            <ImageView android:layout_width="22dp" android:layout_height="22dp" android:src="@android:drawable/ic_menu_myplaces" app:tint="@color/white" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="حسابي" android:textColor="@color/white" android:textSize="11sp" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/navAdmin" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:orientation="vertical" android:padding="4dp" android:visibility="gone">
+            <ImageView android:layout_width="22dp" android:layout_height="22dp" android:src="@android:drawable/ic_menu_manage" app:tint="@color/white" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="الإدارة" android:textColor="@color/white" android:textSize="11sp" />
+        </LinearLayout>
     </LinearLayout>
 </LinearLayout>

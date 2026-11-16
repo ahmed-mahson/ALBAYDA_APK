@@ -107,7 +107,22 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun makeSpinnerAdapter(items: List<String>): ArrayAdapter<String> {
-        return ArrayAdapter(this, R.layout.spinner_item, items).apply {
+        val tf = try {
+            androidx.core.content.res.ResourcesCompat.getFont(this, R.font.sultan_medium)
+                ?: android.graphics.Typeface.createFromAsset(assets, "fonts/sultan-medium.ttf")
+        } catch (_: Exception) { null }
+        return object : ArrayAdapter<String>(this, R.layout.spinner_item, items) {
+            override fun getView(position: Int, convertView: android.view.View?, parent: android.view.ViewGroup): android.view.View {
+                val v = super.getView(position, convertView, parent)
+                (v as? TextView)?.typeface = tf ?: (v as? TextView)?.typeface
+                return v
+            }
+            override fun getDropDownView(position: Int, convertView: android.view.View?, parent: android.view.ViewGroup): android.view.View {
+                val v = super.getDropDownView(position, convertView, parent)
+                (v as? TextView)?.typeface = tf ?: (v as? TextView)?.typeface
+                return v
+            }
+        }.apply {
             setDropDownViewResource(R.layout.spinner_dropdown_item)
         }
     }

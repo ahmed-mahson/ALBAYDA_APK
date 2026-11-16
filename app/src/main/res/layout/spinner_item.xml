@@ -9,5 +9,6 @@
     android:textColor="@color/text_blue"
     android:textSize="15sp"
     android:fontFamily="@font/sultan_medium"
+    android:textDirection="rtl"
     android:singleLine="true"
     android:ellipsize="end" />
