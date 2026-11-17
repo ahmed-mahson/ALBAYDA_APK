@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.albayda.court.data.AuthManager
+import com.albayda.court.data.SyncManager
 import com.albayda.court.databinding.ActivityRegisterBinding
 
 class RegisterActivity : AppCompatActivity() {
@@ -13,6 +14,8 @@ class RegisterActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        AuthManager.init(this)
+        SyncManager.init(this)
 
         binding.btnRegister.setOnClickListener {
             val username = binding.etUsername.text.toString().trim()
@@ -26,6 +29,7 @@ class RegisterActivity : AppCompatActivity() {
 
             val success = AuthManager.register(username, mobile, pass)
             if (success) {
+                SyncManager.notifyUserRegistered(username, mobile)
                 Toast.makeText(
                     this,
                     "تم إرسال طلب إنشاء الحساب. بانتظار موافقة مدير النظام (أحمد محسون)",

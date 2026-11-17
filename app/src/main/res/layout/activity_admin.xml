@@ -3,39 +3,91 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/bg_light">
+    android:background="@color/bg_light"
+    android:fitsSystemWindows="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/navy_900"
-        android:padding="16dp">
+        android:background="@drawable/bg_theme_header"
+        android:padding="14dp">
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="لوحة إدارة النظام"
             android:textColor="@color/white"
-            android:textSize="20sp"
+            android:textSize="19sp"
             android:textStyle="bold" />
     </LinearLayout>
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:fillViewport="true">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="@dimen/screen_padding">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/bg_card_theme"
+                android:padding="12dp">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="إعدادات المزامنة الفورية"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_blue"
+                    android:textSize="15sp" />
+                <EditText
+                    android:id="@+id/etSyncUrl"
+                    android:layout_width="match_parent"
+                    android:layout_height="44dp"
+                    android:layout_marginTop="8dp"
+                    android:hint="رابط خادم المزامنة (مثال https://sync.example.com)"
+                    android:background="@drawable/bg_input"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:inputType="textUri" />
+                <Button
+                    android:id="@+id/btnSaveSync"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="8dp"
+                    android:text="حفظ وتفعيل المزامنة"
+                    android:backgroundTint="@color/navy_600"
+                    android:textColor="@color/white" />
+                <TextView
+                    android:id="@+id/tvSyncStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:textColor="@color/text_muted"
+                    android:textSize="11sp" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btnOpenPosts"
+                android:layout_width="match_parent"
+                android:layout_height="46dp"
+                android:layout_marginTop="12dp"
+                android:text="منشورات واعلانات المحكمة"
+                android:backgroundTint="@color/accent_blue"
+                android:textColor="@color/white" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="الشريط الإخباري والتنبيهات"
                 android:textStyle="bold"
-                android:textColor="@color/navy_700"
-                android:textSize="16sp" />
+                android:textColor="@color/text_blue"
+                android:textSize="15sp"
+                android:layout_marginTop="18dp" />
             <EditText
                 android:id="@+id/etNews"
                 android:layout_width="match_parent"
@@ -43,15 +95,35 @@
                 android:hint="اكتب الخبر/التنبيه"
                 android:inputType="textMultiLine"
                 android:minLines="2"
+                android:background="@drawable/bg_input"
+                android:padding="10dp"
                 android:layout_marginTop="8dp" />
             <Button
                 android:id="@+id/btnAddNews"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="تحديث الشريط الإخباري"
+                android:layout_height="44dp"
+                android:text="تحديث الشريط الإخباري ومزامنته"
                 android:layout_marginTop="8dp"
-                android:backgroundTint="@color/gold"
-                android:textColor="@color/navy_900" />
+                android:backgroundTint="@color/gold_sand"
+                android:textColor="@color/white" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="الإشعارات الواردة"
+                android:textStyle="bold"
+                android:textColor="@color/text_blue"
+                android:textSize="15sp"
+                android:layout_marginTop="18dp" />
+            <TextView
+                android:id="@+id/tvNotifications"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textColor="@color/text_blue"
+                android:textSize="12sp"
+                android:background="@drawable/bg_card_theme"
+                android:padding="12dp" />
 
             <TextView
                 android:id="@+id/tvPendingTitle"
@@ -59,13 +131,13 @@
                 android:layout_height="wrap_content"
                 android:text="تنبيهات المستخدمين الجدد (بانتظار الموافقة)"
                 android:textStyle="bold"
-                android:textColor="@color/navy_700"
-                android:textSize="16sp"
-                android:layout_marginTop="20dp" />
+                android:textColor="@color/text_blue"
+                android:textSize="15sp"
+                android:layout_marginTop="18dp" />
             <ListView
                 android:id="@+id/lvPending"
                 android:layout_width="match_parent"
-                android:layout_height="220dp"
+                android:layout_height="200dp"
                 android:layout_marginTop="8dp"
                 android:dividerHeight="1dp" />
 
@@ -74,17 +146,17 @@
                 android:layout_height="wrap_content"
                 android:text="سجل المستخدمين والإجراءات"
                 android:textStyle="bold"
-                android:textColor="@color/navy_700"
-                android:textSize="16sp"
-                android:layout_marginTop="20dp" />
+                android:textColor="@color/text_blue"
+                android:textSize="15sp"
+                android:layout_marginTop="18dp" />
             <TextView
                 android:id="@+id/tvLogs"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:textColor="@color/text_muted"
-                android:textSize="13sp"
-                android:background="@color/white"
+                android:textSize="12sp"
+                android:background="@drawable/bg_card_theme"
                 android:padding="12dp" />
         </LinearLayout>
     </ScrollView>

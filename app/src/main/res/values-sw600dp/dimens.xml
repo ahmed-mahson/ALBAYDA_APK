@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="splash_logo">160dp</dimen>
+    <dimen name="header_logo">58dp</dimen>
+    <dimen name="header_title">21sp</dimen>
+    <dimen name="banner_height">170dp</dimen>
+    <dimen name="service_card_height">150dp</dimen>
+    <dimen name="bottom_nav_height">64dp</dimen>
+    <dimen name="screen_padding">20dp</dimen>
+</resources>

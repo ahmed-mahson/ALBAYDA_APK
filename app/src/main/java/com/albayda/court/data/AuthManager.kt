@@ -97,6 +97,34 @@ object AuthManager {
         return true
     }
 
+    /** Adds/updates a user received from the sync backend so every device shares the same registry. */
+    fun upsertRemoteUser(username: String, mobile: String, passwordHash: String, createdAt: String) {
+        if (mobile.isBlank()) return
+        val users = getUsers().toMutableList()
+        val index = users.indexOfFirst { it.mobile == mobile }
+        if (index >= 0) {
+            users[index] = users[index].copy(
+                username = username.ifBlank { users[index].username },
+                passwordHash = passwordHash.ifBlank { users[index].passwordHash },
+                createdAt = createdAt.ifBlank { users[index].createdAt }
+            )
+        } else {
+            users.add(User(username, mobile, passwordHash, false, false, createdAt))
+        }
+        saveUsers(users)
+    }
+
+    fun setApproved(mobile: String, approved: Boolean) {
+        val users = getUsers().toMutableList()
+        val index = users.indexOfFirst { it.mobile == mobile }
+        if (index >= 0) {
+            users[index] = users[index].copy(isApproved = approved)
+            saveUsers(users)
+        }
+    }
+
+    fun findByMobile(mobile: String): User? = getUsers().firstOrNull { it.mobile == mobile }
+
     fun login(identifier: String, password: String): User? {
         val hashed = hashPassword(password)
         val user = getUsers().find {

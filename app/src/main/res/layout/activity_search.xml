@@ -9,8 +9,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/navy_900"
-        android:padding="16dp">
+        android:background="@drawable/bg_theme_header"
+        android:padding="12dp">
         <TextView
             android:id="@+id/tvTitle"
             android:layout_width="wrap_content"
@@ -22,7 +22,10 @@
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="0dp"
+        android:layout_weight="1.15"
+        android:minHeight="120dp"
+        android:fillViewport="true">
         <LinearLayout
             android:id="@+id/formContainer"
             android:layout_width="match_parent"
@@ -113,6 +116,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:minHeight="100dp"
         android:fillViewport="true">
         <LinearLayout
             android:id="@+id/resultsContainer"

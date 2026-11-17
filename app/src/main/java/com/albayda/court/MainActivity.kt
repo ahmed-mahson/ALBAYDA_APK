@@ -9,19 +9,25 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.WindowCompat
 import com.albayda.court.data.AuthManager
+import com.albayda.court.data.SyncManager
 import com.albayda.court.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
+    private val syncListener: () -> Unit = {
+        runOnUiThread {
+            val current = SyncManager.getNews().first
+            if (current.isNotBlank()) binding.newsTicker.setNewsText(current)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        WindowCompat.setDecorFitsSystemWindows(window, false)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         AuthManager.init(this)
+        SyncManager.init(this)
 
         val session = AuthManager.getSession()
         val isAdmin = AuthManager.isPrimaryAdmin(session)
@@ -30,10 +36,13 @@ class MainActivity : AppCompatActivity() {
         val userName = session?.username?.ifBlank { "مستخدم" } ?: "مستخدم"
         binding.tvWelcome.text = "مرحباً بك  $userName"
 
-        val news = getSharedPreferences("app_prefs", MODE_PRIVATE)
-            .getString("news_item", "مرحباً بكم في محكمة البيضاء الابتدائية") ?: "مرحباً بكم في محكمة البيضاء الابتدائية"
+        val syncedNews = SyncManager.getNews().first
+        val localNews = getSharedPreferences("app_prefs", MODE_PRIVATE)
+            .getString("news_item", "") ?: ""
+        val news = syncedNews.ifBlank { localNews }.ifBlank { "مرحباً بكم في محكمة البيضاء الابتدائية" }
         binding.newsTicker.speedPxPerSec = 80f
         binding.newsTicker.setNewsText(news)
+        SyncManager.refresh()
 
         // Order in grid: sessions, case, supreme, attendance
         setupCard(binding.cardSessions.root, android.R.drawable.ic_menu_my_calendar, "الاستعلام عن الجلسات اليومية")
@@ -45,6 +54,7 @@ class MainActivity : AppCompatActivity() {
         binding.cardAttendance.root.setOnClickListener { openSearch("attendance") }
         binding.cardSessions.root.setOnClickListener { openSearch("sessions") }
         binding.cardSupreme.root.setOnClickListener { openSearch("supreme") }
+        binding.cardPosts.setOnClickListener { startActivity(Intent(this, PostsActivity::class.java)) }
 
         binding.tvWhatsapp.setOnClickListener {
             startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://wa.me/qr/QIQRW7LA325GG1")))
@@ -62,6 +72,16 @@ class MainActivity : AppCompatActivity() {
         selectTab(binding.navHome)
     }
 
+    override fun onStart() {
+        super.onStart()
+        SyncManager.addListener(syncListener)
+    }
+
+    override fun onStop() {
+        SyncManager.removeListener(syncListener)
+        super.onStop()
+    }
+
     private fun selectTab(active: View) {
         val tabs = listOf(binding.navHome, binding.navServices, binding.navNotifications, binding.navAccount, binding.navAdmin)
         tabs.forEach { tab ->
@@ -71,12 +91,24 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showNotifications() {
-        val news = getSharedPreferences("app_prefs", MODE_PRIVATE).getString("news_item", "") ?: ""
+        val notifications = SyncManager.notifications()
+        val news = SyncManager.getNews().first
+        val body = buildString {
+            if (news.isNotBlank()) append("آخر الأخبار: $news\n\n")
+            if (notifications.isEmpty()) {
+                append("لا توجد إشعارات حالياً.")
+            } else {
+                notifications.take(20).forEach {
+                    append("• ${it.title}: ${it.body}\n${it.timestamp.replace('T', ' ')}\n\n")
+                }
+            }
+        }
         AlertDialog.Builder(this)
             .setTitle("الإشعارات والتنبيهات")
-            .setMessage(if (news.isBlank()) "لا توجد إشعارات حالياً." else news)
+            .setMessage(body)
             .setPositiveButton("إغلاق", null)
             .show()
+        SyncManager.markNotificationsRead()
     }
 
     private fun showAccount(name: String) {

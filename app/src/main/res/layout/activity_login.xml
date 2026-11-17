@@ -3,7 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="@color/white">
+    android:background="@color/sky_pale"
+    android:fitsSystemWindows="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -27,8 +28,7 @@
             android:text="تسجيل الدخول"
             android:textSize="28sp"
             android:textStyle="bold"
-            android:textColor="@color/black"
-            android:fontFamily="sans-serif"
+            android:textColor="@color/navy_900"
             android:layout_marginTop="12dp"
             android:layout_marginBottom="24dp" />
 
@@ -74,7 +74,7 @@
             android:textColor="@color/white"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:backgroundTint="@color/gold_sand" />
+            android:backgroundTint="@color/navy_600" />
 
         <Button
             android:id="@+id/btnBiometric"

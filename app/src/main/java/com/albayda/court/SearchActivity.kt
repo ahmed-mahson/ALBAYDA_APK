@@ -26,6 +26,7 @@ class SearchActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivitySearchBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        CaseRecordsRepository.init(this)
 
         mode = intent.getStringExtra("MODE") ?: "case"
         binding.tvTitle.text = when (mode) {

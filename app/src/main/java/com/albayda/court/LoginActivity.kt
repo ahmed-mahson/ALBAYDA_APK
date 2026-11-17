@@ -7,7 +7,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
-import androidx.core.view.WindowCompat
 import com.albayda.court.data.AuthManager
 import com.albayda.court.databinding.ActivityLoginBinding
 
@@ -16,7 +15,6 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        WindowCompat.setDecorFitsSystemWindows(window, false)
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
         AuthManager.init(this)
