@@ -123,6 +123,45 @@ object AuthManager {
         }
     }
 
+    /** Changes the username of the account identified by its mobile number. */
+    fun updateUsername(mobile: String, newUsername: String): Boolean {
+        val name = newUsername.trim()
+        if (name.isBlank()) return false
+        val users = getUsers().toMutableList()
+        if (users.any { it.username == name && it.mobile != mobile }) return false
+        val index = users.indexOfFirst { it.mobile == mobile }
+        if (index < 0) return false
+        val updated = users[index].copy(username = name)
+        users[index] = updated
+        saveUsers(users)
+        refreshSession(updated)
+        addLog(UserLog(now(), name, mobile, "تعديل اسم المستخدم", ""))
+        runCatching { SyncManager.notifyUserUpdated(name, mobile, updated.passwordHash) }
+        return true
+    }
+
+    /** Changes the password of the account identified by its mobile number. */
+    fun updatePassword(mobile: String, newPassword: String): Boolean {
+        if (newPassword.isBlank()) return false
+        val users = getUsers().toMutableList()
+        val index = users.indexOfFirst { it.mobile == mobile }
+        if (index < 0) return false
+        val updated = users[index].copy(passwordHash = hashPassword(newPassword))
+        users[index] = updated
+        saveUsers(users)
+        refreshSession(updated)
+        addLog(UserLog(now(), updated.username, mobile, "تعديل كلمة المرور", ""))
+        runCatching { SyncManager.notifyUserUpdated(updated.username, mobile, updated.passwordHash) }
+        return true
+    }
+
+    private fun refreshSession(user: User) {
+        val current = getSession() ?: return
+        if (current.mobile == user.mobile) {
+            prefs.edit().putString("session_user", gson.toJson(user)).apply()
+        }
+    }
+
     fun findByMobile(mobile: String): User? = getUsers().firstOrNull { it.mobile == mobile }
 
     fun login(identifier: String, password: String): User? {

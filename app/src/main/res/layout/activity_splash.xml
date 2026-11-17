@@ -1,37 +1,95 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center"
-    android:background="@drawable/bg_splash"
+    android:background="@drawable/bg_splash_gradient"
     android:fitsSystemWindows="true"
-    android:padding="24dp">
+    android:layoutDirection="rtl">
 
+    <!-- صورة القلعة في الخلفية السفلية -->
     <ImageView
-        android:layout_width="@dimen/splash_logo"
-        android:layout_height="@dimen/splash_logo"
-        android:src="@mipmap/ic_launcher"
-        android:adjustViewBounds="true"
+        android:id="@+id/iv_castle_bg"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:alpha="0.35"
+        android:contentDescription="@string/castle_desc"
+        android:scaleType="centerCrop"
+        android:src="@drawable/bg_castle_albayda"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.45"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- الشعار الرسمي في الأعلى -->
+    <ImageView
+        android:id="@+id/iv_logo"
+        android:layout_width="240dp"
+        android:layout_height="240dp"
+        android:layout_marginTop="48dp"
+        android:contentDescription="@string/logo_desc"
         android:scaleType="fitCenter"
-        android:contentDescription="شعار محكمة البيضاء الابتدائية" />
+        android:src="@drawable/ic_court_logo"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- اسم المحكمة الرئيسي -->
     <TextView
+        android:id="@+id/tv_court_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:text="محكمة البيضاء الابتدائية"
+        android:layout_marginTop="16dp"
+        android:shadowColor="#80000000"
+        android:shadowDx="0"
+        android:shadowDy="3"
+        android:shadowRadius="6"
+        android:text="@string/court_title"
         android:textColor="@color/white"
-        android:textSize="22sp"
+        android:textSize="26sp"
         android:textStyle="bold"
-        android:gravity="center" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/iv_logo" />
 
-    <TextView
+    <!-- حاوية حقوق التصميم والبرمجة في الأسفل -->
+    <LinearLayout
+        android:id="@+id/ll_footer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:text="تقنية معلومات المحكمة"
-        android:textColor="@color/sky_light"
-        android:textSize="14sp"
-        android:gravity="center" />
-</LinearLayout>
+        android:layout_marginBottom="20dp"
+        android:gravity="center"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+            android:id="@+id/tv_dev_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/dev_label"
+            android:textColor="@color/text_gray_light"
+            android:textSize="11sp" />
+
+        <TextView
+            android:id="@+id/tv_dev_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="@string/dev_name"
+            android:textColor="@color/text_gray_light"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tv_dev_phones"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="@string/dev_phones"
+            android:textColor="@color/text_blue_light"
+            android:textSize="11sp" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

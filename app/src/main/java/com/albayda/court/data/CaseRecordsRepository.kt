@@ -8,8 +8,11 @@ import java.net.CookieHandler
 import java.net.CookieManager
 import java.net.HttpURLConnection
 import java.net.URL
+import java.nio.ByteBuffer
+import java.nio.charset.Charset
 import java.nio.charset.CodingErrorAction
 import java.nio.charset.StandardCharsets
+import java.text.Normalizer
 import java.util.Locale
 
 data class CaseRecord(
@@ -97,20 +100,118 @@ object CaseRecordsRepository {
         }
     }
 
-    /** Handles UTF-8 BOM and Arabic Windows-1256 encoded files without breaking letters. */
+    /** Detects and normalizes Unicode before CSV parsing to prevent Chinese text and squares. */
     private fun decodeCsv(bytes: ByteArray): String {
-        if (bytes.size >= 3 && (bytes[0].toInt() and 0xFF) == 0xEF &&
-            (bytes[1].toInt() and 0xFF) == 0xBB && (bytes[2].toInt() and 0xFF) == 0xBF
-        ) {
-            return String(bytes.copyOfRange(3, bytes.size), StandardCharsets.UTF_8)
+        if (bytes.isEmpty()) return ""
+
+        val candidates = LinkedHashMap<String, String>()
+        fun add(name: String, text: String?) {
+            if (!text.isNullOrEmpty() && !candidates.values.any { it == text }) candidates[name] = text
         }
-        val decoder = StandardCharsets.UTF_8.newDecoder()
-            .onMalformedInput(CodingErrorAction.REPORT)
-            .onUnmappableCharacter(CodingErrorAction.REPORT)
-        return try {
-            decoder.decode(java.nio.ByteBuffer.wrap(bytes)).toString()
+        fun charset(name: String): Charset? = try { Charset.forName(name) } catch (_: Exception) { null }
+        fun decodeRange(offset: Int, cs: Charset?): String? {
+            if (cs == null || offset >= bytes.size) return null
+            return try { String(bytes, offset, bytes.size - offset, cs) } catch (_: Exception) { null }
+        }
+
+        // 1) Byte-order marks.
+        when {
+            startsWith(bytes, 0x00, 0x00, 0xFE, 0xFF) -> add("UTF-32BE", decodeRange(4, charset("UTF-32BE")))
+            startsWith(bytes, 0xFF, 0xFE, 0x00, 0x00) -> add("UTF-32LE", decodeRange(4, charset("UTF-32LE")))
+            startsWith(bytes, 0xEF, 0xBB, 0xBF) -> add("UTF-8-BOM", decodeRange(3, StandardCharsets.UTF_8))
+            startsWith(bytes, 0xFF, 0xFE) -> add("UTF-16LE-BOM", decodeRange(2, StandardCharsets.UTF_16LE))
+            startsWith(bytes, 0xFE, 0xFF) -> add("UTF-16BE-BOM", decodeRange(2, StandardCharsets.UTF_16BE))
+        }
+
+        // 2) Strict UTF-8 — the normal case for a CSV downloaded from Google Drive.
+        val strictUtf8 = try {
+            StandardCharsets.UTF_8.newDecoder()
+                .onMalformedInput(CodingErrorAction.REPORT)
+                .onUnmappableCharacter(CodingErrorAction.REPORT)
+                .decode(ByteBuffer.wrap(bytes)).toString()
         } catch (_: Exception) {
-            String(bytes, charset("windows-1256"))
+            null
+        }
+        add("UTF-8", strictUtf8)
+
+        // 3) Other encodings. The scoring function below selects the one containing real Arabic.
+        add("UTF-8-lenient", String(bytes, StandardCharsets.UTF_8))
+        add("windows-1256", decodeRange(0, charset("windows-1256")))
+        add("ISO-8859-1", decodeRange(0, charset("ISO-8859-1")))
+        add("UTF-16LE", decodeRange(0, StandardCharsets.UTF_16LE))
+        add("UTF-16BE", decodeRange(0, StandardCharsets.UTF_16BE))
+        add("GB18030", decodeRange(0, charset("GB18030")))
+        add("Big5", decodeRange(0, charset("Big5")))
+        add("Shift_JIS", decodeRange(0, charset("Shift_JIS")))
+
+        // 4) Repair mojibake produced when UTF-8 bytes were read as a single-byte charset.
+        val latinSource = candidates["ISO-8859-1"]
+        if (latinSource != null && latinSource.any { it == 'Ã' || it == 'Ø' || it == 'Ù' || it == 'â' }) {
+            val cs = charset("ISO-8859-1")
+            add("repaired-latin1->UTF-8", if (cs == null) null else try {
+                String(latinSource.toByteArray(cs), StandardCharsets.UTF_8)
+            } catch (_: Exception) { null })
+        }
+        val cp1256Source = candidates["windows-1256"]
+        if (cp1256Source != null && cp1256Source.any { it == 'Ã' || it == 'Ø' || it == 'Ù' }) {
+            val cs = charset("windows-1256")
+            add("repaired-cp1256->UTF-8", if (cs == null) null else try {
+                String(cp1256Source.toByteArray(cs), StandardCharsets.UTF_8)
+            } catch (_: Exception) { null })
+        }
+        if (strictUtf8 != null && strictUtf8.any { it == 'Ã' || it == 'Ø' || it == 'Ù' || it == 'â' }) {
+            val cs = charset("windows-1256")
+            add("repaired-utf8-text-cp1256->UTF-8", if (cs == null) null else try {
+                String(strictUtf8.toByteArray(cs), StandardCharsets.UTF_8)
+            } catch (_: Exception) { null })
+        }
+
+        val best = candidates.maxByOrNull { scoreDecodedText(it.value) }?.value
+            ?: strictUtf8
+            ?: String(bytes, StandardCharsets.UTF_8)
+        return normalizeUnicode(best)
+    }
+
+    private fun startsWith(bytes: ByteArray, vararg magic: Int): Boolean {
+        if (bytes.size < magic.size) return false
+        return magic.indices.all { (bytes[it].toInt() and 0xFF) == (magic[it] and 0xFF) }
+    }
+
+    private fun scoreDecodedText(text: String): Int {
+        var arabic = 0
+        var cjk = 0
+        var replacement = 0
+        var controls = 0
+        var useful = 0
+        for (ch in text) {
+            val code = ch.code
+            when {
+                ch == '\uFFFD' -> replacement += 6
+                code in 0x0600..0x06FF || code in 0x0750..0x077F ||
+                        code in 0xFB50..0xFDFF || code in 0xFE70..0xFEFF -> arabic += 4
+                code in 0x4E00..0x9FFF || code in 0x3400..0x4DBF ||
+                        code in 0x3040..0x30FF || code in 0xAC00..0xD7AF -> cjk += 6
+                code < 32 && ch != '\n' && ch != '\r' && ch != '\t' -> controls += 5
+                ch.isLetterOrDigit() -> useful += 1
+            }
+        }
+        val headerBonus = if (text.contains("رقم القضية") || text.contains("القضية")) 250 else 0
+        val columnBonus = minOf(text.count { it == ',' }, 200)
+        return arabic + headerBonus + columnBonus + minOf(useful, 200) / 4 -
+                cjk * 4 - replacement * 5 - controls * 3
+    }
+
+    private fun normalizeUnicode(text: String): String {
+        val nfc = try { Normalizer.normalize(text, Normalizer.Form.NFC) } catch (_: Exception) { text }
+        return buildString(nfc.length) {
+            nfc.forEach { ch ->
+                when {
+                    ch == '\uFEFF' || ch == '\u200B' || ch == '\u200E' || ch == '\u200F' -> Unit
+                    ch == '\u00A0' -> append(' ')
+                    ch.code < 32 && ch != '\n' && ch != '\r' && ch != '\t' -> append(' ')
+                    else -> append(ch)
+                }
+            }
         }
     }
 

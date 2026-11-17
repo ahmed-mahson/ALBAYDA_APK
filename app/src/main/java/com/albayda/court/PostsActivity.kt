@@ -40,7 +40,7 @@ class PostsActivity : AppCompatActivity() {
         setContentView(binding.root)
         AuthManager.init(this)
         SyncManager.init(this)
-        isAdmin = AuthManager.isPrimaryAdmin(AuthManager.getSession())
+        isAdmin = isPrimaryAdminNow()
 
         binding.adminPostPanel.visibility = if (isAdmin) View.VISIBLE else View.GONE
         binding.btnBackPosts.setOnClickListener { finish() }
@@ -51,11 +51,19 @@ class PostsActivity : AppCompatActivity() {
         }
 
         binding.ivPickPostImage.setOnClickListener {
+            if (!isPrimaryAdminNow()) {
+                Toast.makeText(this, "اختيار صورة المنشور مقتصر على مدير النظام", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
             val intent = Intent(Intent.ACTION_GET_CONTENT).apply { type = "image/*" }
             startActivityForResult(Intent.createChooser(intent, "اختر صورة المنشور"), pickImageRequest)
         }
 
         binding.btnPublishPost.setOnClickListener {
+            if (!isPrimaryAdminNow()) {
+                Toast.makeText(this, "النشر مقتصر على حساب مدير النظام احمد محسون فقط", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
             val details = binding.etPostDetails.text.toString().trim()
             if (pickedBytes == null) {
                 Toast.makeText(this, "يرجى اختيار صورة المنشور", Toast.LENGTH_SHORT).show()
@@ -78,6 +86,9 @@ class PostsActivity : AppCompatActivity() {
         updateStatus()
         SyncManager.refresh()
     }
+
+    private fun isPrimaryAdminNow(): Boolean =
+        AuthManager.isPrimaryAdmin(AuthManager.getSession())
 
     override fun onStart() {
         super.onStart()
@@ -107,7 +118,7 @@ class PostsActivity : AppCompatActivity() {
         return try {
             val stream = contentResolver.openInputStream(uri) ?: return null
             val original = stream.use { BitmapFactory.decodeStream(it) } ?: return null
-            val maxSide = 1400f
+            val maxSide = 2000f
             val scale = minOf(1f, maxSide / maxOf(original.width, original.height).toFloat())
             val bitmap = if (scale < 1f) {
                 Bitmap.createScaledBitmap(
@@ -118,7 +129,7 @@ class PostsActivity : AppCompatActivity() {
                 )
             } else original
             val out = ByteArrayOutputStream()
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 82, out)
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 88, out)
             out.toByteArray()
         } catch (_: Exception) {
             null
@@ -148,8 +159,12 @@ class PostsActivity : AppCompatActivity() {
             item.tvPostDetails.text = post.details
             item.tvPostTime.text = "وقت النشر: ${post.timestamp.replace('T', ' ')}"
             item.btnDownload.setOnClickListener { downloadPost(post) }
-            item.btnDelete.visibility = if (isAdmin) View.VISIBLE else View.GONE
+            item.btnDelete.visibility = if (isPrimaryAdminNow()) View.VISIBLE else View.GONE
             item.btnDelete.setOnClickListener {
+                if (!isPrimaryAdminNow()) {
+                    Toast.makeText(this, "الحذف مقتصر على مدير النظام", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
                 SyncManager.deletePost(post.id)
                 Toast.makeText(this, "تم حذف المنشور", Toast.LENGTH_SHORT).show()
                 renderPosts()

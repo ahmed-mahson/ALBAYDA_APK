@@ -79,9 +79,10 @@
                     <ImageView
                         android:id="@+id/ivPickPostImage"
                         android:layout_width="match_parent"
-                        android:layout_height="120dp"
+                        android:layout_height="@dimen/post_picker_height"
                         android:layout_marginTop="8dp"
-                        android:scaleType="centerCrop"
+                        android:scaleType="fitCenter"
+                        android:adjustViewBounds="true"
                         android:src="@android:drawable/ic_menu_camera"
                         android:background="@drawable/bg_chip_sky"
                         android:contentDescription="اختر صورة المنشور" />

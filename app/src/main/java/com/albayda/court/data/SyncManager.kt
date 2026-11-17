@@ -134,6 +134,21 @@ object SyncManager {
         refresh()
     }
 
+    /** Broadcasts a username/password change so every device can log in with the new data. */
+    fun notifyUserUpdated(username: String, mobile: String, passwordHash: String) {
+        val ts = now()
+        queue(
+            "user_updated",
+            JSONObject()
+                .put("username", username)
+                .put("mobile", mobile)
+                .put("password_hash", passwordHash)
+                .put("timestamp", ts),
+            ts
+        )
+        refresh()
+    }
+
     fun getPosts(): List<CourtPost> = db.getPosts()
 
     fun getNews(): Pair<String, String> = db.getNews()
@@ -244,6 +259,16 @@ object SyncManager {
                             body = "تم تحديث حالة الحساب رقم $mobile",
                             timestamp = ts.ifBlank { now() }
                         )
+                    )
+                }
+                "user_updated" -> {
+                    val username = payload.optString("username")
+                    val mobile = payload.optString("mobile")
+                    AuthManager.upsertRemoteUser(
+                        username,
+                        mobile,
+                        payload.optString("password_hash"),
+                        payload.optString("created_at", ts)
                     )
                 }
             }

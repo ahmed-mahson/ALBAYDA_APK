@@ -7,4 +7,6 @@
     <dimen name="service_card_height">150dp</dimen>
     <dimen name="bottom_nav_height">64dp</dimen>
     <dimen name="screen_padding">20dp</dimen>
+    <dimen name="post_picker_height">300dp</dimen>
+    <dimen name="post_image_height">520dp</dimen>
 </resources>

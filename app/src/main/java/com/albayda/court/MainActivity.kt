@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -33,14 +34,13 @@ class MainActivity : AppCompatActivity() {
         val isAdmin = AuthManager.isPrimaryAdmin(session)
         binding.navAdmin.visibility = if (isAdmin) View.VISIBLE else View.GONE
 
-        val userName = session?.username?.ifBlank { "مستخدم" } ?: "مستخدم"
-        binding.tvWelcome.text = "مرحباً بك  $userName"
+        updateWelcome(session?.username)
 
         val syncedNews = SyncManager.getNews().first
         val localNews = getSharedPreferences("app_prefs", MODE_PRIVATE)
             .getString("news_item", "") ?: ""
         val news = syncedNews.ifBlank { localNews }.ifBlank { "مرحباً بكم في محكمة البيضاء الابتدائية" }
-        binding.newsTicker.speedPxPerSec = 80f
+        binding.newsTicker.speedPxPerSec = 160f
         binding.newsTicker.setNewsText(news)
         SyncManager.refresh()
 
@@ -63,13 +63,11 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/Ahmed_Mahson")))
         }
 
-        binding.ivBell.setOnClickListener { showNotifications() }
-        binding.navHome.setOnClickListener { binding.mainScroll.smoothScrollTo(0, 0); selectTab(binding.navHome) }
-        binding.navServices.setOnClickListener { binding.mainScroll.smoothScrollTo(0, binding.servicesGrid.top); selectTab(binding.navServices) }
-        binding.navNotifications.setOnClickListener { showNotifications(); selectTab(binding.navNotifications) }
-        binding.navAccount.setOnClickListener { showAccount(session?.username ?: "مستخدم"); selectTab(binding.navAccount) }
+        binding.ivBell.setOnClickListener { showNotifications(); selectTab(binding.navNotifications) }
         binding.navAdmin.setOnClickListener { startActivity(Intent(this, AdminActivity::class.java)) }
-        selectTab(binding.navHome)
+        binding.navAccount.setOnClickListener { showAccount(); selectTab(binding.navAccount) }
+        binding.navNotifications.setOnClickListener { showNotifications(); selectTab(binding.navNotifications) }
+        binding.navLogout.setOnClickListener { logout() }
     }
 
     override fun onStart() {
@@ -82,8 +80,12 @@ class MainActivity : AppCompatActivity() {
         super.onStop()
     }
 
+    private fun updateWelcome(username: String?) {
+        binding.tvWelcome.text = "مرحباً بك  ${username?.ifBlank { "مستخدم" } ?: "مستخدم"}"
+    }
+
     private fun selectTab(active: View) {
-        val tabs = listOf(binding.navHome, binding.navServices, binding.navNotifications, binding.navAccount, binding.navAdmin)
+        val tabs = listOf(binding.navAdmin, binding.navAccount, binding.navNotifications, binding.navLogout)
         tabs.forEach { tab ->
             tab.alpha = if (tab == active) 1.0f else 0.75f
             tab.setBackgroundColor(if (tab == active) getColor(R.color.navy_800) else android.graphics.Color.TRANSPARENT)
@@ -111,17 +113,88 @@ class MainActivity : AppCompatActivity() {
         SyncManager.markNotificationsRead()
     }
 
-    private fun showAccount(name: String) {
-        AlertDialog.Builder(this)
-            .setTitle("حسابي")
-            .setMessage("المستخدم: $name")
-            .setPositiveButton("تسجيل الخروج") { _, _ ->
-                AuthManager.clearSession()
-                startActivity(Intent(this, LoginActivity::class.java))
-                finish()
+    private fun showAccount() {
+        val current = AuthManager.getSession()
+        if (current == null) {
+            logout()
+            return
+        }
+
+        val view = layoutInflater.inflate(R.layout.dialog_account, null)
+        val tvUsername = view.findViewById<TextView>(R.id.tvAccountUsername)
+        val tvMobile = view.findViewById<TextView>(R.id.tvAccountMobile)
+        val tvStatus = view.findViewById<TextView>(R.id.tvAccountStatus)
+        val etNewUsername = view.findViewById<EditText>(R.id.etNewUsername)
+        val etNewPassword = view.findViewById<EditText>(R.id.etNewPassword)
+        val btnSave = view.findViewById<View>(R.id.btnSaveAccount)
+        val btnClose = view.findViewById<View>(R.id.btnCloseAccount)
+
+        fun bindInfo() {
+            val user = AuthManager.getSession() ?: current
+            tvUsername.text = "اسم المستخدم: ${user.username}"
+            tvMobile.text = "رقم الجوال: ${user.mobile}"
+            tvStatus.text = if (user.isApproved) "حالة الحساب: معتمد" else "حالة الحساب: بانتظار الاعتماد"
+            etNewUsername.setText(user.username)
+            etNewUsername.setSelection(etNewUsername.text?.length ?: 0)
+        }
+        bindInfo()
+
+        val dialog = AlertDialog.Builder(this)
+            .setView(view)
+            .setCancelable(true)
+            .create()
+
+        btnSave.setOnClickListener {
+            val user = AuthManager.getSession() ?: current
+            val newUsername = etNewUsername.text.toString().trim()
+            val newPassword = etNewPassword.text.toString()
+            var changed = false
+
+            if (newUsername.isNotBlank() && newUsername != user.username) {
+                if (AuthManager.updateUsername(user.mobile, newUsername)) {
+                    changed = true
+                } else {
+                    Toast.makeText(this, "اسم المستخدم مستخدم من قبل حساب آخر", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
             }
-            .setNegativeButton("إغلاق", null)
-            .show()
+            if (newPassword.isNotBlank()) {
+                if (newPassword.length < 4) {
+                    Toast.makeText(this, "كلمة المرور يجب ألا تقل عن 4 أحرف", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+                if (AuthManager.updatePassword(user.mobile, newPassword)) {
+                    changed = true
+                } else {
+                    Toast.makeText(this, "تعذر تحديث كلمة المرور", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+            }
+
+            if (!changed) {
+                Toast.makeText(this, "لا توجد تغييرات للحفظ", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val updated = AuthManager.getSession() ?: user
+            updateWelcome(updated.username)
+            etNewPassword.text?.clear()
+            bindInfo()
+            Toast.makeText(this, "تم حفظ تعديلات الحساب", Toast.LENGTH_SHORT).show()
+            dialog.dismiss()
+        }
+
+        btnClose.setOnClickListener { dialog.dismiss() }
+        dialog.show()
+    }
+
+    private fun logout() {
+        AuthManager.clearSession()
+        startActivity(
+            Intent(this, LoginActivity::class.java)
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+        )
+        finish()
     }
 
     private fun setupCard(card: View, iconRes: Int, title: String) {

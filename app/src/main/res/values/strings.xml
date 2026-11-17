@@ -4,4 +4,12 @@
     <string name="login">تسجيل الدخول</string>
     <string name="register">إنشاء حساب جديد</string>
     <string name="biometric_login">الدخول بالبصمة</string>
+
+    <!-- Provided splash theme strings -->
+    <string name="court_title">محكمة البيضاء الابتدائية</string>
+    <string name="dev_label">تصميم وبرمجة</string>
+    <string name="dev_name">م/ احمد حسين محسون</string>
+    <string name="dev_phones">771421919-734840710</string>
+    <string name="logo_desc">شعار تقنية المعلومات بمحكمة البيضاء الابتدائية</string>
+    <string name="castle_desc">صورة قلعة البيضاء في الخلفية</string>
 </resources>

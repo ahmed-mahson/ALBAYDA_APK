@@ -11,8 +11,8 @@ android {
         applicationId = "com.albayda.court"
         minSdk = 23
         targetSdk = 34
-        versionCode = 400
-        versionName = "4.0-Posts-Sync"
+        versionCode = 401
+        versionName = "4.1-UiFixes"
     }
 
     buildFeatures {
