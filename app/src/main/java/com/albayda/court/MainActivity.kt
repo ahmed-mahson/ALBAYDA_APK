@@ -26,7 +26,10 @@ class MainActivity : AppCompatActivity() {
         AuthManager.init(this)
         SyncManager.init(this)
 
-        val session = AuthManager.getSession()`n        val isAdmin = AuthManager.isPrimaryAdmin(session)`n`n        updateWelcome(session?.username)
+        val session = AuthManager.getSession()
+        val isAdmin = AuthManager.isPrimaryAdmin(session)
+
+        updateWelcome(session?.username)
 
         binding.newsTicker.speedPxPerSec = 160f
         loadNews()
