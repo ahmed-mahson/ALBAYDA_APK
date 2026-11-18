@@ -1,261 +1,273 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@color/bg_light"
-    android:fitsSystemWindows="true">
+    android:background="#FFFFFF"
+    android:fitsSystemWindows="true"
+    android:layoutDirection="rtl">
 
-    <!-- Header: logo moved to the opposite side (right), title beside it, bell on the left -->
-    <LinearLayout
+    <!-- الشاشة الأصلية كما هي تماماً -->
+    <ImageView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layoutDirection="rtl"
-        android:background="@drawable/bg_theme_header"
-        android:paddingStart="10dp"
-        android:paddingEnd="10dp"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp"
-        android:gravity="center_vertical">
+        android:layout_height="match_parent"
+        android:scaleType="fitXY"
+        android:src="@drawable/screen_home_bg"
+        android:contentDescription="@string/logo_desc" />
 
-        <ImageView
-            android:id="@+id/ivLogoHeader"
-            android:layout_width="@dimen/header_logo"
-            android:layout_height="@dimen/header_logo"
-            android:src="@drawable/ic_court_logo"
-            android:contentDescription="@string/logo_desc"
-            android:scaleType="fitCenter" />
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="start"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="6dp">
-
-            <TextView
-                android:id="@+id/tvHeaderTitle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="تقنية معلومات محكمة البيضاء الابتدائية"
-                android:textColor="@color/white"
-                android:textSize="@dimen/header_title"
-                android:textStyle="bold"
-                android:maxLines="2"
-                android:gravity="start" />
-
-            <TextView
-                android:id="@+id/tvWelcome"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="مرحباً بك"
-                android:textColor="@color/gold_light"
-                android:textSize="13sp"
-                android:layout_marginTop="2dp"
-                android:gravity="start" />
-        </LinearLayout>
-
-        <ImageView
-            android:id="@+id/ivBell"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:src="@android:drawable/ic_popup_reminder"
-            app:tint="@color/white"
-            android:contentDescription="الإشعارات" />
-    </LinearLayout>
-
-    <!-- News ticker directly below header -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:orientation="horizontal"
-        android:background="@color/navy_800"
-        android:gravity="center_vertical">
-
-        <FrameLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:clipChildren="true"
-            android:clipToPadding="true">
-
-            <com.albayda.court.util.NewsTicker
-                android:id="@+id/newsTicker"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"
-                android:textColor="@color/white"
-                android:textSize="13sp" />
-        </FrameLayout>
-
-        <TextView
-            android:id="@+id/tvNewsTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp"
-            android:text="آخر الأخبار"
-            android:textColor="@color/navy_950"
-            android:textStyle="bold"
-            android:textSize="12sp"
-            android:background="@color/accent_sky" />
-    </LinearLayout>
-
-    <ScrollView
-        android:id="@+id/mainScroll"
-        android:layout_width="match_parent"
+    <!-- جرس الإشعارات -->
+    <View
+        android:id="@+id/ivBell"
+        android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:fillViewport="true"
-        android:clipToPadding="false">
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.075"
+        app:layout_constraintHorizontal_bias="0.90"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintVertical_bias="0.078"
+        app:layout_constraintWidth_percent="0.10" />
 
-        <LinearLayout
+    <!-- اسم المستخدم فوق النص الثابت في الهيدر -->
+    <TextView
+        android:id="@+id/tvWelcome"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/theme_header_deep"
+        android:gravity="center|end"
+        android:paddingEnd="8dp"
+        android:textColor="@color/gold_light"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.035"
+        app:layout_constraintHorizontal_bias="0.30"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintVertical_bias="0.122"
+        app:layout_constraintWidth_percent="0.46" />
+
+    <!-- شريط الأخبار: خلفية داكنة + عنوان ذهبي على اليمين + النص المتحرك -->
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/navy_900"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.055"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintVertical_bias="0.187"
+        app:layout_constraintWidth_percent="0.94" />
+
+    <TextView
+        android:id="@+id/tvNewsTitle"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/bg_news_label"
+        android:gravity="center"
+        android:text="آخر الأخبار"
+        android:textColor="@color/navy_950"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.055"
+        app:layout_constraintHorizontal_bias="0.055"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintVertical_bias="0.187"
+        app:layout_constraintWidth_percent="0.19" />
+
+    <FrameLayout
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:clipChildren="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.055"
+        app:layout_constraintHorizontal_bias="0.61"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintVertical_bias="0.187"
+        app:layout_constraintWidth_percent="0.74">
+
+        <com.albayda.court.util.NewsTicker
+            android:id="@+id/newsTicker"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="@dimen/screen_padding"
-            android:paddingBottom="20dp">
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:textColor="@color/white"
+            android:textSize="12sp" />
+    </FrameLayout>
 
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/banner_height"
-                android:background="@drawable/bg_banner_theme">
+    <!-- مناطق ضغط شفافة فوق بطاقات الخدمات -->
+    <View
+        android:id="@+id/cardCase"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.132"
+        app:layout_constraintHorizontal_bias="0.25"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintVertical_bias="0.408"
+        app:layout_constraintWidth_percent="0.45" />
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:text="الخدمات الإلكترونية"
-                    android:textColor="@color/white"
-                    android:textSize="22sp"
-                    android:textStyle="bold"
-                    android:shadowColor="#80000000"
-                    android:shadowRadius="6" />
-            </FrameLayout>
+    <View
+        android:id="@+id/cardSessions"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.132"
+        app:layout_constraintHorizontal_bias="0.75"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintVertical_bias="0.408"
+        app:layout_constraintWidth_percent="0.45" />
 
-            <GridLayout
-                android:id="@+id/servicesGrid"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:columnCount="2">
+    <View
+        android:id="@+id/cardAttendance"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.132"
+        app:layout_constraintHorizontal_bias="0.25"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintVertical_bias="0.535"
+        app:layout_constraintWidth_percent="0.45" />
 
-                <include android:id="@+id/cardSessions" layout="@layout/card_service" android:layout_width="0dp" android:layout_height="@dimen/service_card_height" android:layout_columnWeight="1" android:layout_margin="4dp" />
-                <include android:id="@+id/cardCase" layout="@layout/card_service" android:layout_width="0dp" android:layout_height="@dimen/service_card_height" android:layout_columnWeight="1" android:layout_margin="4dp" />
-                <include android:id="@+id/cardSupreme" layout="@layout/card_service" android:layout_width="0dp" android:layout_height="@dimen/service_card_height" android:layout_columnWeight="1" android:layout_margin="4dp" />
-                <include android:id="@+id/cardAttendance" layout="@layout/card_service" android:layout_width="0dp" android:layout_height="@dimen/service_card_height" android:layout_columnWeight="1" android:layout_margin="4dp" />
-            </GridLayout>
+    <View
+        android:id="@+id/cardSupreme"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.132"
+        app:layout_constraintHorizontal_bias="0.75"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintVertical_bias="0.535"
+        app:layout_constraintWidth_percent="0.45" />
 
-            <!-- Court posts and announcements -->
-            <LinearLayout
-                android:id="@+id/cardPosts"
-                android:layout_width="match_parent"
-                android:layout_height="64dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginTop="8dp"
-                android:paddingStart="14dp"
-                android:paddingEnd="14dp"
-                android:background="@drawable/bg_card_theme"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground">
+    <View
+        android:id="@+id/cardPosts"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.11"
+        app:layout_constraintHorizontal_bias="0.25"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintVertical_bias="0.66"
+        app:layout_constraintWidth_percent="0.45" />
 
-                <ImageView
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:src="@android:drawable/ic_menu_agenda"
-                    app:tint="@color/navy_600" />
+    <!-- أيقونا التواصل -->
+    <View
+        android:id="@+id/tvTelegram"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.055"
+        app:layout_constraintHorizontal_bias="0.58"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintVertical_bias="0.795"
+        app:layout_constraintWidth_percent="0.11" />
 
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="10dp"
-                    android:text="منشورات واعلانات المحكمة"
-                    android:textColor="@color/text_blue"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
+    <View
+        android:id="@+id/tvWhatsapp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.055"
+        app:layout_constraintHorizontal_bias="0.42"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintVertical_bias="0.795"
+        app:layout_constraintWidth_percent="0.11" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="استعراض"
-                    android:textColor="@color/accent_blue"
-                    android:textSize="12sp" />
-            </LinearLayout>
+    <!-- شريط التنقل السفلي: أربع مناطق ضغط -->
+    <View
+        android:id="@+id/navAdmin"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.075"
+        app:layout_constraintHorizontal_bias="0.125"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintVertical_bias="0.952"
+        app:layout_constraintWidth_percent="0.235" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center"
-                android:layout_marginTop="14dp">
+    <View
+        android:id="@+id/navAccount"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.075"
+        app:layout_constraintHorizontal_bias="0.375"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintVertical_bias="0.952"
+        app:layout_constraintWidth_percent="0.235" />
 
-                <ImageView
-                    android:id="@+id/tvWhatsapp"
-                    android:layout_width="42dp"
-                    android:layout_height="42dp"
-                    android:src="@drawable/ic_whatsapp"
-                    android:contentDescription="واتساب"
-                    android:padding="3dp" />
+    <View
+        android:id="@+id/navNotifications"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.075"
+        app:layout_constraintHorizontal_bias="0.625"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintVertical_bias="0.952"
+        app:layout_constraintWidth_percent="0.235" />
 
-                <ImageView
-                    android:id="@+id/tvTelegram"
-                    android:layout_width="42dp"
-                    android:layout_height="42dp"
-                    android:layout_marginStart="18dp"
-                    android:src="@drawable/ic_telegram"
-                    android:contentDescription="تيليجرام"
-                    android:padding="3dp" />
-            </LinearLayout>
+    <View
+        android:id="@+id/navLogout"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.075"
+        app:layout_constraintHorizontal_bias="0.875"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintVertical_bias="0.952"
+        app:layout_constraintWidth_percent="0.235" />
 
-            <TextView
-                android:id="@+id/tvFooterCredit"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:gravity="center"
-                android:text="تصميم وبرمجة المهندس/احمد حسين محسون  تلفون 771421919 - 734840710"
-                android:textColor="@color/navy_700"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-    </ScrollView>
-
-    <!-- Bottom navigation: الإدارة / حسابي / الإشعارات / خروج -->
-    <LinearLayout
-        android:id="@+id/bottomNav"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/bottom_nav_height"
-        android:orientation="horizontal"
-        android:layoutDirection="rtl"
-        android:background="@drawable/bg_theme_header"
-        android:elevation="8dp"
-        android:weightSum="4">
-
-        <LinearLayout android:id="@+id/navAdmin" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:orientation="vertical" android:padding="2dp" android:visibility="gone">
-            <ImageView android:layout_width="22dp" android:layout_height="22dp" android:src="@android:drawable/ic_menu_manage" app:tint="@color/white" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="الإدارة" android:textColor="@color/white" android:textSize="11sp" />
-        </LinearLayout>
-        <LinearLayout android:id="@+id/navAccount" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:orientation="vertical" android:padding="2dp">
-            <ImageView android:layout_width="22dp" android:layout_height="22dp" android:src="@android:drawable/ic_menu_myplaces" app:tint="@color/white" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="حسابي" android:textColor="@color/white" android:textSize="11sp" />
-        </LinearLayout>
-        <LinearLayout android:id="@+id/navNotifications" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:orientation="vertical" android:padding="2dp">
-            <ImageView android:layout_width="22dp" android:layout_height="22dp" android:src="@android:drawable/ic_popup_reminder" app:tint="@color/white" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="الإشعارات" android:textColor="@color/white" android:textSize="11sp" />
-        </LinearLayout>
-        <LinearLayout android:id="@+id/navLogout" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:orientation="vertical" android:padding="2dp">
-            <ImageView android:layout_width="22dp" android:layout_height="22dp" android:src="@android:drawable/ic_menu_close_clear_cancel" app:tint="@color/gold_light" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="خروج" android:textColor="@color/white" android:textSize="11sp" />
-        </LinearLayout>
-    </LinearLayout>
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

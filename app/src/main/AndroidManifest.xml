@@ -10,6 +10,7 @@
     <application
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher"
         android:label="تقنية معلومات محكمة البيضاء الابتدائية"
         android:supportsRtl="true"
         android:theme="@style/Theme.Albayda"

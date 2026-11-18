@@ -27,6 +27,17 @@ class LoginActivity : AppCompatActivity() {
         }
 
         binding.btnBiometric.isEnabled = AuthManager.isBiometricEnabled() || session?.isApproved == true
+        binding.cbRemember.isChecked = true
+
+        var passwordVisible = false
+        binding.ivEye.setOnClickListener {
+            passwordVisible = !passwordVisible
+            binding.etPassword.inputType =
+                android.text.InputType.TYPE_CLASS_TEXT or
+                        if (passwordVisible) android.text.InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+                        else android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
+            binding.etPassword.setSelection(binding.etPassword.text?.length ?: 0)
+        }
 
         binding.btnLogin.setOnClickListener {
             val id = binding.etIdentifier.text.toString().trim()
@@ -40,7 +51,7 @@ class LoginActivity : AppCompatActivity() {
                 user == null -> Toast.makeText(this, "بيانات الدخول غير صحيحة", Toast.LENGTH_SHORT).show()
                 !user.isApproved -> Toast.makeText(this, "حسابك قيد المراجعة من مدير النظام", Toast.LENGTH_LONG).show()
                 else -> {
-                    if (binding.cbRemember.isChecked) AuthManager.saveSession(user)
+                    AuthManager.saveSession(user)
                     startActivity(Intent(this, MainActivity::class.java))
                     finish()
                 }

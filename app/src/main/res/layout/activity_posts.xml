@@ -104,8 +104,9 @@
                         android:layout_height="44dp"
                         android:layout_marginTop="8dp"
                         android:text="نشر ومزامنة المنشور"
-                        android:backgroundTint="@color/navy_600"
-                        android:textColor="@color/white" />
+                        android:background="@drawable/bg_button_gold"
+                        app:backgroundTint="@null"
+                        android:textColor="@color/theme_header_deep" />
                 </LinearLayout>
 
                 <TextView

@@ -5,7 +5,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.EditText
-import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -17,10 +16,7 @@ import com.albayda.court.databinding.ActivityMainBinding
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private val syncListener: () -> Unit = {
-        runOnUiThread {
-            val current = SyncManager.getNews().first
-            if (current.isNotBlank()) binding.newsTicker.setNewsText(current)
-        }
+        runOnUiThread { loadNews() }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,31 +32,21 @@ class MainActivity : AppCompatActivity() {
 
         updateWelcome(session?.username)
 
-        val syncedNews = SyncManager.getNews().first
-        val localNews = getSharedPreferences("app_prefs", MODE_PRIVATE)
-            .getString("news_item", "") ?: ""
-        val news = syncedNews.ifBlank { localNews }.ifBlank { "مرحباً بكم في محكمة البيضاء الابتدائية" }
         binding.newsTicker.speedPxPerSec = 160f
-        binding.newsTicker.setNewsText(news)
+        loadNews()
         SyncManager.refresh()
 
-        // Order in grid: sessions, case, supreme, attendance
-        setupCard(binding.cardSessions.root, android.R.drawable.ic_menu_my_calendar, "الاستعلام عن الجلسات اليومية")
-        setupCard(binding.cardCase.root, android.R.drawable.ic_menu_search, "الاستعلام عن قضية")
-        setupCard(binding.cardSupreme.root, android.R.drawable.ic_menu_compass, "الاستعلام عن القضايا بالمحكمة العليا")
-        setupCard(binding.cardAttendance.root, android.R.drawable.ic_menu_edit, "إنشاء إعلان حضور")
-
-        binding.cardCase.root.setOnClickListener { openSearch("case") }
-        binding.cardAttendance.root.setOnClickListener { openSearch("attendance") }
-        binding.cardSessions.root.setOnClickListener { openSearch("sessions") }
-        binding.cardSupreme.root.setOnClickListener { openSearch("supreme") }
+        binding.cardCase.setOnClickListener { openSearch("case") }
+        binding.cardAttendance.setOnClickListener { openSearch("attendance") }
+        binding.cardSessions.setOnClickListener { openSearch("sessions") }
+        binding.cardSupreme.setOnClickListener { openSearch("supreme") }
         binding.cardPosts.setOnClickListener { startActivity(Intent(this, PostsActivity::class.java)) }
 
         binding.tvWhatsapp.setOnClickListener {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://wa.me/qr/QIQRW7LA325GG1")))
+            openExternal("https://wa.me/967734840710", "tg://resolve?phone=967771421919")
         }
         binding.tvTelegram.setOnClickListener {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/Ahmed_Mahson")))
+            openExternal("tg://resolve?phone=967771421919", "https://t.me/967771421919")
         }
 
         binding.ivBell.setOnClickListener { showNotifications(); selectTab(binding.navNotifications) }
@@ -68,6 +54,29 @@ class MainActivity : AppCompatActivity() {
         binding.navAccount.setOnClickListener { showAccount(); selectTab(binding.navAccount) }
         binding.navNotifications.setOnClickListener { showNotifications(); selectTab(binding.navNotifications) }
         binding.navLogout.setOnClickListener { logout() }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loadNews()
+        SyncManager.refresh()
+    }
+
+    private fun loadNews() {
+        val synced = SyncManager.getNews().first
+        val local = getSharedPreferences("app_prefs", MODE_PRIVATE)
+            .getString("news_item", "") ?: ""
+        val news = synced.ifBlank { local }.ifBlank { "مرحباً بكم في محكمة البيضاء الابتدائية" }
+        binding.newsTicker.setNewsText(news)
+    }
+
+    private fun openExternal(primary: String, fallback: String) {
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(primary))
+        try {
+            startActivity(intent)
+        } catch (_: Exception) {
+            try { startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(fallback))) } catch (_: Exception) {}
+        }
     }
 
     override fun onStart() {
@@ -195,11 +204,6 @@ class MainActivity : AppCompatActivity() {
                 .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
         )
         finish()
-    }
-
-    private fun setupCard(card: View, iconRes: Int, title: String) {
-        card.findViewById<ImageView>(R.id.ivIcon).setImageResource(iconRes)
-        card.findViewById<TextView>(R.id.tvTitle).text = title
     }
 
     private fun openSearch(mode: String) {

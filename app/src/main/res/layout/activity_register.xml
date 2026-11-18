@@ -1,100 +1,100 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
-    android:background="@color/surface">
+    android:background="#FFFFFF"
+    android:fitsSystemWindows="true"
+    android:layoutDirection="rtl">
 
-    <LinearLayout
+    <ImageView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="28dp"
-        android:gravity="center_horizontal">
+        android:layout_height="match_parent"
+        android:scaleType="fitXY"
+        android:src="@drawable/screen_register_bg"
+        android:contentDescription="@string/logo_desc" />
 
-        <FrameLayout
-            android:layout_width="170dp"
-            android:layout_height="170dp"
-            android:layout_marginTop="8dp">
+    <EditText
+        android:id="@+id/etUsername"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/bg_input_exact"
+        android:drawableEnd="@android:drawable/ic_menu_myplaces"
+        android:drawableTint="@color/theme_header_mid"
+        android:drawablePadding="10dp"
+        android:gravity="center_vertical|end"
+        android:hint="اسم المستخدم"
+        android:inputType="textPersonName"
+        android:paddingStart="14dp"
+        android:paddingEnd="14dp"
+        android:textColor="@color/theme_header_deep"
+        android:textColorHint="#9AAFC4"
+        android:textSize="15sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.068"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintVertical_bias="0.372"
+        app:layout_constraintWidth_percent="0.84" />
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:animation="@anim/logo_pulse"
-                android:background="@drawable/bg_logo_glow" />
+    <EditText
+        android:id="@+id/etMobile"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/bg_input_exact"
+        android:drawableEnd="@android:drawable/ic_menu_call"
+        android:drawableTint="@color/theme_header_mid"
+        android:drawablePadding="10dp"
+        android:gravity="center_vertical|end"
+        android:hint="رقم الجوال"
+        android:inputType="phone"
+        android:paddingStart="14dp"
+        android:paddingEnd="14dp"
+        android:textColor="@color/theme_header_deep"
+        android:textColorHint="#9AAFC4"
+        android:textSize="15sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.068"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintVertical_bias="0.462"
+        app:layout_constraintWidth_percent="0.84" />
 
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:animation="@anim/logo_pulse"
-                android:src="@drawable/ic_court_logo"
-                android:adjustViewBounds="true"
-                android:scaleType="fitCenter"
-                android:contentDescription="@string/logo_desc" />
-        </FrameLayout>
+    <EditText
+        android:id="@+id/etPassword"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/bg_input_exact"
+        android:drawableEnd="@android:drawable/ic_lock_idle_lock"
+        android:drawableTint="@color/theme_header_mid"
+        android:drawablePadding="10dp"
+        android:gravity="center_vertical|end"
+        android:hint="كلمة المرور"
+        android:inputType="textPassword"
+        android:paddingStart="14dp"
+        android:paddingEnd="14dp"
+        android:textColor="@color/theme_header_deep"
+        android:textColorHint="#9AAFC4"
+        android:textSize="15sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.068"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintVertical_bias="0.552"
+        app:layout_constraintWidth_percent="0.84" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="إنشاء حساب جديد"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:textColor="@color/text_blue"
-            android:layout_marginTop="12dp" />
+    <View
+        android:id="@+id/btnRegister"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.07"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintVertical_bias="0.645"
+        app:layout_constraintWidth_percent="0.84" />
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:hint="اسم المستخدم"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etUsername"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textPersonName" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:hint="رقم الجوال"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etMobile"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="phone" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:hint="كلمة المرور"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etPassword"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textPassword" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <Button
-            android:id="@+id/btnRegister"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_marginTop="24dp"
-            android:text="إرسال طلب إنشاء الحساب"
-            android:textColor="@color/theme_header_deep"
-            android:background="@drawable/bg_button_theme"
-            app:backgroundTint="@null"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-    </LinearLayout>
-</ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -55,6 +55,9 @@ class AdminActivity : AppCompatActivity() {
             val news = binding.etNews.text.toString().trim()
             if (news.isNotEmpty()) {
                 SyncManager.setNews(news)
+                getSharedPreferences("app_prefs", MODE_PRIVATE)
+                    .edit().putString("news_item", news).apply()
+                SyncManager.refresh()
                 Toast.makeText(this, "تم تحديث الشريط الإخباري ومزامنته", Toast.LENGTH_SHORT).show()
             }
         }

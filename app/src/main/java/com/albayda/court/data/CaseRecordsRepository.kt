@@ -33,7 +33,19 @@ object CaseRecordsRepository {
     private const val DRIVE_URL = "https://drive.google.com/uc?export=download&id=$DRIVE_FILE_ID"
     private const val DIRECT_URL =
         "https://drive.usercontent.google.com/download?id=$DRIVE_FILE_ID&export=download&confirm=t"
+    private const val OPEN_URL = "https://drive.google.com/open?id=$DRIVE_FILE_ID"
     private const val CACHE_KEY = "case_csv_cache"
+
+    /** Cache-busting so every edit to the Google Sheet/CSV is picked up immediately. */
+    private fun driveUrls(): List<String> {
+        val stamp = System.currentTimeMillis()
+        return listOf(
+            "$DRIVE_URL&confirm=t&ts=$stamp",
+            "$DIRECT_URL&ts=$stamp",
+            "$DRIVE_URL&ts=$stamp",
+            "$OPEN_URL&ts=$stamp"
+        )
+    }
 
     // Case-type mapping used by the official Albayda Telegram bot (case_records.py).
     private val CASE_TYPE_DISPLAY_NAMES = mapOf(
@@ -69,7 +81,7 @@ object CaseRecordsRepository {
 
     /** Always tries to fetch fresh data; falls back to the last successful copy only on failure. */
     suspend fun loadRecords(force: Boolean = false): List<CaseRecord> = withContext(Dispatchers.IO) {
-        val urls = listOf(DIRECT_URL, DRIVE_URL)
+        val urls = driveUrls()
         var lastError: Exception? = null
         for (url in urls) {
             try {
@@ -265,13 +277,6 @@ object CaseRecordsRepository {
             if (line.trim().isEmpty()) continue
             val row = parseCsvLine(line)
             if (row.size < 27) continue
-            if (lineNumber == 1) {
-                val validHeader =
-                    clean(row.getOrNull(1)).contains("نوع القضية الأساسي") &&
-                            clean(row.getOrNull(8)).contains("برئاسة القاضي") &&
-                            clean(row.getOrNull(14)).contains("رقم القضية")
-                if (!validHeader) continue
-            }
             val caseHeader = row.getOrNull(14).orEmpty()
             if (caseHeader.contains("رقم") && caseHeader.contains("القضية")) continue
             val rec = CaseRecord(
