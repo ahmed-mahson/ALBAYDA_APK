@@ -1,4 +1,4 @@
-﻿package com.albayda.court
+package com.albayda.court
 
 import android.content.Intent
 import android.net.Uri
