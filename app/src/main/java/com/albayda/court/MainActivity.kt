@@ -1,4 +1,4 @@
-package com.albayda.court
+﻿package com.albayda.court
 
 import android.content.Intent
 import android.net.Uri
@@ -26,11 +26,7 @@ class MainActivity : AppCompatActivity() {
         AuthManager.init(this)
         SyncManager.init(this)
 
-        val session = AuthManager.getSession()
-        val isAdmin = AuthManager.isPrimaryAdmin(session)
-        binding.navAdmin.visibility = if (isAdmin) View.VISIBLE else View.GONE
-
-        updateWelcome(session?.username)
+        val session = AuthManager.getSession()`n        val isAdmin = AuthManager.isPrimaryAdmin(session)`n`n        updateWelcome(session?.username)
 
         binding.newsTicker.speedPxPerSec = 160f
         loadNews()
@@ -66,7 +62,7 @@ class MainActivity : AppCompatActivity() {
         val synced = SyncManager.getNews().first
         val local = getSharedPreferences("app_prefs", MODE_PRIVATE)
             .getString("news_item", "") ?: ""
-        val news = synced.ifBlank { local }.ifBlank { "مرحباً بكم في محكمة البيضاء الابتدائية" }
+        val news = synced.ifBlank { local }.ifBlank { "ظ…ط±ط­ط¨ط§ظ‹ ط¨ظƒظ… ظپظٹ ظ…ط­ظƒظ…ط© ط§ظ„ط¨ظٹط¶ط§ط، ط§ظ„ط§ط¨طھط¯ط§ط¦ظٹط©" }
         binding.newsTicker.setNewsText(news)
     }
 
@@ -90,14 +86,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateWelcome(username: String?) {
-        binding.tvWelcome.text = "مرحباً بك  ${username?.ifBlank { "مستخدم" } ?: "مستخدم"}"
+        binding.tvWelcome.text = "ظ…ط±ط­ط¨ط§ظ‹ ط¨ظƒ  ${username?.ifBlank { "ظ…ط³طھط®ط¯ظ…" } ?: "ظ…ط³طھط®ط¯ظ…"}"
     }
 
     private fun selectTab(active: View) {
         val tabs = listOf(binding.navAdmin, binding.navAccount, binding.navNotifications, binding.navLogout)
         tabs.forEach { tab ->
-            tab.alpha = if (tab == active) 1.0f else 0.75f
-            tab.setBackgroundColor(if (tab == active) getColor(R.color.navy_800) else android.graphics.Color.TRANSPARENT)
+            tab.alpha = if (tab == active) 1.0f else 0.7f
         }
     }
 
@@ -105,19 +100,19 @@ class MainActivity : AppCompatActivity() {
         val notifications = SyncManager.notifications()
         val news = SyncManager.getNews().first
         val body = buildString {
-            if (news.isNotBlank()) append("آخر الأخبار: $news\n\n")
+            if (news.isNotBlank()) append("ط¢ط®ط± ط§ظ„ط£ط®ط¨ط§ط±: $news\n\n")
             if (notifications.isEmpty()) {
-                append("لا توجد إشعارات حالياً.")
+                append("ظ„ط§ طھظˆط¬ط¯ ط¥ط´ط¹ط§ط±ط§طھ ط­ط§ظ„ظٹط§ظ‹.")
             } else {
                 notifications.take(20).forEach {
-                    append("• ${it.title}: ${it.body}\n${it.timestamp.replace('T', ' ')}\n\n")
+                    append("â€¢ ${it.title}: ${it.body}\n${it.timestamp.replace('T', ' ')}\n\n")
                 }
             }
         }
         AlertDialog.Builder(this)
-            .setTitle("الإشعارات والتنبيهات")
+            .setTitle("ط§ظ„ط¥ط´ط¹ط§ط±ط§طھ ظˆط§ظ„طھظ†ط¨ظٹظ‡ط§طھ")
             .setMessage(body)
-            .setPositiveButton("إغلاق", null)
+            .setPositiveButton("ط¥ط؛ظ„ط§ظ‚", null)
             .show()
         SyncManager.markNotificationsRead()
     }
@@ -140,9 +135,9 @@ class MainActivity : AppCompatActivity() {
 
         fun bindInfo() {
             val user = AuthManager.getSession() ?: current
-            tvUsername.text = "اسم المستخدم: ${user.username}"
-            tvMobile.text = "رقم الجوال: ${user.mobile}"
-            tvStatus.text = if (user.isApproved) "حالة الحساب: معتمد" else "حالة الحساب: بانتظار الاعتماد"
+            tvUsername.text = "ط§ط³ظ… ط§ظ„ظ…ط³طھط®ط¯ظ…: ${user.username}"
+            tvMobile.text = "ط±ظ‚ظ… ط§ظ„ط¬ظˆط§ظ„: ${user.mobile}"
+            tvStatus.text = if (user.isApproved) "ط­ط§ظ„ط© ط§ظ„ط­ط³ط§ط¨: ظ…ط¹طھظ…ط¯" else "ط­ط§ظ„ط© ط§ظ„ط­ط³ط§ط¨: ط¨ط§ظ†طھط¸ط§ط± ط§ظ„ط§ط¹طھظ…ط§ط¯"
             etNewUsername.setText(user.username)
             etNewUsername.setSelection(etNewUsername.text?.length ?: 0)
         }
@@ -163,25 +158,25 @@ class MainActivity : AppCompatActivity() {
                 if (AuthManager.updateUsername(user.mobile, newUsername)) {
                     changed = true
                 } else {
-                    Toast.makeText(this, "اسم المستخدم مستخدم من قبل حساب آخر", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "ط§ط³ظ… ط§ظ„ظ…ط³طھط®ط¯ظ… ظ…ط³طھط®ط¯ظ… ظ…ظ† ظ‚ط¨ظ„ ط­ط³ط§ط¨ ط¢ط®ط±", Toast.LENGTH_SHORT).show()
                     return@setOnClickListener
                 }
             }
             if (newPassword.isNotBlank()) {
                 if (newPassword.length < 4) {
-                    Toast.makeText(this, "كلمة المرور يجب ألا تقل عن 4 أحرف", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ظٹط¬ط¨ ط£ظ„ط§ طھظ‚ظ„ ط¹ظ† 4 ط£ط­ط±ظپ", Toast.LENGTH_SHORT).show()
                     return@setOnClickListener
                 }
                 if (AuthManager.updatePassword(user.mobile, newPassword)) {
                     changed = true
                 } else {
-                    Toast.makeText(this, "تعذر تحديث كلمة المرور", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "طھط¹ط°ط± طھط­ط¯ظٹط« ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±", Toast.LENGTH_SHORT).show()
                     return@setOnClickListener
                 }
             }
 
             if (!changed) {
-                Toast.makeText(this, "لا توجد تغييرات للحفظ", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "ظ„ط§ طھظˆط¬ط¯ طھط؛ظٹظٹط±ط§طھ ظ„ظ„ط­ظپط¸", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
@@ -189,7 +184,7 @@ class MainActivity : AppCompatActivity() {
             updateWelcome(updated.username)
             etNewPassword.text?.clear()
             bindInfo()
-            Toast.makeText(this, "تم حفظ تعديلات الحساب", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "طھظ… ط­ظپط¸ طھط¹ط¯ظٹظ„ط§طھ ط§ظ„ط­ط³ط§ط¨", Toast.LENGTH_SHORT).show()
             dialog.dismiss()
         }
 
@@ -210,3 +205,4 @@ class MainActivity : AppCompatActivity() {
         startActivity(Intent(this, SearchActivity::class.java).putExtra("MODE", mode))
     }
 }
+
