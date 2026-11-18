@@ -30,47 +30,11 @@ data class CaseRecord(
 
 object CaseRecordsRepository {
     private const val DRIVE_FILE_ID = "1an8xIuEv59d-ERmEy5OIlBvDlNGA5ZO8"
-    private const val DRIVE_URL = "https://drive.google.com/uc?export=download&id=$DRIVE_FILE_ID"
-    private const val DIRECT_URL =
-        "https://drive.usercontent.google.com/download?id=$DRIVE_FILE_ID&export=download&confirm=t"
-    private const val OPEN_URL = "https://drive.google.com/open?id=$DRIVE_FILE_ID"
     private const val CACHE_KEY = "case_csv_cache"
 
-    /** Cache-busting so every edit to the Google Sheet/CSV is picked up immediately. */
-    private fun driveUrls(): List<String> {
-        val stamp = System.currentTimeMillis()
-        return listOf(
-            "$DRIVE_URL&confirm=t&ts=$stamp",
-            "$DIRECT_URL&ts=$stamp",
-            "$DRIVE_URL&ts=$stamp",
-            "$OPEN_URL&ts=$stamp"
-        )
-    }
-
-    // Case-type mapping used by the official Albayda Telegram bot (case_records.py).
-    private val CASE_TYPE_DISPLAY_NAMES = mapOf(
-        "مدنية" to "مدنيــــة",
-        "مستعجل" to "مدنية (مستعجلة)",
-        "مستعجلة" to "مدنية (مستعجلة)",
-        "مدني مستعجل" to "مدنية (مستعجلة)",
-        "مدنية مستعجلة" to "مدنية (مستعجلة)",
-        "مدنية (مستعجلة)" to "مدنية (مستعجلة)",
-        "شخصية" to "شخصيـــة",
-        "جسيمة" to "جزائية (جسيمة)",
-        "غير جسيمة" to "جزائية (غير جسيمة)",
-        "تعرض للانحراف" to "جزائية (أحداث)",
-        "تنفيذ" to "قضايا التنفيذ (منازعات)",
-        "تنفيذية (منازعات)" to "قضايا التنفيذ (منازعات)",
-        "تنفيذ (منازعات)" to "قضايا التنفيذ (منازعات)"
-    )
-    private val CASE_TYPE_ORDER = listOf(
-        "مدنية", "مستعجل", "مستعجلة", "مدني مستعجل", "مدنية مستعجلة",
-        "مدنية (مستعجلة)", "شخصية", "جسيمة", "غير جسيمة", "تنفيذ",
-        "تنفيذية (منازعات)", "تنفيذ (منازعات)", "تعرض للانحراف"
-    )
-    private val CASE_TYPE_SOURCE_BY_DISPLAY_NAME = CASE_TYPE_DISPLAY_NAMES
-        .entries
-        .groupBy({ it.value }, { it.key })
+    // Case-type and judge lists are derived directly from the downloaded CSV data
+    // (see orderedCaseTypes / orderedJudges) instead of a hard-coded mapping,
+    // so mojibake in literals can never empty the drop-downs.
 
     private var appContext: Context? = null
 
@@ -81,7 +45,10 @@ object CaseRecordsRepository {
 
     /** Always tries to fetch fresh data; falls back to the last successful copy only on failure. */
     suspend fun loadRecords(force: Boolean = false): List<CaseRecord> = withContext(Dispatchers.IO) {
-        val urls = driveUrls()
+        val urls = listOf(
+            "https://drive.usercontent.google.com/download?id=" + DRIVE_FILE_ID + "&export=download&confirm=t",
+            "https://drive.google.com/uc?export=download&id=" + DRIVE_FILE_ID + "&confirm=t"
+        )
         var lastError: Exception? = null
         for (url in urls) {
             try {
@@ -103,40 +70,51 @@ object CaseRecordsRepository {
         throw lastError ?: IllegalStateException("تعذر جلب بيانات القضايا من Google Drive")
     }
 
-    private fun download(url: String): String {
-        val conn = URL(url).openConnection() as HttpURLConnection
-        return try {
-            conn.connectTimeout = 25_000
-            conn.readTimeout = 30_000
-            conn.instanceFollowRedirects = true
-            conn.useCaches = false
-            conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 12) AlbaydaCourt/3.0")
-            conn.setRequestProperty("Accept", "text/csv,text/plain,*/*")
-            when (conn.responseCode) {
-                in 200..299 -> Unit
-                else -> throw IllegalStateException("HTTP ${conn.responseCode}")
-            }
-            val bytes = ByteArrayOutputStream().use { out ->
-                conn.inputStream.use { input ->
-                    val buffer = ByteArray(8192)
-                    var read = input.read(buffer)
-                    while (read != -1 && out.size() < 25 * 1024 * 1024) {
-                        out.write(buffer, 0, read)
-                        read = input.read(buffer)
+﻿    private fun download(url: String): String {
+        var currentUrl = url
+        var attempts = 0
+        while (attempts < 5) {
+            attempts++
+            val conn = URL(currentUrl).openConnection() as HttpURLConnection
+            val (code, bytes, finalUrl) = try {
+                conn.connectTimeout = 25_000
+                conn.readTimeout = 30_000
+                conn.instanceFollowRedirects = true
+                conn.useCaches = false
+                conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 12) AlbaydaCourt/3.0")
+                conn.setRequestProperty("Accept", "text/csv,text/plain,*/*")
+                val c = conn.responseCode
+                val b = ByteArrayOutputStream().use { out ->
+                    try {
+                        conn.inputStream.use { input ->
+                            val buffer = ByteArray(8192)
+                            var read = input.read(buffer)
+                            while (read != -1 && out.size() < 25 * 1024 * 1024) {
+                                out.write(buffer, 0, read)
+                                read = input.read(buffer)
+                            }
+                        }
+                    } catch (_: Exception) {
                     }
+                    out.toByteArray()
                 }
-                out.toByteArray()
+                Triple(c, b, conn.url?.toString())
+            } finally {
+                conn.disconnect()
             }
+            if (code !in 200..299) throw IllegalStateException("HTTP $code")
             val text = decodeCsv(bytes)
-            if (text.trimStart().startsWith("<")) {
-                throw IllegalStateException("تم استلام صفحة HTML بدلاً من ملف CSV")
-            }
-            text
-        } finally {
-            conn.disconnect()
+            if (!text.trimStart().startsWith("<")) return text
+            // HTML interstitial (virus scan). Extract confirm token.
+            val token = Regex("confirm=([0-9A-Za-z_-]+)").find(text)?.groupValues?.get(1)
+                ?: Regex("confirm=([0-9A-Za-z_-]+)").find(finalUrl ?: "")?.groupValues?.get(1)
+            val uuid = Regex("uuid=([0-9A-Za-z-]+)").find(text)?.groupValues?.get(1)
+            if (token.isNullOrBlank()) throw IllegalStateException("تم استلام صفحة HTML بدلاً من ملف CSV")
+            val sep = if (currentUrl.contains("?")) "&" else "?"
+            currentUrl = "$currentUrl${sep}confirm=$token" + (if (uuid != null) "&uuid=$uuid" else "")
         }
+        throw IllegalStateException("تم استلام صفحة HTML بدلاً من ملف CSV")
     }
-
     /** Detects and normalizes Unicode before CSV parsing to prevent Chinese text and squares. */
     private fun decodeCsv(bytes: ByteArray): String {
         if (bytes.isEmpty()) return ""
@@ -383,42 +361,29 @@ object CaseRecordsRepository {
         return "${parts[2]}/${parts[1]}/${parts[0]}"
     }
 
-    fun displayCaseType(raw: String): String =
-        CASE_TYPE_DISPLAY_NAMES[raw.trim()] ?: raw.trim()
+﻿    fun displayCaseType(raw: String): String = raw.trim()
 
-    private fun sourceCaseTypes(selected: String): List<String> =
-        CASE_TYPE_SOURCE_BY_DISPLAY_NAME[selected.trim()] ?: listOf(selected.trim())
+    fun orderedCaseTypes(records: List<CaseRecord>): List<String> =
+        records.map { it.caseType.trim() }.filter { it.isNotBlank() }.distinct().sorted()
 
-    private fun caseTypeMatches(recordType: String, selected: String): Boolean {
-        val ct = selected.trim()
-        if (ct.isBlank() || ct == "الكل" || ct.contains("(الكل)")) return true
-        val raw = recordType.trim()
-        return sourceCaseTypes(ct).contains(raw) || raw.contains(ct) || ct.contains(raw)
-    }
-
-    fun orderedCaseTypes(records: List<CaseRecord>): List<String> {
-        val available = records.map { it.caseType.trim() }.filter { it.isNotBlank() }.toSet()
-        val ordered = CASE_TYPE_ORDER.mapNotNull { source ->
-            if (source in available) CASE_TYPE_DISPLAY_NAMES[source] else null
-        }.distinct()
-        val other = available.filter { it !in CASE_TYPE_DISPLAY_NAMES }.sorted()
-        return ordered + other
-    }
-
-    fun normalizeJudge(value: String): String {
-        val name = clean(value)
-        return if (name == "عبدالعزيز ناصر أحمد الهصيصي") "عبدالعزيز ناصر الهصيصي" else name
-    }
+    fun normalizeJudge(value: String): String = clean(value)
 
     fun displayJudge(value: String): String {
         val name = normalizeJudge(value)
         if (name.isBlank()) return "-"
-        return if (name.startsWith("⚖️")) name else "⚖️$name"
+        return if (name.startsWith("\u2696\uFE0F")) name else "\u2696\uFE0F$name"
+    }
+
+    private fun caseTypeMatches(recordType: String, selected: String): Boolean {
+        val ct = selected.trim()
+        if (ct.isBlank() || ct == "الكل" || ct.contains("الكل")) return true
+        val raw = recordType.trim()
+        return raw == ct || raw.contains(ct) || ct.contains(raw)
     }
 
     private fun judgeMatches(recordJudge: String, selected: String): Boolean {
-        val jg = selected.trim().removePrefix("⚖️").trim()
-        if (jg.isBlank() || jg == "الكل" || jg.contains("(الكل)")) return true
+        val jg = selected.trim().removePrefix("\u2696\uFE0F").trim()
+        if (jg.isBlank() || jg == "الكل" || jg.contains("الكل")) return true
         val expected = normalizeJudge(jg)
         val actual = normalizeJudge(recordJudge)
         return actual == expected || actual.contains(expected) || expected.contains(actual)

@@ -110,7 +110,7 @@
             android:text="حفظ بيانات الدخول"
             android:textColor="@color/white"
             android:layout_marginTop="8dp"
-            android:visibility="gone" />
+            />
 
         <Button
             android:id="@+id/btnLogin"
@@ -131,7 +131,7 @@
             android:text="الدخول بالبصمة"
             style="@style/Widget.Material3.Button.OutlinedButton"
             android:textColor="@color/white"
-            android:visibility="gone" />
+            />
 
         <TextView
             android:layout_width="wrap_content"
