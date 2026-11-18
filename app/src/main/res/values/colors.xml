@@ -29,6 +29,16 @@
     <color name="blue_dark_edge">#03142C</color>
     <color name="blue_mid">#072F6B</color>
     <color name="blue_glow_center">#1967D2</color>
+
+    <!-- Exact palette sampled from the three supplied theme screenshots -->
+    <color name="theme_header_dark">#012A61</color>
+    <color name="theme_header_mid">#194F91</color>
+    <color name="theme_header_deep">#0A1E37</color>
+    <color name="theme_header_light">#2F6FAF</color>
+    <color name="theme_blue_pale">#92C9EF</color>
+    <color name="theme_button_light">#76BCFC</color>
+    <color name="theme_button_mid">#8AC4F9</color>
+    <color name="theme_button_dark">#5A99D7</color>
     <color name="text_gray_light">#B0C4DE</color>
     <color name="text_blue_light">#5C9CE6</color>
 </resources>

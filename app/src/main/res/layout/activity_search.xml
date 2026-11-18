@@ -79,8 +79,11 @@
                 android:id="@+id/etDate"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="اختر التاريخ"
+                android:hint="التاريخ (مثال 18/11/2026)"
                 android:layout_marginTop="8dp"
+                android:background="@drawable/bg_input"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
                 android:focusable="false"
                 android:clickable="true"
                 android:inputType="none" />

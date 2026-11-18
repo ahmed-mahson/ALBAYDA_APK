@@ -46,7 +46,7 @@ class SearchActivity : AppCompatActivity() {
         val openPicker = {
             val cal = Calendar.getInstance()
             DatePickerDialog(this, { _, y, m, d ->
-                binding.etDate.setText(String.format(Locale.US, "%04d-%02d-%02d", y, m + 1, d))
+                binding.etDate.setText(String.format(Locale.US, "%02d/%02d/%04d", d, m + 1, y))
             }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)).show()
         }
         binding.etDate.isFocusable = false
@@ -67,7 +67,7 @@ class SearchActivity : AppCompatActivity() {
             "sessions" -> {
                 v(binding.etCaseNumber, false); v(binding.etPlaintiff, false); v(binding.etDefendant, false)
                 v(binding.spCaseType, false); v(binding.spJudge, true); v(binding.etDate, true); v(binding.etQuery, false)
-                binding.etDate.hint = "اختر تاريخ الجلسة"
+                binding.etDate.hint = "تاريخ الجلسة (يوم/شهر/سنة)"
                 binding.btnSearch.text = "بحث"
                 loadDropdowns(loadCaseTypes = false, loadJudges = true)
             }
@@ -80,7 +80,7 @@ class SearchActivity : AppCompatActivity() {
             "attendance" -> {
                 v(binding.etCaseNumber, true); v(binding.etPlaintiff, true); v(binding.etDefendant, true)
                 v(binding.spCaseType, true); v(binding.spJudge, true); v(binding.etDate, true); v(binding.etQuery, false)
-                binding.etDate.hint = "اختر تاريخ الجلسة"
+                binding.etDate.hint = "تاريخ الجلسة (يوم/شهر/سنة)"
                 binding.btnSearch.text = "تنزيل الاعلان pdf"
                 loadDropdowns(loadCaseTypes = true, loadJudges = true)
             }
@@ -93,11 +93,16 @@ class SearchActivity : AppCompatActivity() {
             try {
                 val records = CaseRecordsRepository.loadRecords()
                 if (loadCaseTypes) {
-                    val types = listOf("نوع القضية (الكل)") + records.map { it.caseType.trim() }.filter { it.isNotBlank() }.distinct().sorted()
+                    val types = listOf("نوع القضية (الكل)") + CaseRecordsRepository.orderedCaseTypes(records)
                     binding.spCaseType.adapter = makeSpinnerAdapter(types)
                 }
                 if (loadJudges) {
-                    val judges = listOf("اسم القاضي (الكل)") + records.map { it.judge.trim() }.filter { it.isNotBlank() }.distinct().sorted()
+                    // Same ordering/normalization as the official bot: ⚖️ + normalized judge name.
+                    val judges = listOf("اسم القاضي (الكل)") + records
+                        .map { CaseRecordsRepository.displayJudge(it.judge) }
+                        .filter { it != "-" }
+                        .distinct()
+                        .sorted()
                     binding.spJudge.adapter = makeSpinnerAdapter(judges)
                 }
             } catch (_: Exception) {
@@ -153,6 +158,13 @@ class SearchActivity : AppCompatActivity() {
     } ?: ""
 
     private suspend fun searchCase() {
+        val caseNumberInput = binding.etCaseNumber.text.toString().trim()
+        if (caseNumberInput.contains('/') &&
+            CaseRecordsRepository.parseCaseQuery(caseNumberInput) == null
+        ) {
+            addResultText("صيغة رقم القضية غير صحيحة. استخدم مثلاً 1446/6.")
+            return
+        }
         val records = CaseRecordsRepository.loadRecords()
         val results = CaseRecordsRepository.search(
             records,
@@ -173,12 +185,10 @@ class SearchActivity : AppCompatActivity() {
         val judge = selected(binding.spJudge)
         if (date.isBlank()) { addResultText("يرجى اختيار تاريخ الجلسة."); return }
         val records = CaseRecordsRepository.loadRecords()
-        val results = records.filter { rec ->
-            rec.nextSession.trim() == date && (judge.isBlank() || rec.judge.trim() == judge || rec.judge.contains(judge))
-        }
+        val results = CaseRecordsRepository.searchSessions(records, date, judge)
         if (results.isEmpty()) { addResultText("لا توجد جلسات مسجلة بهذا التاريخ للقاضي المحدد."); return }
-        val judgeLabel = if (judge.isBlank()) "جميع القضاة" else judge
-        addResultText("عدد الجلسات: ${results.size} — $judgeLabel — $date")
+        val judgeLabel = if (judge.isBlank()) "جميع القضاة" else CaseRecordsRepository.displayJudge(judge)
+        addResultText("عدد الجلسات: ${results.size} — $judgeLabel — ${CaseRecordsRepository.formatDisplayDate(date)}")
         addSessionsDownloadCard(date, judgeLabel, results)
         // show compact list
         results.forEach { r ->
@@ -229,6 +239,10 @@ class SearchActivity : AppCompatActivity() {
         val judge = selected(binding.spJudge).ifBlank { "غير متوفر" }
         val date = binding.etDate.text.toString().trim()
         if (caseNo.isBlank() || date.isBlank()) { addResultText("يرجى إدخال رقم القضية وتاريخ الجلسة."); return }
+        if (CaseRecordsRepository.normalizeDate(date) == null) {
+            addResultText("التاريخ غير صحيح. اختر التاريخ بصيغة 18/11/2026.")
+            return
+        }
         val data = linkedMapOf(
             "رقم القضية" to caseNo,
             "نوع القضية" to caseType,
@@ -254,15 +268,15 @@ class SearchActivity : AppCompatActivity() {
 
     private fun addCaseCard(r: CaseRecord) {
         val data = linkedMapOf(
-            "القاضي المختص" to r.judge,
             "رقم القضية" to r.caseNumber,
-            "تاريخ الورود" to r.receivedDate,
-            "موضوع القضية" to r.subject,
-            "نوع القضية" to r.caseType,
+            "نوع القضية" to CaseRecordsRepository.displayCaseType(r.caseType),
+            "موضوعها" to r.subject,
             "المدعي" to r.plaintiff,
             "المدعى عليه" to r.defendant,
-            "آخر قرار للقضية" to r.status,
-            "تاريخ الجلسة القادمة" to r.nextSession
+            "برئاسة القاضي" to CaseRecordsRepository.displayJudge(r.judge),
+            "حالة القضية" to r.status,
+            "الجلسة القادمة" to CaseRecordsRepository.formatDisplayDate(r.nextSession),
+            "تاريخ الورود" to CaseRecordsRepository.formatDisplayDate(r.receivedDate)
         )
         addGenericCard(r.caseNumber.ifBlank { "سجل" }, data)
     }
@@ -270,7 +284,11 @@ class SearchActivity : AppCompatActivity() {
     private fun addGenericCard(title: String, data: Map<String, String>) {
         val card = layoutInflater.inflate(R.layout.item_result_card, binding.resultsContainer, false)
         card.findViewById<TextView>(R.id.tvMain).text = title
-        val sub = listOfNotNull(data["المدعي"], data["المدعى عليه"], data["القاضي"] ?: data["القاضي المختص"], data["حالة القضية"] ?: data["آخر قرار للقضية"]).filter { it.isNotBlank() }.joinToString(" | ")
+        val sub = listOfNotNull(
+            data["المدعي"], data["المدعى عليه"],
+            data["القاضي"] ?: data["برئاسة القاضي"] ?: data["القاضي المختص"],
+            data["حالة القضية"] ?: data["آخر قرار للقضية"]
+        ).filter { it.isNotBlank() }.joinToString(" | ")
         card.findViewById<TextView>(R.id.tvSub).text = sub.ifBlank { data.entries.take(2).joinToString(" | ") { "${it.key}: ${it.value}" } }
 
         val fileName = buildPdfFileName(title, data)

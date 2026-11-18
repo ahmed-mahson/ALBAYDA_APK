@@ -11,8 +11,8 @@ android {
         applicationId = "com.albayda.court"
         minSdk = 23
         targetSdk = 34
-        versionCode = 402
-        versionName = "4.2-AutoSync"
+        versionCode = 403
+        versionName = "4.3-BotTheme"
     }
 
     buildFeatures {

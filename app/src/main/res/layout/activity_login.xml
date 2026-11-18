@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="@color/sky_pale"
+    android:background="@color/surface"
     android:fitsSystemWindows="true">
 
     <LinearLayout
@@ -13,14 +14,26 @@
         android:gravity="center_horizontal"
         android:padding="28dp">
 
-        <ImageView
-            android:layout_width="160dp"
-            android:layout_height="160dp"
-            android:src="@drawable/ic_court_logo"
-            android:layout_marginTop="20dp"
-            android:adjustViewBounds="true"
-            android:scaleType="fitCenter"
-            android:contentDescription="@string/logo_desc" />
+        <FrameLayout
+            android:layout_width="180dp"
+            android:layout_height="180dp"
+            android:layout_marginTop="12dp">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:animation="@anim/logo_pulse"
+                android:background="@drawable/bg_logo_glow" />
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:animation="@anim/logo_pulse"
+                android:src="@drawable/ic_court_logo"
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter"
+                android:contentDescription="@string/logo_desc" />
+        </FrameLayout>
 
         <TextView
             android:layout_width="wrap_content"
@@ -71,10 +84,11 @@
             android:layout_height="54dp"
             android:layout_marginTop="18dp"
             android:text="دخول"
-            android:textColor="@color/white"
+            android:textColor="@color/theme_header_deep"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:backgroundTint="@color/navy_600" />
+            android:background="@drawable/bg_button_theme"
+            app:backgroundTint="@null" />
 
         <Button
             android:id="@+id/btnBiometric"

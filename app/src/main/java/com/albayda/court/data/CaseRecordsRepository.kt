@@ -35,6 +35,31 @@ object CaseRecordsRepository {
         "https://drive.usercontent.google.com/download?id=$DRIVE_FILE_ID&export=download&confirm=t"
     private const val CACHE_KEY = "case_csv_cache"
 
+    // Case-type mapping used by the official Albayda Telegram bot (case_records.py).
+    private val CASE_TYPE_DISPLAY_NAMES = mapOf(
+        "مدنية" to "مدنيــــة",
+        "مستعجل" to "مدنية (مستعجلة)",
+        "مستعجلة" to "مدنية (مستعجلة)",
+        "مدني مستعجل" to "مدنية (مستعجلة)",
+        "مدنية مستعجلة" to "مدنية (مستعجلة)",
+        "مدنية (مستعجلة)" to "مدنية (مستعجلة)",
+        "شخصية" to "شخصيـــة",
+        "جسيمة" to "جزائية (جسيمة)",
+        "غير جسيمة" to "جزائية (غير جسيمة)",
+        "تعرض للانحراف" to "جزائية (أحداث)",
+        "تنفيذ" to "قضايا التنفيذ (منازعات)",
+        "تنفيذية (منازعات)" to "قضايا التنفيذ (منازعات)",
+        "تنفيذ (منازعات)" to "قضايا التنفيذ (منازعات)"
+    )
+    private val CASE_TYPE_ORDER = listOf(
+        "مدنية", "مستعجل", "مستعجلة", "مدني مستعجل", "مدنية مستعجلة",
+        "مدنية (مستعجلة)", "شخصية", "جسيمة", "غير جسيمة", "تنفيذ",
+        "تنفيذية (منازعات)", "تنفيذ (منازعات)", "تعرض للانحراف"
+    )
+    private val CASE_TYPE_SOURCE_BY_DISPLAY_NAME = CASE_TYPE_DISPLAY_NAMES
+        .entries
+        .groupBy({ it.value }, { it.key })
+
     private var appContext: Context? = null
 
     fun init(context: Context) {
@@ -235,10 +260,18 @@ object CaseRecordsRepository {
     private fun parseCsv(text: String): List<CaseRecord> {
         val lines = text.replace("\uFEFF", "").replace("\r\n", "\n").replace("\r", "\n").split("\n")
         val out = mutableListOf<CaseRecord>()
-        for (line in lines) {
+        for ((index, line) in lines.withIndex()) {
+            val lineNumber = index + 1
             if (line.trim().isEmpty()) continue
             val row = parseCsvLine(line)
             if (row.size < 27) continue
+            if (lineNumber == 1) {
+                val validHeader =
+                    clean(row.getOrNull(1)).contains("نوع القضية الأساسي") &&
+                            clean(row.getOrNull(8)).contains("برئاسة القاضي") &&
+                            clean(row.getOrNull(14)).contains("رقم القضية")
+                if (!validHeader) continue
+            }
             val caseHeader = row.getOrNull(14).orEmpty()
             if (caseHeader.contains("رقم") && caseHeader.contains("القضية")) continue
             val rec = CaseRecord(
@@ -300,9 +333,103 @@ object CaseRecordsRepository {
         return result
     }
 
-    fun normalizeDigits(s: String): String = s.map { ch ->
-        if (ch.isDigit()) Character.getNumericValue(ch).digitToChar() else ch
-    }.joinToString("")
+    /** Converts Arabic-Indic / Extended Arabic / Persian digits to plain ASCII digits. */
+    fun normalizeDigits(s: String): String = buildString(s.length) {
+        s.forEach { ch ->
+            if (ch.isDigit()) append(Character.getNumericValue(ch)) else append(ch)
+        }
+    }
+
+    /** Same validation as bot.py::parse_case_query — e.g. 1446/6. */
+    fun parseCaseQuery(input: String): Pair<String, String>? {
+        val value = normalizeDigits(input.trim())
+        if (value.count { it == '/' } != 1) return null
+        val parts = value.split('/')
+        val caseNum = parts[0].trim()
+        val year = parts[1].trim()
+        if (caseNum.isEmpty() || year.isEmpty()) return null
+        if (caseNum.length !in 1..10 || year.length != 4) return null
+        if (caseNum.all { it == '0' } || year.all { it == '0' }) return null
+        return caseNum to year
+    }
+
+    /** Accepts yyyy-MM-dd, yyyy/MM/dd and dd/MM/yyyy — same as the bot. */
+    fun normalizeDate(value: String): String? {
+        val text = normalizeDigits(value.trim())
+        if (text.isBlank()) return null
+        val iso = Regex("^(\\d{4})[-/](\\d{1,2})[-/](\\d{1,2})$").matchEntire(text)
+        val dayFirst = Regex("^(\\d{1,2})/(\\d{1,2})/(\\d{4})$").matchEntire(text)
+        val (y, m, d) = when {
+            iso != null -> listOf(iso.groupValues[1], iso.groupValues[2], iso.groupValues[3])
+            dayFirst != null -> listOf(dayFirst.groupValues[3], dayFirst.groupValues[2], dayFirst.groupValues[1])
+            else -> return null
+        }
+        val year = y.toIntOrNull() ?: return null
+        val month = m.toIntOrNull() ?: return null
+        val day = d.toIntOrNull() ?: return null
+        if (year < 1 || month !in 1..12 || day !in 1..31) return null
+        return String.format(Locale.US, "%04d-%02d-%02d", year, month, day)
+    }
+
+    /** Dates are displayed as dd/MM/yyyy, e.g. 18/11/2026. */
+    fun formatDisplayDate(value: String): String {
+        val iso = normalizeDate(value) ?: return value
+        val parts = iso.split("-")
+        return "${parts[2]}/${parts[1]}/${parts[0]}"
+    }
+
+    fun displayCaseType(raw: String): String =
+        CASE_TYPE_DISPLAY_NAMES[raw.trim()] ?: raw.trim()
+
+    private fun sourceCaseTypes(selected: String): List<String> =
+        CASE_TYPE_SOURCE_BY_DISPLAY_NAME[selected.trim()] ?: listOf(selected.trim())
+
+    private fun caseTypeMatches(recordType: String, selected: String): Boolean {
+        val ct = selected.trim()
+        if (ct.isBlank() || ct == "الكل" || ct.contains("(الكل)")) return true
+        val raw = recordType.trim()
+        return sourceCaseTypes(ct).contains(raw) || raw.contains(ct) || ct.contains(raw)
+    }
+
+    fun orderedCaseTypes(records: List<CaseRecord>): List<String> {
+        val available = records.map { it.caseType.trim() }.filter { it.isNotBlank() }.toSet()
+        val ordered = CASE_TYPE_ORDER.mapNotNull { source ->
+            if (source in available) CASE_TYPE_DISPLAY_NAMES[source] else null
+        }.distinct()
+        val other = available.filter { it !in CASE_TYPE_DISPLAY_NAMES }.sorted()
+        return ordered + other
+    }
+
+    fun normalizeJudge(value: String): String {
+        val name = clean(value)
+        return if (name == "عبدالعزيز ناصر أحمد الهصيصي") "عبدالعزيز ناصر الهصيصي" else name
+    }
+
+    fun displayJudge(value: String): String {
+        val name = normalizeJudge(value)
+        if (name.isBlank()) return "-"
+        return if (name.startsWith("⚖️")) name else "⚖️$name"
+    }
+
+    private fun judgeMatches(recordJudge: String, selected: String): Boolean {
+        val jg = selected.trim().removePrefix("⚖️").trim()
+        if (jg.isBlank() || jg == "الكل" || jg.contains("(الكل)")) return true
+        val expected = normalizeJudge(jg)
+        val actual = normalizeJudge(recordJudge)
+        return actual == expected || actual.contains(expected) || expected.contains(actual)
+    }
+
+    /** Session search with normalized dates, matching the bot's search_sessions_by_date. */
+    fun searchSessions(
+        records: List<CaseRecord>,
+        date: String,
+        judge: String = ""
+    ): List<CaseRecord> {
+        val target = normalizeDate(date) ?: return emptyList()
+        return records.filter { rec ->
+            normalizeDate(rec.nextSession) == target && judgeMatches(rec.judge, judge)
+        }.take(100)
+    }
 
     fun search(
         records: List<CaseRecord>,
@@ -314,19 +441,34 @@ object CaseRecordsRepository {
         query: String = ""
     ): List<CaseRecord> {
         val cn = normalizeDigits(caseNumber.trim()).lowercase(Locale.ROOT)
-        val pl = plaintiff.trim()
-        val de = defendant.trim()
+        val pl = plaintiff.trim().lowercase(Locale.ROOT)
+        val de = defendant.trim().lowercase(Locale.ROOT)
         val ct = caseType.trim()
         val jg = judge.trim()
-        val q = query.trim()
+        val rawQuery = query.trim()
+        val q = rawQuery.lowercase(Locale.ROOT)
+        val numberQueries = LinkedHashSet<String>()
+        if (cn.isNotBlank()) numberQueries.add(cn)
+        if (q.isNotBlank()) {
+            val normalized = normalizeDigits(q)
+            numberQueries.add(normalized)
+            // bot.py tries both 1446/6 and 6/1446 because the sheet may store either order.
+            if (normalized.count { it == '/' } == 1) {
+                val parts = normalized.split('/')
+                numberQueries.add("${parts[1].trim()}/${parts[0].trim()}")
+            }
+        }
         return records.filter { r ->
-            (cn.isBlank() || normalizeDigits(r.caseNumber).contains(cn)) &&
-                    (pl.isBlank() || r.plaintiff.contains(pl, ignoreCase = true)) &&
-                    (de.isBlank() || r.defendant.contains(de, ignoreCase = true)) &&
-                    (ct.isBlank() || ct == "الكل" || r.caseType.contains(ct) || ct.contains(r.caseType)) &&
-                    (jg.isBlank() || jg == "الكل" || r.judge.contains(jg) || jg.contains(r.judge)) &&
-                    (q.isBlank() || normalizeDigits(r.caseNumber).contains(normalizeDigits(q)) ||
-                            r.plaintiff.contains(q, ignoreCase = true) || r.defendant.contains(q, ignoreCase = true))
+            val recordNumber = normalizeDigits(r.caseNumber).lowercase(Locale.ROOT)
+            val numberMatch = numberQueries.isEmpty() || numberQueries.any { recordNumber.contains(it) }
+            val nameMatch = q.isBlank() ||
+                    r.plaintiff.lowercase(Locale.ROOT).contains(q) ||
+                    r.defendant.lowercase(Locale.ROOT).contains(q)
+            numberMatch && nameMatch &&
+                    (pl.isBlank() || r.plaintiff.lowercase(Locale.ROOT).contains(pl)) &&
+                    (de.isBlank() || r.defendant.lowercase(Locale.ROOT).contains(de)) &&
+                    caseTypeMatches(r.caseType, ct) &&
+                    judgeMatches(r.judge, jg)
         }.take(100)
     }
 }
