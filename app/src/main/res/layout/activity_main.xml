@@ -138,7 +138,7 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:columnCount="2"
-            android:rowCount="2"
+            android:rowCount="3"
             android:useDefaultMargins="false">
 
             <LinearLayout
@@ -147,15 +147,15 @@
                 android:layout_height="0dp"
                 android:layout_columnWeight="1"
                 android:layout_rowWeight="1"
-                android:layout_margin="4dp"
+                android:layout_margin="3dp"
                 android:orientation="vertical"
                 android:gravity="center"
-                android:padding="8dp"
+                android:padding="6dp"
                 android:background="@drawable/bg_card_theme"
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground">
-                <ImageView android:layout_width="38dp" android:layout_height="38dp" android:src="@android:drawable/ic_menu_search" app:tint="@color/teable_primary" />
+                <ImageView android:layout_width="46dp" android:layout_height="46dp" android:src="@android:drawable/ic_menu_search" app:tint="#1565C0" />
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="الاستعلام عن قضية" android:textColor="@color/teable_text" android:textSize="12sp" android:textStyle="bold" android:gravity="center" />
             </LinearLayout>
 
@@ -165,15 +165,15 @@
                 android:layout_height="0dp"
                 android:layout_columnWeight="1"
                 android:layout_rowWeight="1"
-                android:layout_margin="4dp"
+                android:layout_margin="3dp"
                 android:orientation="vertical"
                 android:gravity="center"
-                android:padding="8dp"
+                android:padding="6dp"
                 android:background="@drawable/bg_card_theme"
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground">
-                <ImageView android:layout_width="38dp" android:layout_height="38dp" android:src="@android:drawable/ic_menu_my_calendar" app:tint="@color/teable_primary" />
+                <ImageView android:layout_width="46dp" android:layout_height="46dp" android:src="@android:drawable/ic_menu_my_calendar" app:tint="#2E7D32" />
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="الاستعلام عن الجلسات اليومية" android:textColor="@color/teable_text" android:textSize="12sp" android:textStyle="bold" android:gravity="center" />
             </LinearLayout>
 
@@ -183,15 +183,15 @@
                 android:layout_height="0dp"
                 android:layout_columnWeight="1"
                 android:layout_rowWeight="1"
-                android:layout_margin="4dp"
+                android:layout_margin="3dp"
                 android:orientation="vertical"
                 android:gravity="center"
-                android:padding="8dp"
+                android:padding="6dp"
                 android:background="@drawable/bg_card_theme"
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground">
-                <ImageView android:layout_width="38dp" android:layout_height="38dp" android:src="@android:drawable/ic_menu_edit" app:tint="@color/teable_primary" />
+                <ImageView android:layout_width="46dp" android:layout_height="46dp" android:src="@android:drawable/ic_menu_edit" app:tint="#EF6C00" />
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="إنشاء إعلان حضور" android:textColor="@color/teable_text" android:textSize="12sp" android:textStyle="bold" android:gravity="center" />
             </LinearLayout>
 
@@ -201,56 +201,43 @@
                 android:layout_height="0dp"
                 android:layout_columnWeight="1"
                 android:layout_rowWeight="1"
-                android:layout_margin="4dp"
+                android:layout_margin="3dp"
                 android:orientation="vertical"
                 android:gravity="center"
-                android:padding="8dp"
+                android:padding="6dp"
                 android:background="@drawable/bg_card_theme"
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground">
-                <ImageView android:layout_width="38dp" android:layout_height="38dp" android:src="@android:drawable/ic_menu_compass" app:tint="@color/teable_primary" />
+                <ImageView android:layout_width="46dp" android:layout_height="46dp" android:src="@android:drawable/ic_menu_compass" app:tint="#6A1B9A" />
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="الاستعلام عن القضايا بالمحكمة العليا" android:textColor="@color/teable_text" android:textSize="12sp" android:textStyle="bold" android:gravity="center" />
             </LinearLayout>
-        </GridLayout>
 
-        <LinearLayout
-            android:id="@+id/cardPosts"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginTop="4dp"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
-            android:background="@drawable/bg_card_theme"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?attr/selectableItemBackground">
-
-            <ImageView
-                android:layout_width="38dp"
-                android:layout_height="38dp"
-                android:src="@android:drawable/ic_menu_agenda"
-                app:tint="@color/teable_primary" />
-
-            <TextView
+            <LinearLayout
+                android:id="@+id/cardPosts"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="8dp"
-                android:text="منشورات واعلانات المحكمة"
-                android:textColor="@color/teable_text"
-                android:textSize="13sp"
-                android:textStyle="bold" />
+                android:layout_height="0dp"
+                android:layout_columnWeight="1"
+                android:layout_rowWeight="1"
+                android:layout_margin="3dp"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="6dp"
+                android:background="@drawable/bg_card_theme"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+                <ImageView android:layout_width="46dp" android:layout_height="46dp" android:src="@android:drawable/ic_menu_agenda" app:tint="#00838F" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="منشورات واعلانات المحكمة" android:textColor="@color/teable_text" android:textSize="12sp" android:textStyle="bold" android:gravity="center" />
+            </LinearLayout>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="استعراض"
-                android:textColor="@color/teable_link"
-                android:textSize="11sp" />
-        </LinearLayout>
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_columnWeight="1"
+                android:layout_rowWeight="1"
+                android:layout_margin="3dp" />
+        </GridLayout>
 
         <LinearLayout
             android:layout_width="match_parent"

@@ -333,17 +333,23 @@ object CaseRecordsRepository {
         }
     }
 
-    /** Same validation as bot.py::parse_case_query — e.g. 1446/6. */
+    /** Accepts case queries in either order, e.g. 1446/6 or 6/1446. */
     fun parseCaseQuery(input: String): Pair<String, String>? {
         val value = normalizeDigits(input.trim())
         if (value.count { it == '/' } != 1) return null
         val parts = value.split('/')
-        val caseNum = parts[0].trim()
-        val year = parts[1].trim()
-        if (caseNum.isEmpty() || year.isEmpty()) return null
-        if (caseNum.length !in 1..10 || year.length != 4) return null
-        if (caseNum.all { it == '0' } || year.all { it == '0' }) return null
-        return caseNum to year
+        val a = parts[0].trim()
+        val b = parts[1].trim()
+        if (a.isEmpty() || b.isEmpty()) return null
+        if (a.length !in 1..10 || b.length !in 1..10) return null
+        if (a.all { it == '0' } || b.all { it == '0' }) return null
+        val aDigits = a.all { it.isDigit() }
+        val bDigits = b.all { it.isDigit() }
+        if (!aDigits || !bDigits) return null
+        val aIsYear = a.length == 4
+        val bIsYear = b.length == 4
+        // Accept year/case or case/year (e.g. 1446/6 or 6/1446)
+        return if (aIsYear || bIsYear || (a.length in 1..10 && b.length in 1..10)) a to b else null
     }
 
     /** Accepts yyyy-MM-dd, yyyy/MM/dd and dd/MM/yyyy — same as the bot. */
@@ -395,8 +401,7 @@ object CaseRecordsRepository {
 
     fun displayJudge(value: String): String {
         val name = normalizeJudge(value)
-        if (name.isBlank()) return "-"
-        return if (name.startsWith("\u2696\uFE0F")) name else "\u2696\uFE0F$name"
+        return if (name.isBlank()) "-" else name
     }
 
     private fun caseTypeMatches(recordType: String, selected: String): Boolean {

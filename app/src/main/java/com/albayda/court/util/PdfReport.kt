@@ -95,41 +95,195 @@ object PdfReport {
         return out
     }
 
+    private data class HijriDate(val day: Int, val month: Int, val year: Int)
+
+    private fun hijriFromGregorian(y: Int, m: Int, d: Int): HijriDate? {
+        return try {
+            if (android.os.Build.VERSION.SDK_INT >= 24) {
+                try {
+                    val icuCal = android.icu.util.IslamicCalendar()
+                    try {
+                        icuCal.calculationType = android.icu.util.IslamicCalendar.CalculationType.ISLAMIC_UMALQURA
+                    } catch (_: Throwable) { }
+                    val g = android.icu.util.GregorianCalendar(y, m - 1, d)
+                    icuCal.timeInMillis = g.timeInMillis
+                    val hd = icuCal.get(android.icu.util.Calendar.DAY_OF_MONTH)
+                    val hm = icuCal.get(android.icu.util.Calendar.MONTH) + 1
+                    val hy = icuCal.get(android.icu.util.Calendar.YEAR)
+                    return HijriDate(hd, hm, hy)
+                } catch (_: Throwable) { }
+            }
+            val a = (14 - m) / 12
+            val yy = y + 4800 - a
+            val mm = m + 12 * a - 3
+            val jdn = d + (153 * mm + 2) / 5 + 365 * yy + yy / 4 - yy / 100 + yy / 400 - 32045
+            val l = jdn - 1948440 + 10632
+            val n = (l - 1) / 10631
+            var l2 = l - 10631 * n + 354
+            val j = ((10985 - l2) / 5316) * ((50 * l2) / 17719) + (l2 / 5670) * ((43 * l2) / 15238)
+            l2 = l2 - ((30 - j) / 15) * ((17719 * j) / 50) - (j / 16) * ((15238 * j) / 43) + 29
+            val hm = (24 * l2) / 709
+            val hd = l2 - (709 * hm) / 24
+            val hy = 30 * n + j - 30
+            HijriDate(hd, hm, hy)
+        } catch (_: Exception) { null }
+    }
+
+    private fun hijriFullDate(y: Int, m: Int, d: Int): String {
+        val h = hijriFromGregorian(y, m, d) ?: return "--/--/----"
+        return String.format(Locale.US, "%02d/%02d/%04d", h.day, h.month, h.year)
+    }
+
+    private fun weekdayName(y: Int, m: Int, d: Int): String {
+        val weekdays = listOf("الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت", "الأحد")
+        return try {
+            val cal = java.util.Calendar.getInstance().apply { clear(); set(y, m - 1, d) }
+            when (cal.get(java.util.Calendar.DAY_OF_WEEK)) {
+                java.util.Calendar.MONDAY -> weekdays[0]
+                java.util.Calendar.TUESDAY -> weekdays[1]
+                java.util.Calendar.WEDNESDAY -> weekdays[2]
+                java.util.Calendar.THURSDAY -> weekdays[3]
+                java.util.Calendar.FRIDAY -> weekdays[4]
+                java.util.Calendar.SATURDAY -> weekdays[5]
+                else -> weekdays[6]
+            }
+        } catch (_: Exception) { "" }
+    }
+
+    private fun parseIsoParts(date: String): Triple<Int, Int, Int>? {
+        val norm = CaseRecordsRepository.normalizeDate(date) ?: return null
+        val p = norm.split("-")
+        if (p.size != 3) return null
+        val y = p[0].toIntOrNull() ?: return null
+        val m = p[1].toIntOrNull() ?: return null
+        val d = p[2].toIntOrNull() ?: return null
+        return Triple(y, m, d)
+    }
+
+    private fun formatDisplayFull(date: String): String {
+        val t = parseIsoParts(date) ?: return if (date.isBlank()) "-" else date
+        return String.format(Locale.US, "%02d/%02d/%04d", t.third, t.second, t.first)
+    }
+
+    private fun wrapTextRight(text: String, paint: Paint, maxWidth: Float): List<String> {
+        val clean = if (text.isBlank()) "-" else text.trim().replace(Regex("\\s+"), " ")
+        val words = clean.split(" ").filter { it.isNotEmpty() }
+        if (words.isEmpty()) return listOf("-")
+        val lines = mutableListOf<String>()
+        var current = ""
+        fun fits(s: String) = paint.measureText(s) <= maxWidth
+        for (word in words) {
+            val candidate = if (current.isEmpty()) word else "$current $word"
+            if (fits(candidate)) {
+                current = candidate
+            } else if (current.isNotEmpty()) {
+                lines.add(current)
+                if (fits(word)) {
+                    current = word
+                } else {
+                    var chunk = ""
+                    for (ch in word) {
+                        val c2 = chunk + ch
+                        if (chunk.isNotEmpty() && !fits(c2)) { lines.add(chunk); chunk = ch.toString() } else chunk = c2
+                    }
+                    current = chunk
+                }
+            } else {
+                var chunk = ""
+                for (ch in word) {
+                    val c2 = chunk + ch
+                    if (chunk.isNotEmpty() && !fits(c2)) { lines.add(chunk); chunk = ch.toString() } else chunk = c2
+                }
+                current = chunk
+            }
+        }
+        if (current.isNotEmpty()) lines.add(current)
+        return if (lines.isEmpty()) listOf("-") else lines
+    }
+
     private fun renderCaseInfoTemplate(context: Context, ordered: List<Pair<String, String>>): ByteArray {
         val file = openTemplate(context, "templates/case-info.pdf")
         val pfd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
         val renderer = PdfRenderer(pfd)
-        val outDoc = PdfDocument()
-        val tf = loadTypeface(context)
         val src = renderer.openPage(0)
         val w = src.width * 2
         val h = src.height * 2
-        val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
-        bmp.eraseColor(Color.WHITE)
-        src.render(bmp, null, null, PdfRenderer.Page.RENDER_MODE_FOR_PRINT)
-        src.close()
-        val c = Canvas(bmp)
-        val p = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.BLACK
-            textAlign = Paint.Align.RIGHT
-            typeface = tf ?: typeface
-        }
         val sx = w / 595.32f
         val sy = h / 841.92f
-        val rightX = 393f * sx
-        val baselines = floatArrayOf(609.94f, 550.63f, 491.35f, 431.95f, 372.65f, 313.37f, 254.09f, 194.78f, 136.22f)
-        for (i in ordered.indices) {
-            if (i >= baselines.size) break
-            val value = ordered[i].second.ifBlank { "-" }
-            val y = h - baselines[i] * sy
-            p.textSize = (if (i == baselines.lastIndex) 24f else 28f) * sy
-            drawFittedText(c, p, value, rightX, y, 340f * sx)
+        src.close(); renderer.close(); pfd.close()
+
+        fun renderBg(): Bitmap {
+            val pfd2 = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
+            val r2 = PdfRenderer(pfd2)
+            val pg = r2.openPage(0)
+            val bm = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+            bm.eraseColor(Color.WHITE)
+            pg.render(bm, null, null, PdfRenderer.Page.RENDER_MODE_FOR_PRINT)
+            pg.close(); r2.close(); pfd2.close()
+            return bm
         }
-        val page = outDoc.startPage(PdfDocument.PageInfo.Builder(w, h, 1).create())
-        page.canvas.drawBitmap(bmp, 0f, 0f, null)
-        outDoc.finishPage(page)
-        bmp.recycle()
-        renderer.close(); pfd.close()
+
+        val tf = loadTypeface(context) ?: Typeface.DEFAULT
+        val outDoc = PdfDocument()
+
+        data class Row(val label: String, val baseline: Float, val fontPt: Float)
+        val layout = listOf(
+            Row("القاضي المختص", 609.94f, 30f),
+            Row("رقم القضية", 550.63f, 30f),
+            Row("تاريخ الورود", 491.35f, 30f),
+            Row("موضوع القضية", 431.95f, 30f),
+            Row("نوع القضية", 372.65f, 30f),
+            Row("المدعي", 313.37f, 30f),
+            Row("المدعى عليه", 254.09f, 30f),
+            Row("آخر قرار للقضية", 194.78f, 30f),
+            Row("تاريخ الجلسة القادمة", 136.22f, 24f)
+        )
+        val rightX = 393f * sx
+        val maxW = 357f * sx
+        val dateLabels = setOf("تاريخ الورود", "تاريخ الجلسة القادمة")
+
+        data class FieldLines(val baselinePx: Float, val fontPx: Float, val chunks: List<List<String>>)
+        val fieldsLines = mutableListOf<FieldLines>()
+        for (i in layout.indices) {
+            val row = layout[i]
+            val raw = ordered.getOrNull(i)?.second?.ifBlank { "-" } ?: "-"
+            val value = if (row.label in dateLabels) {
+                val fd = formatDisplayFull(raw)
+                if (fd == "--/--/----" || fd == "-") raw.ifBlank { "-" } else fd
+            } else raw.ifBlank { "-" }
+            val fontPx = row.fontPt * sy
+            val p = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.BLACK; textAlign = Paint.Align.RIGHT; typeface = tf; textSize = fontPx }
+            val lines = wrapTextRight(value, p, maxW)
+            val chunks = mutableListOf<List<String>>()
+            var idx = 0
+            while (idx < lines.size) {
+                chunks.add(lines.subList(idx, minOf(idx + 2, lines.size)))
+                idx += 2
+            }
+            if (chunks.isEmpty()) chunks.add(listOf("-"))
+            fieldsLines.add(FieldLines(h - row.baseline * sy, fontPx, chunks))
+        }
+
+        val pageCount = maxOf(1, fieldsLines.maxOfOrNull { it.chunks.size } ?: 1)
+        for (pageIndex in 0 until pageCount) {
+            val bg = renderBg()
+            val page = outDoc.startPage(PdfDocument.PageInfo.Builder(w, h, pageIndex + 1).create())
+            val c = page.canvas
+            c.drawBitmap(bg, 0f, 0f, null)
+            bg.recycle()
+            for (f in fieldsLines) {
+                if (pageIndex >= f.chunks.size) continue
+                val lines = f.chunks[pageIndex]
+                val p = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.BLACK; textAlign = Paint.Align.RIGHT; typeface = tf; textSize = f.fontPx }
+                val leading = f.fontPx
+                val firstBaseline = f.baselinePx + (lines.size - 1) * leading / 2f
+                for ((li, line) in lines.withIndex()) {
+                    c.drawText(line, rightX, firstBaseline - li * leading, p)
+                }
+            }
+            outDoc.finishPage(page)
+        }
+
         val bos = ByteArrayOutputStream(); outDoc.writeTo(bos); outDoc.close()
         return bos.toByteArray()
     }
@@ -138,44 +292,83 @@ object PdfReport {
         val file = openTemplate(context, "templates/attendance-ad.pdf")
         val pfd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
         val renderer = PdfRenderer(pfd)
-        val outDoc = PdfDocument()
-        val tf = loadTypeface(context)
         val src = renderer.openPage(0)
         val w = src.width * 2
         val h = src.height * 2
-        val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
-        bmp.eraseColor(Color.WHITE)
-        src.render(bmp, null, null, PdfRenderer.Page.RENDER_MODE_FOR_PRINT)
-        src.close()
-        val c = Canvas(bmp)
+        src.close(); renderer.close(); pfd.close()
+
+        val pfd2 = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
+        val renderer2 = PdfRenderer(pfd2)
+        val pg = renderer2.openPage(0)
+        val bg = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+        bg.eraseColor(Color.WHITE)
+        pg.render(bg, null, null, PdfRenderer.Page.RENDER_MODE_FOR_PRINT)
+        pg.close(); renderer2.close(); pfd2.close()
+
+        val outDoc = PdfDocument()
+        val page = outDoc.startPage(PdfDocument.PageInfo.Builder(w, h, 1).create())
+        val c = page.canvas
+        c.drawBitmap(bg, 0f, 0f, null)
+        bg.recycle()
+
+        val tf = loadTypeface(context) ?: Typeface.DEFAULT
         val sx = w / 595.32f
         val sy = h / 841.92f
-        val pCenter = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.BLACK
-            textAlign = Paint.Align.CENTER
-            typeface = tf ?: typeface
-            textSize = 24f * sy
-        }
-        val pRight = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.BLACK
-            textAlign = Paint.Align.RIGHT
-            typeface = tf ?: typeface
-            textSize = 18f * sy
-        }
+        fun ax(x: Float) = x * sx
+        fun ay(y: Float) = h - y * sy
+
         val plaintiff = data["المدعي"] ?: data["الطاعن"] ?: "-"
         val defendant = data["المدعى عليه"] ?: data["المطعون ضده"] ?: "-"
-        val date = data["تاريخ الجلسة"] ?: "-"
-        val judge = data["القاضي"] ?: data["اسم القاضي"] ?: data["القاضي المختص"] ?: "-"
-        // Positions aligned with bot logic where possible
-        drawFittedText(c, pCenter, plaintiff, 380f * sx, h - 648f * sy, 205f * sx)
-        drawFittedText(c, pCenter, defendant, 380f * sx, h - 603f * sy, 205f * sx)
-        drawFittedText(c, pCenter, date, 310f * sx, h - 521.47f * sy, 180f * sx)
-        drawFittedText(c, pRight, judge, 211.25f * sx, h - 382.49f * sy, 150f * sx)
-        val page = outDoc.startPage(PdfDocument.PageInfo.Builder(w, h, 1).create())
-        page.canvas.drawBitmap(bmp, 0f, 0f, null)
+        val sessionDateRaw = data["تاريخ الجلسة"] ?: data["الجلسة القادمة"] ?: "-"
+        val judge = data["القاضي"] ?: data["اسم القاضي"] ?: data["القاضي المختص"] ?: data["برئاسة القاضي"] ?: "-"
+
+        val coverPaint = Paint().apply { color = Color.WHITE; style = Paint.Style.FILL }
+        fun cover(x: Float, y: Float, cw: Float, ch: Float) {
+            c.drawRect(ax(x), ay(y + ch), ax(x + cw), ay(y), coverPaint)
+        }
+        cover(249f, 516f, 45f, 31f)
+        cover(46f, 516f, 51f, 31f)
+        cover(298f, 444f, 114f, 31f)
+        cover(123f, 444f, 55f, 31f)
+
+        fun drawSingleLineFit(text: String, anchorX: Float, baselineY: Float, maxWidth: Float, maxSize: Float, align: Paint.Align = Paint.Align.CENTER) {
+            val p = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.BLACK; textAlign = align; typeface = tf }
+            val t = if (text.isBlank()) "-" else text.trim()
+            var fs = maxSize * sy
+            p.textSize = fs
+            val maxW = maxWidth * sx
+            while (fs > 8f * sy && p.measureText(t) > maxW) { fs -= 0.5f * sy; p.textSize = fs }
+            c.drawText(t, ax(anchorX), ay(baselineY), p)
+        }
+        fun drawCenteredFit(text: String, centerX: Float, baselineY: Float, maxWidth: Float, maxSize: Float) {
+            drawSingleLineFit(text, centerX, baselineY, maxWidth, maxSize, Paint.Align.CENTER)
+        }
+
+        drawSingleLineFit(plaintiff, 380f, 648f, 205f, 24f)
+        drawSingleLineFit(defendant, 380f, 603f, 205f, 24f)
+
+        val sp = parseIsoParts(sessionDateRaw)
+        if (sp != null) {
+            val (syy, smm, sdd) = sp
+            drawCenteredFit(weekdayName(syy, smm, sdd), 450f, 521.47f, 90f, 24f)
+            drawCenteredFit(String.format(Locale.US, "%02d/%02d/%04d", sdd, smm, syy), 310f, 521.47f, 115f, 24f)
+            drawCenteredFit(hijriFullDate(syy, smm, sdd), 120f, 521.47f, 120f, 24f)
+        } else {
+            drawCenteredFit(sessionDateRaw.ifBlank { "-" }, 310f, 521.47f, 180f, 24f)
+        }
+
+        try {
+            val now = java.util.Calendar.getInstance()
+            val py = now.get(java.util.Calendar.YEAR)
+            val pm = now.get(java.util.Calendar.MONTH) + 1
+            val pd = now.get(java.util.Calendar.DAY_OF_MONTH)
+            drawCenteredFit(String.format(Locale.US, "%02d/%02d/%04d", pd, pm, py), 354f, 450.31f, 115f, 24.96f)
+            drawCenteredFit(hijriFullDate(py, pm, pd), 190f, 450.31f, 120f, 24.96f)
+        } catch (_: Exception) { }
+
+        drawSingleLineFit(judge, 211.25f, 382.49f, 150f, 18f, Paint.Align.RIGHT)
+
         outDoc.finishPage(page)
-        bmp.recycle()
-        renderer.close(); pfd.close()
         val bos = ByteArrayOutputStream(); outDoc.writeTo(bos); outDoc.close()
         return bos.toByteArray()
     }
@@ -415,7 +608,7 @@ object PdfReport {
             val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply { typeface = tf; color = Color.BLACK }
 
             // Judge name
-            val judgeTitle = CaseRecordsRepository.displayJudge(pageData.judge).removePrefix("⚖️").trim().ifBlank { pageData.judge }
+            val judgeTitle = CaseRecordsRepository.displayJudge(pageData.judge).removePrefix("").trim().ifBlank { pageData.judge }
             paint.textAlign = Paint.Align.RIGHT
             var jSize = headerFontPt * sy
             paint.textSize = jSize
