@@ -97,7 +97,6 @@ class SearchActivity : AppCompatActivity() {
                     binding.spCaseType.adapter = makeSpinnerAdapter(types)
                 }
                 if (loadJudges) {
-                    // Same ordering/normalization as the official bot: ⚖️ + normalized judge name.
                     val judges = listOf("اسم القاضي (الكل)") + records
                         .map { CaseRecordsRepository.displayJudge(it.judge) }
                         .filter { it != "-" }
@@ -105,9 +104,10 @@ class SearchActivity : AppCompatActivity() {
                         .sorted()
                     binding.spJudge.adapter = makeSpinnerAdapter(judges)
                 }
-            } catch (_: Exception) {
+            } catch (e: Exception) {
                 if (loadCaseTypes) binding.spCaseType.adapter = makeSpinnerAdapter(listOf("نوع القضية (الكل)"))
                 if (loadJudges) binding.spJudge.adapter = makeSpinnerAdapter(listOf("اسم القاضي (الكل)"))
+                Toast.makeText(this@SearchActivity, "تعذر جلب بيانات القضايا: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
     }

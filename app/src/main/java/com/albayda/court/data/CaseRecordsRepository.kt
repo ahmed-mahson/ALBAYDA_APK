@@ -46,8 +46,10 @@ object CaseRecordsRepository {
     /** Always tries to fetch fresh data; falls back to the last successful copy only on failure. */
     suspend fun loadRecords(force: Boolean = false): List<CaseRecord> = withContext(Dispatchers.IO) {
         val urls = listOf(
+            "https://drive.google.com/uc?export=download&id=" + DRIVE_FILE_ID,
             "https://drive.usercontent.google.com/download?id=" + DRIVE_FILE_ID + "&export=download&confirm=t",
-            "https://drive.google.com/uc?export=download&id=" + DRIVE_FILE_ID + "&confirm=t"
+            "https://drive.google.com/uc?export=download&id=" + DRIVE_FILE_ID + "&confirm=t",
+            "https://drive.usercontent.google.com/download?id=" + DRIVE_FILE_ID + "&export=download"
         )
         var lastError: Exception? = null
         for (url in urls) {
@@ -81,7 +83,7 @@ object CaseRecordsRepository {
                 conn.readTimeout = 30_000
                 conn.instanceFollowRedirects = true
                 conn.useCaches = false
-                conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 12) AlbaydaCourtBot/1.0")
+                conn.setRequestProperty("User-Agent", "AlbaydaCourtBot/1.0")
                 conn.setRequestProperty("Accept", "text/csv,text/plain,*/*")
                 val c = conn.responseCode
                 val b = ByteArrayOutputStream().use { out ->
@@ -250,13 +252,20 @@ object CaseRecordsRepository {
     private fun parseCsv(text: String): List<CaseRecord> {
         val lines = text.replace("\uFEFF", "").replace("\r\n", "\n").replace("\r", "\n").split("\n")
         val out = mutableListOf<CaseRecord>()
-        for ((index, line) in lines.withIndex()) {
-            val lineNumber = index + 1
-            if (line.trim().isEmpty()) continue
-            val row = parseCsvLine(line)
+        for ((_, rawLine) in lines.withIndex()) {
+            if (rawLine.trim().isEmpty()) continue
+            val row = parseCsvLine(rawLine)
             if (row.size < 27) continue
-            val caseHeader = row.getOrNull(14).orEmpty()
-            if (caseHeader.contains("رقم") && caseHeader.contains("القضية")) continue
+            // Each row in the Drive "report" export contains label columns (1,8,14)
+            // alongside value columns. Validate labels when present, but do not skip.
+            val label1 = row.getOrNull(1)?.trim().orEmpty()
+            val label8 = row.getOrNull(8)?.trim().orEmpty()
+            val label14 = row.getOrNull(14)?.trim().orEmpty()
+            val looksLikeHeaderOnly =
+                label1 == "نوع القضية الأساسي" && label8 == "برئاسة القاضي" && label14 == "رقم القضية" &&
+                clean(row.getOrNull(26)).isBlank() && clean(row.getOrNull(25)).isBlank() &&
+                clean(row.getOrNull(22)).isBlank() && clean(row.getOrNull(21)).isBlank()
+            if (looksLikeHeaderOnly) continue
             val rec = CaseRecord(
                 previousSession = clean(row.getOrNull(16)),
                 nextSession = clean(row.getOrNull(17)),
@@ -269,7 +278,8 @@ object CaseRecordsRepository {
                 caseType = clean(row.getOrNull(25)),
                 caseNumber = clean(row.getOrNull(26))
             )
-            if (rec.caseNumber.isNotBlank() || rec.plaintiff.isNotBlank() || rec.defendant.isNotBlank()) {
+            if (rec.caseNumber.isNotBlank() || rec.plaintiff.isNotBlank() || rec.defendant.isNotBlank() ||
+                rec.caseType.isNotBlank() || rec.judge.isNotBlank() || rec.nextSession.isNotBlank()) {
                 out.add(rec)
             }
         }

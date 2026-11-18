@@ -448,25 +448,38 @@
 
 
 
-            <TextView
-
-                android:id="@+id/tvFooterCredit"
-
+            <LinearLayout
                 android:layout_width="match_parent"
-
                 android:layout_height="wrap_content"
-
-                android:layout_marginTop="12dp"
-
+                android:orientation="vertical"
                 android:gravity="center"
+                android:layout_marginTop="14dp">
 
-                android:text="تصميم وبرمجة المهندس/احمد حسين محسون  تلفون 771421919 - 734840710"
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="تصميم وبرمجة"
+                    android:textColor="@color/navy_700"
+                    android:textSize="11sp" />
 
-                android:textColor="@color/navy_700"
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="م/احمد حسين محسون"
+                    android:textColor="@color/navy_700"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
 
-                android:textSize="12sp"
-
-                android:textStyle="bold" />
+                <TextView
+                    android:id="@+id/tvFooterCredit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="771421919-734840710"
+                    android:textColor="@color/navy_700"
+                    android:textSize="11sp" />
+            </LinearLayout>
 
         </LinearLayout>
 
