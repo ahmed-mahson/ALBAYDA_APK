@@ -6,6 +6,6 @@
         android:gravity="center">
         <bitmap
             android:gravity="center"
-            android:src="@drawable/ic_launcher_art" />
+            android:src="@drawable/logo_court" />
     </item>
 </layer-list>
