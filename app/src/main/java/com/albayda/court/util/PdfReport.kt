@@ -83,6 +83,104 @@ object PdfReport {
         }
     }
 
+    private fun loadTypeface(context: Context): Typeface? {
+        return try { Typeface.createFromAsset(context.assets, "fonts/sultan-medium.ttf") } catch (_: Exception) { null }
+    }
+
+    private fun openTemplate(context: Context, assetPath: String): File {
+        val out = File(context.cacheDir, assetPath.substringAfterLast('/'))
+        if (!out.exists() || out.length() == 0L) {
+            context.assets.open(assetPath).use { input -> FileOutputStream(out).use { input.copyTo(it) } }
+        }
+        return out
+    }
+
+    private fun renderCaseInfoTemplate(context: Context, ordered: List<Pair<String, String>>): ByteArray {
+        val file = openTemplate(context, "templates/case-info.pdf")
+        val pfd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
+        val renderer = PdfRenderer(pfd)
+        val outDoc = PdfDocument()
+        val tf = loadTypeface(context)
+        val src = renderer.openPage(0)
+        val w = src.width * 2
+        val h = src.height * 2
+        val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+        bmp.eraseColor(Color.WHITE)
+        src.render(bmp, null, null, PdfRenderer.Page.RENDER_MODE_FOR_PRINT)
+        src.close()
+        val c = Canvas(bmp)
+        val p = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.BLACK
+            textAlign = Paint.Align.RIGHT
+            typeface = tf ?: typeface
+        }
+        val sx = w / 595.32f
+        val sy = h / 841.92f
+        val rightX = 393f * sx
+        val baselines = floatArrayOf(609.94f, 550.63f, 491.35f, 431.95f, 372.65f, 313.37f, 254.09f, 194.78f, 136.22f)
+        for (i in ordered.indices) {
+            if (i >= baselines.size) break
+            val value = ordered[i].second.ifBlank { "-" }
+            val y = h - baselines[i] * sy
+            p.textSize = (if (i == baselines.lastIndex) 24f else 28f) * sy
+            drawFittedText(c, p, value, rightX, y, 340f * sx)
+        }
+        val page = outDoc.startPage(PdfDocument.PageInfo.Builder(w, h, 1).create())
+        page.canvas.drawBitmap(bmp, 0f, 0f, null)
+        outDoc.finishPage(page)
+        bmp.recycle()
+        renderer.close(); pfd.close()
+        val bos = ByteArrayOutputStream(); outDoc.writeTo(bos); outDoc.close()
+        return bos.toByteArray()
+    }
+
+    private fun renderAttendanceTemplate(context: Context, data: Map<String, String>): ByteArray {
+        val file = openTemplate(context, "templates/attendance-ad.pdf")
+        val pfd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
+        val renderer = PdfRenderer(pfd)
+        val outDoc = PdfDocument()
+        val tf = loadTypeface(context)
+        val src = renderer.openPage(0)
+        val w = src.width * 2
+        val h = src.height * 2
+        val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+        bmp.eraseColor(Color.WHITE)
+        src.render(bmp, null, null, PdfRenderer.Page.RENDER_MODE_FOR_PRINT)
+        src.close()
+        val c = Canvas(bmp)
+        val sx = w / 595.32f
+        val sy = h / 841.92f
+        val pCenter = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.BLACK
+            textAlign = Paint.Align.CENTER
+            typeface = tf ?: typeface
+            textSize = 24f * sy
+        }
+        val pRight = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.BLACK
+            textAlign = Paint.Align.RIGHT
+            typeface = tf ?: typeface
+            textSize = 18f * sy
+        }
+        val plaintiff = data["المدعي"] ?: data["الطاعن"] ?: "-"
+        val defendant = data["المدعى عليه"] ?: data["المطعون ضده"] ?: "-"
+        val date = data["تاريخ الجلسة"] ?: "-"
+        val judge = data["القاضي"] ?: data["اسم القاضي"] ?: data["القاضي المختص"] ?: "-"
+        // Positions aligned with bot logic where possible
+        drawFittedText(c, pCenter, plaintiff, 380f * sx, h - 648f * sy, 205f * sx)
+        drawFittedText(c, pCenter, defendant, 380f * sx, h - 603f * sy, 205f * sx)
+        drawFittedText(c, pCenter, date, 310f * sx, h - 521.47f * sy, 180f * sx)
+        drawFittedText(c, pRight, judge, 211.25f * sx, h - 382.49f * sy, 150f * sx)
+        val page = outDoc.startPage(PdfDocument.PageInfo.Builder(w, h, 1).create())
+        page.canvas.drawBitmap(bmp, 0f, 0f, null)
+        outDoc.finishPage(page)
+        bmp.recycle()
+        renderer.close(); pfd.close()
+        val bos = ByteArrayOutputStream(); outDoc.writeTo(bos); outDoc.close()
+        return bos.toByteArray()
+    }
+
+
     private data class SessionFragment(
         val fields: Map<String, List<String>>,
         val height: Float,
