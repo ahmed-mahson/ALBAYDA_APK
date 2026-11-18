@@ -89,7 +89,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateWelcome(username: String?) {
-        binding.tvWelcome.text = "ظ…ط±ط­ط¨ط§ظ‹ ط¨ظƒ  ${username?.ifBlank { "ظ…ط³طھط®ط¯ظ…" } ?: "ظ…ط³طھط®ط¯ظ…"}"
+        binding.tvWelcome.text = "مرحباً بك  ${username?.ifBlank { "مستخدم" } ?: "مستخدم"}"
     }
 
     private fun selectTab(active: View) {

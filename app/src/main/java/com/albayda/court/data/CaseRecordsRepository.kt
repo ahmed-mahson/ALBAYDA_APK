@@ -81,7 +81,7 @@ object CaseRecordsRepository {
                 conn.readTimeout = 30_000
                 conn.instanceFollowRedirects = true
                 conn.useCaches = false
-                conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 12) AlbaydaCourt/3.0")
+                conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 12) AlbaydaCourtBot/1.0")
                 conn.setRequestProperty("Accept", "text/csv,text/plain,*/*")
                 val c = conn.responseCode
                 val b = ByteArrayOutputStream().use { out ->
