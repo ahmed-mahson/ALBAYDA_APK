@@ -41,4 +41,23 @@
     <color name="theme_button_dark">#5A99D7</color>
     <color name="text_gray_light">#B0C4DE</color>
     <color name="text_blue_light">#5C9CE6</color>
+
+    <!-- Teable login theme (https://appeuscehxpjkgejmso.teable.app/login) -->
+    <color name="teable_page_bg">#031D40</color>
+    <color name="teable_card_bg">#FFFFFF</color>
+    <color name="teable_text">#031D40</color>
+    <color name="teable_text_secondary">#082F62</color>
+    <color name="teable_link">#17599F</color>
+    <color name="teable_input_start">#F8FBFF</color>
+    <color name="teable_input_end">#EDF6FC</color>
+    <color name="teable_input_border">#BED0E3</color>
+    <color name="teable_input_text">#082F62</color>
+    <color name="teable_input_hint">#9AAFC4</color>
+    <color name="teable_gold_start">#F2D485</color>
+    <color name="teable_gold_end">#AE7B2F</color>
+    <color name="teable_gold_border">#EFD18B</color>
+    <color name="teable_divider">#B6CDE1</color>
+    <color name="teable_footer_bg">#F0F7FD</color>
+    <color name="teable_primary">#135BA3</color>
+    <color name="teable_border">#C9DCED</color>
 </resources>

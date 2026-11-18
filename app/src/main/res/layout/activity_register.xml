@@ -1,149 +1,171 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
-    android:background="@drawable/bg_splash_gradient"
+    android:orientation="vertical"
+    android:background="@color/teable_page_bg"
     android:fitsSystemWindows="true"
-    android:layoutDirection="rtl">
+    android:layoutDirection="rtl"
+    android:paddingStart="14dp"
+    android:paddingEnd="14dp"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:orientation="vertical"
-        android:gravity="center_horizontal"
-        android:padding="24dp">
+        android:background="@drawable/bg_teable_card"
+        android:elevation="8dp"
+        android:clipToOutline="true">
 
-        <FrameLayout
-            android:layout_width="190dp"
-            android:layout_height="190dp"
-            android:layout_marginTop="16dp">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="6dp">
+
+            <FrameLayout
+                android:layout_width="110dp"
+                android:layout_height="110dp">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/bg_logo_glow" />
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_court_logo"
+                    android:scaleType="fitCenter"
+                    android:contentDescription="@string/logo_desc" />
+            </FrameLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="محكمة البيضاء الابتدائية"
+                android:textColor="@color/teable_text_secondary"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="إنشاء حساب جديد"
+                android:textColor="@color/teable_text"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/etUsername"
+                android:layout_width="match_parent"
+                android:layout_height="46dp"
+                android:layout_marginTop="12dp"
+                android:hint="اسم المستخدم"
+                android:background="@drawable/bg_input_exact"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:inputType="textPersonName"
+                android:drawableStart="@android:drawable/ic_menu_myplaces"
+                android:drawableTint="@color/teable_primary"
+                android:drawablePadding="8dp"
+                android:textColor="@color/teable_input_text"
+                android:textColorHint="@color/teable_input_hint"
+                android:textSize="14sp" />
+
+            <EditText
+                android:id="@+id/etMobile"
+                android:layout_width="match_parent"
+                android:layout_height="46dp"
+                android:layout_marginTop="8dp"
+                android:hint="رقم الجوال"
+                android:background="@drawable/bg_input_exact"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:inputType="phone"
+                android:drawableStart="@android:drawable/ic_menu_call"
+                android:drawableTint="@color/teable_primary"
+                android:drawablePadding="8dp"
+                android:textColor="@color/teable_input_text"
+                android:textColorHint="@color/teable_input_hint"
+                android:textSize="14sp" />
+
+            <EditText
+                android:id="@+id/etPassword"
+                android:layout_width="match_parent"
+                android:layout_height="46dp"
+                android:layout_marginTop="8dp"
+                android:hint="كلمة المرور"
+                android:background="@drawable/bg_input_exact"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:inputType="textPassword"
+                android:drawableStart="@android:drawable/ic_lock_idle_lock"
+                android:drawableTint="@color/teable_primary"
+                android:drawablePadding="8dp"
+                android:textColor="@color/teable_input_text"
+                android:textColorHint="@color/teable_input_hint"
+                android:textSize="14sp" />
+
+            <Button
+                android:id="@+id/btnRegister"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="14dp"
+                android:text="إرسال طلب إنشاء الحساب"
+                android:textColor="@color/teable_text"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:background="@drawable/bg_button_gold"
+                app:backgroundTint="@null" />
 
             <View
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:animation="@anim/logo_pulse"
-                android:background="@drawable/bg_logo_glow" />
-
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:animation="@anim/logo_pulse"
-                android:src="@drawable/ic_court_logo"
-                android:adjustViewBounds="true"
-                android:scaleType="fitCenter"
-                android:contentDescription="@string/logo_desc" />
-        </FrameLayout>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="محكمة البيضاء الابتدائية"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="@color/white"
-            android:layout_marginTop="8dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="إنشاء حساب جديد"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:textColor="@color/gold_light"
-            android:layout_marginTop="12dp"
-            android:layout_marginBottom="20dp" />
-
-        <EditText
-            android:id="@+id/etUsername"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:hint="اسم المستخدم"
-            android:background="@drawable/bg_input_exact"
-            android:paddingStart="16dp"
-            android:paddingEnd="42dp"
-            android:inputType="textPersonName"
-            android:drawableStart="@android:drawable/ic_menu_myplaces"
-            android:drawableTint="@color/theme_header_mid"
-            android:drawablePadding="8dp"
-            android:textColor="@color/theme_header_deep"
-            android:textColorHint="#9AAFC4"
-            android:textSize="15sp" />
-
-        <EditText
-            android:id="@+id/etMobile"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:layout_marginTop="14dp"
-            android:hint="رقم الجوال"
-            android:background="@drawable/bg_input_exact"
-            android:paddingStart="16dp"
-            android:paddingEnd="42dp"
-            android:inputType="phone"
-            android:drawableStart="@android:drawable/ic_menu_call"
-            android:drawableTint="@color/theme_header_mid"
-            android:drawablePadding="8dp"
-            android:textColor="@color/theme_header_deep"
-            android:textColorHint="#9AAFC4"
-            android:textSize="15sp" />
-
-        <EditText
-            android:id="@+id/etPassword"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:layout_marginTop="14dp"
-            android:hint="كلمة المرور"
-            android:background="@drawable/bg_input_exact"
-            android:paddingStart="16dp"
-            android:paddingEnd="42dp"
-            android:inputType="textPassword"
-            android:drawableStart="@android:drawable/ic_lock_idle_lock"
-            android:drawableTint="@color/theme_header_mid"
-            android:drawablePadding="8dp"
-            android:textColor="@color/theme_header_deep"
-            android:textColorHint="#9AAFC4"
-            android:textSize="15sp" />
-
-        <Button
-            android:id="@+id/btnRegister"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_marginTop="24dp"
-            android:text="إرسال طلب إنشاء الحساب"
-            android:textColor="@color/theme_header_deep"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:background="@drawable/bg_button_gold" />
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center"
-            android:layout_marginTop="28dp">
+            android:background="@drawable/bg_teable_footer"
+            android:paddingTop="6dp"
+            android:paddingBottom="8dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="تصميم وبرمجة"
-                android:textColor="@color/text_gray_light"
+                android:textColor="@color/text_muted"
                 android:textSize="10sp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="م/احمد حسين محسون"
-                android:textColor="@color/text_gray_light"
+                android:textColor="@color/teable_text_secondary"
                 android:textSize="11sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="771421919-734840710"
-                android:textColor="@color/text_blue_light"
+                android:text="771421919 - 734840710"
+                android:textColor="@color/teable_link"
                 android:textSize="10sp" />
         </LinearLayout>
     </LinearLayout>
-</ScrollView>
+</LinearLayout>

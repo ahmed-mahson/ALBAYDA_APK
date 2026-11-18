@@ -1,547 +1,341 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-
     xmlns:app="http://schemas.android.com/apk/res-auto"
-
     android:layout_width="match_parent"
-
     android:layout_height="match_parent"
-
     android:orientation="vertical"
-
-    android:background="@color/bg_light"
-
+    android:background="#F5F8FC"
     android:fitsSystemWindows="true"
-
     android:layoutDirection="rtl">
 
-
-
     <!-- Header -->
-
     <LinearLayout
-
         android:layout_width="match_parent"
-
         android:layout_height="wrap_content"
-
         android:orientation="horizontal"
-
         android:layoutDirection="rtl"
-
         android:background="@drawable/bg_theme_header"
-
         android:paddingStart="10dp"
-
         android:paddingEnd="10dp"
-
-        android:paddingTop="10dp"
-
-        android:paddingBottom="10dp"
-
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
         android:gravity="center_vertical">
 
-
-
         <ImageView
-
             android:id="@+id/ivLogoHeader"
-
-            android:layout_width="@dimen/header_logo"
-
-            android:layout_height="@dimen/header_logo"
-
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:src="@drawable/ic_court_logo"
-
             android:contentDescription="@string/logo_desc"
-
             android:scaleType="fitCenter" />
 
-
-
         <LinearLayout
-
             android:layout_width="0dp"
-
             android:layout_height="wrap_content"
-
             android:layout_weight="1"
-
             android:orientation="vertical"
-
             android:gravity="start"
-
-            android:layout_marginStart="10dp"
-
+            android:layout_marginStart="8dp"
             android:layout_marginEnd="6dp">
 
-
-
             <TextView
-
                 android:id="@+id/tvHeaderTitle"
-
                 android:layout_width="match_parent"
-
                 android:layout_height="wrap_content"
-
                 android:text="تقنية معلومات محكمة البيضاء الابتدائية"
-
                 android:textColor="@color/white"
-
-                android:textSize="@dimen/header_title"
-
+                android:textSize="14sp"
                 android:textStyle="bold"
-
-                android:maxLines="2"
-
+                android:maxLines="1"
+                android:ellipsize="end"
                 android:gravity="start" />
-
-
 
             <TextView
-
                 android:id="@+id/tvWelcome"
-
                 android:layout_width="match_parent"
-
                 android:layout_height="wrap_content"
-
                 android:text="مرحباً بك"
-
-                android:textColor="@color/gold_light"
-
-                android:textSize="13sp"
-
-                android:layout_marginTop="2dp"
-
+                android:textColor="@color/teable_gold_start"
+                android:textSize="12sp"
+                android:layout_marginTop="1dp"
                 android:gravity="start" />
-
         </LinearLayout>
-
-
 
         <ImageView
-
             android:id="@+id/ivBell"
-
-            android:layout_width="28dp"
-
-            android:layout_height="28dp"
-
+            android:layout_width="26dp"
+            android:layout_height="26dp"
             android:src="@android:drawable/ic_popup_reminder"
-
             app:tint="@color/white"
-
             android:contentDescription="الإشعارات" />
-
     </LinearLayout>
 
-
-
-    <!-- News ticker below header -->
-
+    <!-- News ticker -->
     <LinearLayout
-
         android:layout_width="match_parent"
-
-        android:layout_height="40dp"
-
+        android:layout_height="30dp"
         android:orientation="horizontal"
-
-        android:background="@color/navy_800"
-
+        android:background="@color/teable_text_secondary"
         android:gravity="center_vertical">
 
-
-
         <FrameLayout
-
             android:layout_width="0dp"
-
             android:layout_height="match_parent"
-
             android:layout_weight="1"
-
             android:clipChildren="true"
-
             android:clipToPadding="true">
 
-
-
             <com.albayda.court.util.NewsTicker
-
                 android:id="@+id/newsTicker"
-
                 android:layout_width="match_parent"
-
                 android:layout_height="match_parent"
-
                 android:gravity="center_vertical"
-
                 android:paddingStart="8dp"
-
                 android:paddingEnd="8dp"
-
                 android:textColor="@color/white"
-
-                android:textSize="13sp" />
-
+                android:textSize="12sp" />
         </FrameLayout>
 
-
-
         <TextView
-
             android:id="@+id/tvNewsTitle"
-
             android:layout_width="wrap_content"
-
             android:layout_height="match_parent"
-
             android:gravity="center"
-
             android:paddingStart="10dp"
-
             android:paddingEnd="10dp"
-
             android:text="آخر الأخبار"
-
-            android:textColor="@color/navy_950"
-
+            android:textColor="@color/teable_text"
             android:textStyle="bold"
-
-            android:textSize="12sp"
-
-            android:background="@color/accent_sky" />
-
+            android:textSize="11sp"
+            android:background="@color/teable_gold_start" />
     </LinearLayout>
 
-
-
-    <ScrollView
-
-        android:id="@+id/mainScroll"
-
+    <!-- Main content - no scroll, fits screen -->
+    <LinearLayout
         android:layout_width="match_parent"
-
         android:layout_height="0dp"
-
         android:layout_weight="1"
+        android:orientation="vertical"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:paddingTop="6dp"
+        android:paddingBottom="4dp">
 
-        android:fillViewport="true"
-
-        android:clipToPadding="false">
-
-
-
-        <LinearLayout
-
+        <TextView
             android:layout_width="match_parent"
-
             android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="الخدمات الإلكترونية"
+            android:textColor="@color/teable_text"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:paddingTop="2dp"
+            android:paddingBottom="4dp" />
 
-            android:orientation="vertical"
-
-            android:padding="@dimen/screen_padding"
-
-            android:paddingBottom="20dp">
-
-
-
-            <FrameLayout
-
-                android:layout_width="match_parent"
-
-                android:layout_height="@dimen/banner_height"
-
-                android:background="@drawable/bg_banner_theme">
-
-
-
-                <TextView
-
-                    android:layout_width="match_parent"
-
-                    android:layout_height="match_parent"
-
-                    android:gravity="center"
-
-                    android:text="الخدمات الإلكترونية"
-
-                    android:textColor="@color/white"
-
-                    android:textSize="22sp"
-
-                    android:textStyle="bold"
-
-                    android:shadowColor="#80000000"
-
-                    android:shadowRadius="6" />
-
-            </FrameLayout>
-
-
-
-            <GridLayout
-
-                android:id="@+id/servicesGrid"
-
-                android:layout_width="match_parent"
-
-                android:layout_height="wrap_content"
-
-                android:layout_marginTop="12dp"
-
-                android:columnCount="2">
-
-
-
-                <LinearLayout android:id="@+id/cardSessions" android:layout_width="0dp" android:layout_height="@dimen/service_card_height" android:layout_columnWeight="1" android:layout_margin="4dp" android:orientation="vertical" android:gravity="center" android:padding="10dp" android:background="@drawable/bg_card_theme" android:clickable="true" android:focusable="true" android:foreground="?attr/selectableItemBackground">
-                    <ImageView android:layout_width="36dp" android:layout_height="36dp" android:src="@android:drawable/ic_menu_my_calendar" app:tint="@color/navy_600" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:text="الاستعلام عن الجلسات اليومية" android:textColor="@color/text_blue" android:textSize="13sp" android:textStyle="bold" android:gravity="center" />
-                </LinearLayout>
-
-                <LinearLayout android:id="@+id/cardCase" android:layout_width="0dp" android:layout_height="@dimen/service_card_height" android:layout_columnWeight="1" android:layout_margin="4dp" android:orientation="vertical" android:gravity="center" android:padding="10dp" android:background="@drawable/bg_card_theme" android:clickable="true" android:focusable="true" android:foreground="?attr/selectableItemBackground">
-                    <ImageView android:layout_width="36dp" android:layout_height="36dp" android:src="@android:drawable/ic_menu_search" app:tint="@color/navy_600" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:text="الاستعلام عن قضية" android:textColor="@color/text_blue" android:textSize="13sp" android:textStyle="bold" android:gravity="center" />
-                </LinearLayout>
-
-                <LinearLayout android:id="@+id/cardSupreme" android:layout_width="0dp" android:layout_height="@dimen/service_card_height" android:layout_columnWeight="1" android:layout_margin="4dp" android:orientation="vertical" android:gravity="center" android:padding="10dp" android:background="@drawable/bg_card_theme" android:clickable="true" android:focusable="true" android:foreground="?attr/selectableItemBackground">
-                    <ImageView android:layout_width="36dp" android:layout_height="36dp" android:src="@android:drawable/ic_menu_compass" app:tint="@color/navy_600" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:text="الاستعلام عن القضايا بالمحكمة العليا" android:textColor="@color/text_blue" android:textSize="13sp" android:textStyle="bold" android:gravity="center" />
-                </LinearLayout>
-
-                <LinearLayout android:id="@+id/cardAttendance" android:layout_width="0dp" android:layout_height="@dimen/service_card_height" android:layout_columnWeight="1" android:layout_margin="4dp" android:orientation="vertical" android:gravity="center" android:padding="10dp" android:background="@drawable/bg_card_theme" android:clickable="true" android:focusable="true" android:foreground="?attr/selectableItemBackground">
-                    <ImageView android:layout_width="36dp" android:layout_height="36dp" android:src="@android:drawable/ic_menu_edit" app:tint="@color/navy_600" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:text="إنشاء إعلان حضور" android:textColor="@color/text_blue" android:textSize="13sp" android:textStyle="bold" android:gravity="center" />
-                </LinearLayout>
-
-            </GridLayout>
-
-
+        <GridLayout
+            android:id="@+id/servicesGrid"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:columnCount="2"
+            android:rowCount="2"
+            android:useDefaultMargins="false">
 
             <LinearLayout
-
-                android:id="@+id/cardPosts"
-
-                android:layout_width="match_parent"
-
-                android:layout_height="64dp"
-
-                android:orientation="horizontal"
-
-                android:gravity="center_vertical"
-
-                android:layout_marginTop="8dp"
-
-                android:paddingStart="14dp"
-
-                android:paddingEnd="14dp"
-
-                android:background="@drawable/bg_card_theme"
-
-                android:clickable="true"
-
-                android:focusable="true"
-
-                android:foreground="?attr/selectableItemBackground">
-
-
-
-                <ImageView
-
-                    android:layout_width="30dp"
-
-                    android:layout_height="30dp"
-
-                    android:src="@android:drawable/ic_menu_agenda"
-
-                    app:tint="@color/navy_600" />
-
-
-
-                <TextView
-
-                    android:layout_width="0dp"
-
-                    android:layout_height="wrap_content"
-
-                    android:layout_weight="1"
-
-                    android:layout_marginStart="10dp"
-
-                    android:text="منشورات واعلانات المحكمة"
-
-                    android:textColor="@color/text_blue"
-
-                    android:textSize="15sp"
-
-                    android:textStyle="bold" />
-
-
-
-                <TextView
-
-                    android:layout_width="wrap_content"
-
-                    android:layout_height="wrap_content"
-
-                    android:text="استعراض"
-
-                    android:textColor="@color/accent_blue"
-
-                    android:textSize="12sp" />
-
-            </LinearLayout>
-
-
-
-            <LinearLayout
-
-                android:layout_width="match_parent"
-
-                android:layout_height="wrap_content"
-
-                android:orientation="horizontal"
-
-                android:gravity="center"
-
-                android:layout_marginTop="14dp">
-
-
-
-                <ImageView
-
-                    android:id="@+id/tvWhatsapp"
-
-                    android:layout_width="42dp"
-
-                    android:layout_height="42dp"
-
-                    android:src="@drawable/ic_whatsapp"
-
-                    android:contentDescription="واتساب"
-
-                    android:padding="3dp" />
-
-
-
-                <ImageView
-
-                    android:id="@+id/tvTelegram"
-
-                    android:layout_width="42dp"
-
-                    android:layout_height="42dp"
-
-                    android:layout_marginStart="18dp"
-
-                    android:src="@drawable/ic_telegram"
-
-                    android:contentDescription="تيليجرام"
-
-                    android:padding="3dp" />
-
-            </LinearLayout>
-
-
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:id="@+id/cardSessions"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_columnWeight="1"
+                android:layout_rowWeight="1"
+                android:layout_margin="4dp"
                 android:orientation="vertical"
                 android:gravity="center"
-                android:layout_marginTop="14dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="تصميم وبرمجة"
-                    android:textColor="@color/navy_700"
-                    android:textSize="11sp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:text="م/احمد حسين محسون"
-                    android:textColor="@color/navy_700"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/tvFooterCredit"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:text="771421919-734840710"
-                    android:textColor="@color/navy_700"
-                    android:textSize="11sp" />
+                android:padding="8dp"
+                android:background="@drawable/bg_card_theme"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+                <ImageView android:layout_width="30dp" android:layout_height="30dp" android:src="@android:drawable/ic_menu_my_calendar" app:tint="@color/teable_primary" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="الاستعلام عن الجلسات اليومية" android:textColor="@color/teable_text" android:textSize="12sp" android:textStyle="bold" android:gravity="center" />
             </LinearLayout>
 
+            <LinearLayout
+                android:id="@+id/cardCase"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_columnWeight="1"
+                android:layout_rowWeight="1"
+                android:layout_margin="4dp"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="8dp"
+                android:background="@drawable/bg_card_theme"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+                <ImageView android:layout_width="30dp" android:layout_height="30dp" android:src="@android:drawable/ic_menu_search" app:tint="@color/teable_primary" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="الاستعلام عن قضية" android:textColor="@color/teable_text" android:textSize="12sp" android:textStyle="bold" android:gravity="center" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/cardSupreme"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_columnWeight="1"
+                android:layout_rowWeight="1"
+                android:layout_margin="4dp"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="8dp"
+                android:background="@drawable/bg_card_theme"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+                <ImageView android:layout_width="30dp" android:layout_height="30dp" android:src="@android:drawable/ic_menu_compass" app:tint="@color/teable_primary" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="الاستعلام عن القضايا بالمحكمة العليا" android:textColor="@color/teable_text" android:textSize="12sp" android:textStyle="bold" android:gravity="center" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/cardAttendance"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_columnWeight="1"
+                android:layout_rowWeight="1"
+                android:layout_margin="4dp"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="8dp"
+                android:background="@drawable/bg_card_theme"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+                <ImageView android:layout_width="30dp" android:layout_height="30dp" android:src="@android:drawable/ic_menu_edit" app:tint="@color/teable_primary" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="إنشاء إعلان حضور" android:textColor="@color/teable_text" android:textSize="12sp" android:textStyle="bold" android:gravity="center" />
+            </LinearLayout>
+        </GridLayout>
+
+        <LinearLayout
+            android:id="@+id/cardPosts"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="4dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:background="@drawable/bg_card_theme"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@android:drawable/ic_menu_agenda"
+                app:tint="@color/teable_primary" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:text="منشورات واعلانات المحكمة"
+                android:textColor="@color/teable_text"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="استعراض"
+                android:textColor="@color/teable_link"
+                android:textSize="11sp" />
         </LinearLayout>
 
-    </ScrollView>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginTop="4dp">
 
+            <ImageView
+                android:id="@+id/tvWhatsapp"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:src="@drawable/ic_whatsapp"
+                android:contentDescription="واتساب"
+                android:padding="2dp" />
 
+            <ImageView
+                android:id="@+id/tvTelegram"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:layout_marginStart="16dp"
+                android:src="@drawable/ic_telegram"
+                android:contentDescription="تيليجرام"
+                android:padding="2dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_marginTop="2dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="تصميم وبرمجة"
+                android:textColor="@color/teable_text_secondary"
+                android:textSize="10sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="م/احمد حسين محسون"
+                android:textColor="@color/teable_text_secondary"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvFooterCredit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="771421919-734840710"
+                android:textColor="@color/teable_link"
+                android:textSize="10sp" />
+        </LinearLayout>
+    </LinearLayout>
 
     <!-- Bottom nav -->
-
     <LinearLayout
-
         android:id="@+id/bottomNav"
-
         android:layout_width="match_parent"
-
-        android:layout_height="@dimen/bottom_nav_height"
-
+        android:layout_height="52dp"
         android:orientation="horizontal"
-
         android:layoutDirection="rtl"
-
         android:background="@drawable/bg_theme_header"
-
         android:elevation="8dp"
-
         android:weightSum="4">
 
-
-
-        <LinearLayout android:id="@+id/navAdmin" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:orientation="vertical" android:padding="2dp">
-
-            <ImageView android:layout_width="22dp" android:layout_height="22dp" android:src="@android:drawable/ic_menu_manage" app:tint="@color/white" />
-
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="الإدارة" android:textColor="@color/white" android:textSize="11sp" />
-
+        <LinearLayout android:id="@+id/navAdmin" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
+            <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@android:drawable/ic_menu_manage" app:tint="@color/white" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="الإدارة" android:textColor="@color/white" android:textSize="10sp" />
         </LinearLayout>
-
-        <LinearLayout android:id="@+id/navAccount" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:orientation="vertical" android:padding="2dp">
-
-            <ImageView android:layout_width="22dp" android:layout_height="22dp" android:src="@android:drawable/ic_menu_myplaces" app:tint="@color/white" />
-
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="حسابي" android:textColor="@color/white" android:textSize="11sp" />
-
+        <LinearLayout android:id="@+id/navAccount" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
+            <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@android:drawable/ic_menu_myplaces" app:tint="@color/white" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="حسابي" android:textColor="@color/white" android:textSize="10sp" />
         </LinearLayout>
-
-        <LinearLayout android:id="@+id/navNotifications" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:orientation="vertical" android:padding="2dp">
-
-            <ImageView android:layout_width="22dp" android:layout_height="22dp" android:src="@android:drawable/ic_popup_reminder" app:tint="@color/white" />
-
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="الإشعارات" android:textColor="@color/white" android:textSize="11sp" />
-
+        <LinearLayout android:id="@+id/navNotifications" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
+            <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@android:drawable/ic_popup_reminder" app:tint="@color/white" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="الإشعارات" android:textColor="@color/white" android:textSize="10sp" />
         </LinearLayout>
-
-        <LinearLayout android:id="@+id/navLogout" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:orientation="vertical" android:padding="2dp">
-
-            <ImageView android:layout_width="22dp" android:layout_height="22dp" android:src="@android:drawable/ic_menu_close_clear_cancel" app:tint="@color/gold_light" />
-
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="خروج" android:textColor="@color/white" android:textSize="11sp" />
-
+        <LinearLayout android:id="@+id/navLogout" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
+            <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@android:drawable/ic_menu_close_clear_cancel" app:tint="@color/teable_gold_start" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="خروج" android:textColor="@color/white" android:textSize="10sp" />
         </LinearLayout>
-
     </LinearLayout>
 
 </LinearLayout>
-

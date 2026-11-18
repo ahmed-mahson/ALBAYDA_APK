@@ -1,9 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <gradient
-        android:angle="270"
-        android:startColor="@color/theme_header_dark"
-        android:centerColor="@color/theme_header_mid"
-        android:endColor="@color/theme_header_deep"
-        android:type="linear" />
+    <solid android:color="#031D40" />
 </shape>
