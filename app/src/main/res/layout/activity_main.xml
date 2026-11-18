@@ -148,10 +148,22 @@
                 android:layout_marginTop="12dp"
                 android:columnCount="2">
 
-                <include android:id="@+id/cardSessions" layout="@layout/card_service" android:layout_width="0dp" android:layout_height="@dimen/service_card_height" android:layout_columnWeight="1" android:layout_margin="4dp" />
-                <include android:id="@+id/cardCase" layout="@layout/card_service" android:layout_width="0dp" android:layout_height="@dimen/service_card_height" android:layout_columnWeight="1" android:layout_margin="4dp" />
-                <include android:id="@+id/cardSupreme" layout="@layout/card_service" android:layout_width="0dp" android:layout_height="@dimen/service_card_height" android:layout_columnWeight="1" android:layout_margin="4dp" />
-                <include android:id="@+id/cardAttendance" layout="@layout/card_service" android:layout_width="0dp" android:layout_height="@dimen/service_card_height" android:layout_columnWeight="1" android:layout_margin="4dp" />
+                <LinearLayout android:id="@+id/cardSessions" android:layout_width="0dp" android:layout_height="@dimen/service_card_height" android:layout_columnWeight="1" android:layout_margin="4dp" android:orientation="vertical" android:gravity="center" android:padding="10dp" android:background="@drawable/bg_card_theme" android:clickable="true" android:focusable="true" android:foreground="?attr/selectableItemBackground">
+                    <ImageView android:layout_width="36dp" android:layout_height="36dp" android:src="@android:drawable/ic_menu_my_calendar" app:tint="@color/navy_600" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:text="الاستعلام عن الجلسات اليومية" android:textColor="@color/text_blue" android:textSize="13sp" android:textStyle="bold" android:gravity="center" />
+                </LinearLayout>
+                <LinearLayout android:id="@+id/cardCase" android:layout_width="0dp" android:layout_height="@dimen/service_card_height" android:layout_columnWeight="1" android:layout_margin="4dp" android:orientation="vertical" android:gravity="center" android:padding="10dp" android:background="@drawable/bg_card_theme" android:clickable="true" android:focusable="true" android:foreground="?attr/selectableItemBackground">
+                    <ImageView android:layout_width="36dp" android:layout_height="36dp" android:src="@android:drawable/ic_menu_search" app:tint="@color/navy_600" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:text="الاستعلام عن قضية" android:textColor="@color/text_blue" android:textSize="13sp" android:textStyle="bold" android:gravity="center" />
+                </LinearLayout>
+                <LinearLayout android:id="@+id/cardSupreme" android:layout_width="0dp" android:layout_height="@dimen/service_card_height" android:layout_columnWeight="1" android:layout_margin="4dp" android:orientation="vertical" android:gravity="center" android:padding="10dp" android:background="@drawable/bg_card_theme" android:clickable="true" android:focusable="true" android:foreground="?attr/selectableItemBackground">
+                    <ImageView android:layout_width="36dp" android:layout_height="36dp" android:src="@android:drawable/ic_menu_compass" app:tint="@color/navy_600" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:text="الاستعلام عن القضايا بالمحكمة العليا" android:textColor="@color/text_blue" android:textSize="13sp" android:textStyle="bold" android:gravity="center" />
+                </LinearLayout>
+                <LinearLayout android:id="@+id/cardAttendance" android:layout_width="0dp" android:layout_height="@dimen/service_card_height" android:layout_columnWeight="1" android:layout_margin="4dp" android:orientation="vertical" android:gravity="center" android:padding="10dp" android:background="@drawable/bg_card_theme" android:clickable="true" android:focusable="true" android:foreground="?attr/selectableItemBackground">
+                    <ImageView android:layout_width="36dp" android:layout_height="36dp" android:src="@android:drawable/ic_menu_edit" app:tint="@color/navy_600" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:text="إنشاء إعلان حضور" android:textColor="@color/text_blue" android:textSize="13sp" android:textStyle="bold" android:gravity="center" />
+                </LinearLayout>
             </GridLayout>
 
             <LinearLayout
