@@ -59,8 +59,7 @@ class SearchActivity : AppCompatActivity() {
         when (mode) {
             "case" -> {
                 v(binding.etCaseNumber, true); v(binding.etPlaintiff, true); v(binding.etDefendant, true)
-                v(binding.spCaseType, true); v(binding.spJudge, true); v(binding.etDate, false); v(binding.etQuery, true)
-                binding.etQuery.hint = "بحث عام (رقم/اسم)"
+                v(binding.spCaseType, true); v(binding.spJudge, true); v(binding.etDate, false); v(binding.etQuery, false)
                 binding.btnSearch.text = "بحث"
                 loadDropdowns(loadCaseTypes = true, loadJudges = true)
             }
@@ -80,9 +79,10 @@ class SearchActivity : AppCompatActivity() {
             "attendance" -> {
                 v(binding.etCaseNumber, true); v(binding.etPlaintiff, true); v(binding.etDefendant, true)
                 v(binding.spCaseType, true); v(binding.spJudge, true); v(binding.etDate, true); v(binding.etQuery, false)
-                binding.etDate.hint = "تاريخ الجلسة (يوم/شهر/سنة)"
+                binding.etDate.hint = "تاريخ الجلسة (مثال 18/11/2026)"
                 binding.btnSearch.text = "تنزيل الاعلان pdf"
                 loadDropdowns(loadCaseTypes = true, loadJudges = true)
+                applyAttendancePrefillIfAny()
             }
             else -> {}
         }
@@ -95,6 +95,9 @@ class SearchActivity : AppCompatActivity() {
                 if (loadCaseTypes) {
                     val types = listOf("نوع القضية (الكل)") + CaseRecordsRepository.orderedCaseTypes(records)
                     binding.spCaseType.adapter = makeSpinnerAdapter(types)
+                    if (mode == "attendance") {
+                        selectSpinnerValue(binding.spCaseType, intent.getStringExtra("prefill_case_type"))
+                    }
                 }
                 if (loadJudges) {
                     val judges = listOf("اسم القاضي (الكل)") + records
@@ -103,6 +106,10 @@ class SearchActivity : AppCompatActivity() {
                         .distinct()
                         .sorted()
                     binding.spJudge.adapter = makeSpinnerAdapter(judges)
+                    if (mode == "attendance") {
+                        val pj = intent.getStringExtra("prefill_judge")
+                        selectSpinnerValue(binding.spJudge, pj, pj?.let { CaseRecordsRepository.displayJudge(it) })
+                    }
                 }
             } catch (e: Exception) {
                 if (loadCaseTypes) binding.spCaseType.adapter = makeSpinnerAdapter(listOf("نوع القضية (الكل)"))
@@ -157,6 +164,42 @@ class SearchActivity : AppCompatActivity() {
         if (it == "الكل" || it.contains("(الكل)")) "" else it
     } ?: ""
 
+    private fun cleanDateInput(raw: String): String {
+        return raw.trim()
+            .replace('\u200E', ' ')
+            .replace('\u200F', ' ')
+            .replace('\u202A', ' ')
+            .replace('\u202B', ' ')
+            .replace('\u202C', ' ')
+            .replace('\u202D', ' ')
+            .replace('\u202E', ' ')
+            .replace(Regex("\\s+"), "")
+    }
+
+    private fun applyAttendancePrefillIfAny() {
+        val caseNo = intent.getStringExtra("prefill_case_number") ?: return
+        binding.etCaseNumber.setText(caseNo)
+        binding.etPlaintiff.setText(intent.getStringExtra("prefill_plaintiff") ?: "")
+        binding.etDefendant.setText(intent.getStringExtra("prefill_defendant") ?: "")
+        val date = intent.getStringExtra("prefill_date") ?: ""
+        if (date.isNotBlank()) binding.etDate.setText(CaseRecordsRepository.formatDisplayDate(date))
+        // spinner selection is applied after dropdowns load (see loadDropdowns)
+    }
+
+    private fun selectSpinnerValue(sp: android.widget.Spinner, wantedRaw: String?, displayWanted: String? = null) {
+        val wanted = wantedRaw?.trim().orEmpty()
+        val wantedDisp = displayWanted?.trim().orEmpty()
+        if (wanted.isBlank() && wantedDisp.isBlank()) return
+        val adapter = sp.adapter ?: return
+        for (i in 0 until adapter.count) {
+            val item = adapter.getItem(i)?.toString()?.trim().orEmpty()
+            if (item == wanted || item == wantedDisp || (wanted.isNotBlank() && item.contains(wanted)) || (wantedDisp.isNotBlank() && item.contains(wantedDisp))) {
+                sp.setSelection(i)
+                return
+            }
+        }
+    }
+
     private suspend fun searchCase() {
         val caseNumberInput = binding.etCaseNumber.text.toString().trim()
         if (caseNumberInput.contains('/') &&
@@ -173,7 +216,7 @@ class SearchActivity : AppCompatActivity() {
             defendant = binding.etDefendant.text.toString(),
             caseType = selected(binding.spCaseType),
             judge = selected(binding.spJudge),
-            query = binding.etQuery.text.toString()
+            query = "" // حقل البحث العام أزيل من صفحة الاستعلام عن قضية
         )
         if (results.isEmpty()) { addResultText("لا توجد نتائج مطابقة."); return }
         addResultText("تم العثور على ${results.size} نتيجة:")
@@ -181,9 +224,13 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private suspend fun searchSessions() {
-        val date = binding.etDate.text.toString().trim()
+        val date = cleanDateInput(binding.etDate.text.toString())
         val judge = selected(binding.spJudge)
         if (date.isBlank()) { addResultText("يرجى اختيار تاريخ الجلسة."); return }
+        if (CaseRecordsRepository.normalizeDate(date) == null) {
+            addResultText("صيغة التاريخ غير صحيحة. استخدم يوم/شهر/سنة مثل 18/11/2026.")
+            return
+        }
         val records = CaseRecordsRepository.loadRecords()
         val results = CaseRecordsRepository.searchSessions(records, date, judge)
         if (results.isEmpty()) { addResultText("لا توجد جلسات مسجلة بهذا التاريخ للقاضي المحدد."); return }
@@ -237,7 +284,7 @@ class SearchActivity : AppCompatActivity() {
         val plaintiff = binding.etPlaintiff.text.toString().trim().ifBlank { "غير متوفر" }
         val defendant = binding.etDefendant.text.toString().trim().ifBlank { "غير متوفر" }
         val judge = selected(binding.spJudge).ifBlank { "غير متوفر" }
-        val date = binding.etDate.text.toString().trim()
+        val date = cleanDateInput(binding.etDate.text.toString())
         if (caseNo.isBlank() || date.isBlank()) { addResultText("يرجى إدخال رقم القضية وتاريخ الجلسة."); return }
         if (CaseRecordsRepository.normalizeDate(date) == null) {
             addResultText("التاريخ غير صحيح. اختر التاريخ بصيغة 18/11/2026.")
@@ -278,10 +325,21 @@ class SearchActivity : AppCompatActivity() {
             "الجلسة القادمة" to CaseRecordsRepository.formatDisplayDate(r.nextSession),
             "تاريخ الورود" to CaseRecordsRepository.formatDisplayDate(r.receivedDate)
         )
-        addGenericCard(r.caseNumber.ifBlank { "سجل" }, data)
+        addGenericCard(
+            r.caseNumber.ifBlank { "سجل" },
+            data,
+            attendanceData = linkedMapOf(
+                "prefill_case_number" to r.caseNumber,
+                "prefill_case_type" to r.caseType,
+                "prefill_plaintiff" to r.plaintiff,
+                "prefill_defendant" to r.defendant,
+                "prefill_judge" to r.judge,
+                "prefill_date" to r.nextSession
+            )
+        )
     }
 
-    private fun addGenericCard(title: String, data: Map<String, String>) {
+    private fun addGenericCard(title: String, data: Map<String, String>, attendanceData: Map<String, String>? = null) {
         val card = layoutInflater.inflate(R.layout.item_result_card, binding.resultsContainer, false)
         card.findViewById<TextView>(R.id.tvMain).text = title
         val sub = listOfNotNull(
@@ -307,6 +365,21 @@ class SearchActivity : AppCompatActivity() {
                 Toast.makeText(this, "تعذر إنشاء الملف: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
+
+        val btnAttendance = card.findViewById<View>(R.id.btnCreateAttendance)
+        if (mode == "case" && attendanceData != null) {
+            btnAttendance.visibility = View.VISIBLE
+            btnAttendance.setOnClickListener {
+                val intent = android.content.Intent(this, SearchActivity::class.java).apply {
+                    putExtra("MODE", "attendance")
+                    attendanceData.forEach { (k, v) -> putExtra(k, v) }
+                }
+                startActivity(intent)
+            }
+        } else {
+            btnAttendance.visibility = View.GONE
+        }
+
         binding.resultsContainer.addView(card)
     }
 

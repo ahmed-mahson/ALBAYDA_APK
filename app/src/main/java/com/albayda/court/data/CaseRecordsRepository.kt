@@ -348,10 +348,25 @@ object CaseRecordsRepository {
 
     /** Accepts yyyy-MM-dd, yyyy/MM/dd and dd/MM/yyyy — same as the bot. */
     fun normalizeDate(value: String): String? {
-        val text = normalizeDigits(value.trim())
+        // strip BiDi/control marks and normalize Arabic separators/digits to avoid RTL input issues
+        val cleaned = buildString(value.length) {
+            value.forEach { ch ->
+                when {
+                    ch == '\u200E' || ch == '\u200F' || ch == '\u202A' || ch == '\u202B' ||
+                            ch == '\u202C' || ch == '\u202D' || ch == '\u202E' || ch == '\u2066' ||
+                            ch == '\u2067' || ch == '\u2068' || ch == '\u2069' || ch == '\uFEFF' -> Unit
+                    ch == '\u2212' || ch == '\u2013' || ch == '\u2014' -> append('-')
+                    else -> append(ch)
+                }
+            }
+        }.trim()
+        val text = normalizeDigits(cleaned)
+            .replace("\\", "/")
+            .replace(".", "/")
+            .replace(Regex("\\s+"), "")
         if (text.isBlank()) return null
         val iso = Regex("^(\\d{4})[-/](\\d{1,2})[-/](\\d{1,2})$").matchEntire(text)
-        val dayFirst = Regex("^(\\d{1,2})/(\\d{1,2})/(\\d{4})$").matchEntire(text)
+        val dayFirst = Regex("^(\\d{1,2})[/-](\\d{1,2})[/-](\\d{4})$").matchEntire(text)
         val (y, m, d) = when {
             iso != null -> listOf(iso.groupValues[1], iso.groupValues[2], iso.groupValues[3])
             dayFirst != null -> listOf(dayFirst.groupValues[3], dayFirst.groupValues[2], dayFirst.groupValues[1])
@@ -420,33 +435,46 @@ object CaseRecordsRepository {
         judge: String = "",
         query: String = ""
     ): List<CaseRecord> {
-        val cn = normalizeDigits(caseNumber.trim()).lowercase(Locale.ROOT)
-        val pl = plaintiff.trim().lowercase(Locale.ROOT)
-        val de = defendant.trim().lowercase(Locale.ROOT)
+        val cnNorm = normalizeDigits(caseNumber.trim()).lowercase(Locale.ROOT)
+        val plNorm = plaintiff.trim().lowercase(Locale.ROOT)
+        val deNorm = defendant.trim().lowercase(Locale.ROOT)
         val ct = caseType.trim()
         val jg = judge.trim()
-        val rawQuery = query.trim()
-        val q = rawQuery.lowercase(Locale.ROOT)
-        val numberQueries = LinkedHashSet<String>()
-        if (cn.isNotBlank()) numberQueries.add(cn)
-        if (q.isNotBlank()) {
-            val normalized = normalizeDigits(q)
-            numberQueries.add(normalized)
-            // bot.py tries both 1446/6 and 6/1446 because the sheet may store either order.
-            if (normalized.count { it == '/' } == 1) {
-                val parts = normalized.split('/')
-                numberQueries.add("${parts[1].trim()}/${parts[0].trim()}")
+        val qRaw = query.trim()
+        val qNorm = normalizeDigits(qRaw).lowercase(Locale.ROOT)
+
+        fun numberVariants(s: String): List<String> {
+            val n = normalizeDigits(s.trim()).lowercase(Locale.ROOT)
+            if (n.isBlank()) return emptyList()
+            val out = mutableListOf(n)
+            // accept both 1446/6 and 6/1446 because the sheet may store either order
+            if (n.count { it == '/' } == 1) {
+                val parts = n.split('/')
+                val a = parts[0].trim()
+                val b = parts[1].trim()
+                if (a.isNotBlank() && b.isNotBlank()) out.add("$b/$a")
             }
+            return out.toList()
         }
+
+        val cnVariants = numberVariants(cnNorm)
+        // treat query as a number search when it contains digits; otherwise as a name search
+        val qIsNumberLike = qNorm.isNotBlank() && qNorm.any { it.isDigit() }
+        val qNumberVariants = if (qIsNumberLike) numberVariants(qNorm) else emptyList()
+        val qName = if (qNorm.isNotBlank() && !qIsNumberLike) qNorm else ""
+
         return records.filter { r ->
             val recordNumber = normalizeDigits(r.caseNumber).lowercase(Locale.ROOT)
-            val numberMatch = numberQueries.isEmpty() || numberQueries.any { recordNumber.contains(it) }
-            val nameMatch = q.isBlank() ||
-                    r.plaintiff.lowercase(Locale.ROOT).contains(q) ||
-                    r.defendant.lowercase(Locale.ROOT).contains(q)
-            numberMatch && nameMatch &&
-                    (pl.isBlank() || r.plaintiff.lowercase(Locale.ROOT).contains(pl)) &&
-                    (de.isBlank() || r.defendant.lowercase(Locale.ROOT).contains(de)) &&
+            val recPl = r.plaintiff.lowercase(Locale.ROOT)
+            val recDe = r.defendant.lowercase(Locale.ROOT)
+
+            val cnOk = cnVariants.isEmpty() || cnVariants.any { recordNumber.contains(it) }
+            val qNumberOk = qNumberVariants.isEmpty() || qNumberVariants.any { recordNumber.contains(it) }
+            val qNameOk = qName.isBlank() || recPl.contains(qName) || recDe.contains(qName)
+            val plOk = plNorm.isBlank() || recPl.contains(plNorm)
+            val deOk = deNorm.isBlank() || recDe.contains(deNorm)
+
+            cnOk && qNumberOk && qNameOk && plOk && deOk &&
                     caseTypeMatches(r.caseType, ct) &&
                     judgeMatches(r.judge, jg)
         }.take(100)

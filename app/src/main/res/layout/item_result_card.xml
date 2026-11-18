@@ -29,14 +29,33 @@
             android:textSize="14sp"
             android:layout_marginTop="4dp" />
 
-        <Button
-            android:id="@+id/btnDownloadPdf"
+        <LinearLayout
+            android:id="@+id/llActions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="تحميل PDF"
-            style="@style/Widget.Material3.Button"
-            android:backgroundTint="@color/navy_700"
-            android:textColor="@color/white" />
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnDownloadPdf"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="تحميل PDF"
+                style="@style/Widget.Material3.Button"
+                android:backgroundTint="@color/navy_700"
+                android:textColor="@color/white" />
+
+            <Button
+                android:id="@+id/btnCreateAttendance"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:text="إنشاء إعلان حضور"
+                android:visibility="gone"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:textColor="@color/navy_700" />
+        </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>
