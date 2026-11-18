@@ -70,7 +70,7 @@ object CaseRecordsRepository {
         throw lastError ?: IllegalStateException("تعذر جلب بيانات القضايا من Google Drive")
     }
 
-﻿    private fun download(url: String): String {
+    private fun download(url: String): String {
         var currentUrl = url
         var attempts = 0
         while (attempts < 5) {
@@ -361,7 +361,7 @@ object CaseRecordsRepository {
         return "${parts[2]}/${parts[1]}/${parts[0]}"
     }
 
-﻿    fun displayCaseType(raw: String): String = raw.trim()
+    fun displayCaseType(raw: String): String = raw.trim()
 
     fun orderedCaseTypes(records: List<CaseRecord>): List<String> =
         records.map { it.caseType.trim() }.filter { it.isNotBlank() }.distinct().sorted()
