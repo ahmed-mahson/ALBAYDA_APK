@@ -48,15 +48,13 @@ class AppDatabase(context: Context) : SQLiteOpenHelper(context, DB_NAME, null, D
                     "id TEXT PRIMARY KEY, title TEXT, body TEXT, timestamp TEXT, is_read INTEGER DEFAULT 0)"
         )
         db.execSQL("CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT)")
+        db.execSQL("CREATE TABLE applied_events (id TEXT PRIMARY KEY)")
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        db.execSQL("DROP TABLE IF EXISTS posts")
-        db.execSQL("DROP TABLE IF EXISTS news")
-        db.execSQL("DROP TABLE IF EXISTS events")
-        db.execSQL("DROP TABLE IF EXISTS notifications")
-        db.execSQL("DROP TABLE IF EXISTS meta")
-        onCreate(db)
+        if (oldVersion < 2) {
+            db.execSQL("CREATE TABLE IF NOT EXISTS applied_events (id TEXT PRIMARY KEY)")
+        }
     }
 
     fun insertPost(post: CourtPost) {
@@ -188,8 +186,21 @@ class AppDatabase(context: Context) : SQLiteOpenHelper(context, DB_NAME, null, D
         writableDatabase.insertWithOnConflict("meta", null, values, SQLiteDatabase.CONFLICT_REPLACE)
     }
 
+    fun isEventApplied(id: String): Boolean {
+        if (id.isBlank()) return false
+        return readableDatabase.rawQuery(
+            "SELECT 1 FROM applied_events WHERE id = ?", arrayOf(id)
+        ).use { it.moveToFirst() }
+    }
+
+    fun markEventApplied(id: String) {
+        if (id.isBlank()) return
+        val values = ContentValues().apply { put("id", id) }
+        writableDatabase.insertWithOnConflict("applied_events", null, values, SQLiteDatabase.CONFLICT_IGNORE)
+    }
+
     companion object {
         private const val DB_NAME = "albayda_sync.db"
-        private const val DB_VERSION = 1
+        private const val DB_VERSION = 2
     }
 }

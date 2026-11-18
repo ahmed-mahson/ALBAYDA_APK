@@ -11,8 +11,8 @@ android {
         applicationId = "com.albayda.court"
         minSdk = 23
         targetSdk = 34
-        versionCode = 401
-        versionName = "4.1-UiFixes"
+        versionCode = 402
+        versionName = "4.2-AutoSync"
     }
 
     buildFeatures {
@@ -49,4 +49,5 @@ dependencies {
     implementation("org.jsoup:jsoup:1.17.2")
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5")
 }

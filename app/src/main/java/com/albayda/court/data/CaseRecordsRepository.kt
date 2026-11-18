@@ -202,7 +202,7 @@ object CaseRecordsRepository {
     }
 
     private fun normalizeUnicode(text: String): String {
-        val nfc = try { Normalizer.normalize(text, Normalizer.Form.NFC) } catch (_: Exception) { text }
+        val nfc = try { Normalizer.normalize(text, Normalizer.Form.NFKC) } catch (_: Exception) { text }
         return buildString(nfc.length) {
             nfc.forEach { ch ->
                 when {
@@ -239,7 +239,8 @@ object CaseRecordsRepository {
             if (line.trim().isEmpty()) continue
             val row = parseCsvLine(line)
             if (row.size < 27) continue
-            if (row.getOrNull(14)?.trim() == "رقم القضية") continue
+            val caseHeader = row.getOrNull(14).orEmpty()
+            if (caseHeader.contains("رقم") && caseHeader.contains("القضية")) continue
             val rec = CaseRecord(
                 previousSession = clean(row.getOrNull(16)),
                 nextSession = clean(row.getOrNull(17)),

@@ -40,7 +40,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="إعدادات المزامنة الفورية"
+                    android:text="المزامنة التلقائية (لا يلزم إعداد)"
                     android:textStyle="bold"
                     android:textColor="@color/text_blue"
                     android:textSize="15sp" />
@@ -49,7 +49,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="44dp"
                     android:layout_marginTop="8dp"
-                    android:hint="رابط خادم المزامنة (مثال https://sync.example.com)"
+                    android:hint="خادم مخصص اختياري (اتركه فارغاً للتلقائي)"
                     android:background="@drawable/bg_input"
                     android:paddingStart="10dp"
                     android:paddingEnd="10dp"
@@ -59,7 +59,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
                     android:layout_marginTop="8dp"
-                    android:text="حفظ وتفعيل المزامنة"
+                    android:text="إضافة خادم مخصص (اختياري)"
                     android:backgroundTint="@color/navy_600"
                     android:textColor="@color/white" />
                 <TextView

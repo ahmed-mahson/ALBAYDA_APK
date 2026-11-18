@@ -137,10 +137,8 @@ class PostsActivity : AppCompatActivity() {
     }
 
     private fun updateStatus() {
-        binding.tvSyncStatus.text = if (SyncManager.configured())
-            "المزامنة مفعّلة — المنشورات تُحدَّث تلقائياً لدى جميع المستخدمين"
-        else
-            "المزامنة غير مفعّلة — افتح لوحة الإدارة واضبط رابط خادم المزامنة"
+        binding.tvSyncStatus.text =
+            "المزامنة التلقائية ${SyncManager.syncState()} — المنشورات تظهر فوراً لدى جميع المستخدمين"
     }
 
     private fun renderPosts() {

@@ -20,9 +20,13 @@ import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.Executors
 
 /**
- * Local-first database with a pluggable REST sync endpoint.
- * Set the endpoint from the admin screen (or with SyncManager.configure) to enable
- * real-time delivery of posts, news, registrations and notifications to all devices.
+ * One shared database for every device.
+ *
+ * Events are published as retained MQTT messages, which remain on the broker
+ * until replaced and are replayed to any device that connects later. Local
+ * SQLite is the working copy on each device; the retained event topics are the
+ * single shared source of truth. An optional REST endpoint is still supported
+ * for organisations that want to host their own server.
  */
 object SyncManager {
     private const val PREF_NAME = "app_prefs"
@@ -47,17 +51,33 @@ object SyncManager {
         db = AppDatabase(appContext)
         val dir = File(appContext.filesDir, "posts")
         if (!dir.exists()) dir.mkdirs()
+
+        MqttTransport.start(
+            context = appContext,
+            onEvent = { json ->
+                runCatching {
+                    applyEvent(JSONObject(json))
+                    notifyListeners()
+                }
+            },
+            onReady = { publishPending() },
+            onState = { /* state is exposed through syncState() */ }
+        )
         startPolling()
     }
 
+    /** Always enabled — no setup or admin action is required. */
+    fun configured(): Boolean = true
+
+    fun endpoint(): String = "مزامنة تلقائية مشتركة (MQTT)"
+
+    fun syncState(): String = if (::appContext.isInitialized) MqttTransport.lastState else "غير مفعّلة"
+
+    /** Optional self-hosted REST endpoint; the app works without it. */
     fun configure(baseUrl: String, token: String = "") {
         prefs().edit().putString(KEY_URL, baseUrl.trim().trimEnd('/')).putString(KEY_TOKEN, token.trim()).apply()
         refresh()
     }
-
-    fun configured(): Boolean = endpoint().isNotBlank()
-
-    fun endpoint(): String = prefs().getString(KEY_URL, "")?.trim()?.trimEnd('/') ?: ""
 
     private fun token(): String = prefs().getString(KEY_TOKEN, "")?.trim() ?: ""
 
@@ -97,6 +117,7 @@ object SyncManager {
 
     fun deletePost(id: String) {
         db.deletePost(id)
+        db.setMeta("deleted_post_$id", now())
         queue("post_delete", JSONObject().put("id", id), now())
         refresh()
         notifyListeners()
@@ -163,9 +184,16 @@ object SyncManager {
     }
 
     private fun queue(type: String, payload: JSONObject, timestamp: String) {
-        db.queueEvent(
-            SyncEvent(UUID.randomUUID().toString(), type, payload.toString(), timestamp)
-        )
+        val event = SyncEvent(UUID.randomUUID().toString(), type, payload.toString(), timestamp)
+        db.queueEvent(event)
+        MqttTransport.publish(event.id, event.type, event.payload, event.createdAt)
+    }
+
+    /** Replays anything that was created while the broker was unavailable. */
+    private fun publishPending() {
+        db.pendingEvents().forEach { event ->
+            MqttTransport.publish(event.id, event.type, event.payload, event.createdAt)
+        }
     }
 
     private fun saveImage(id: String, bytes: ByteArray?): String {
@@ -185,13 +213,14 @@ object SyncManager {
         executor.execute {
             while (true) {
                 runCatching { syncNow() }
-                Thread.sleep(10_000)
+                Thread.sleep(15_000)
             }
         }
     }
 
+    /** Optional REST backend; skipped when not configured because MQTT is automatic. */
     private fun syncNow() {
-        val base = endpoint()
+        val base = prefs().getString(KEY_URL, "")?.trim()?.trimEnd('/') ?: ""
         if (base.isBlank()) return
 
         val pending = db.pendingEvents()
@@ -217,22 +246,49 @@ object SyncManager {
         var maxTs = since
         for (i in 0 until incoming.length()) {
             val event = incoming.optJSONObject(i) ?: continue
-            val type = event.optString("type")
-            val payload = event.optJSONObject("payload") ?: JSONObject()
+            applyEvent(event)
             val ts = event.optString("created_at", event.optString("timestamp", ""))
-            when (type) {
-                "post" -> applyPost(payload)
-                "post_delete" -> {
-                    val id = payload.optString("id")
-                    if (id.isNotBlank()) db.deletePost(id)
+            if (ts > maxTs) maxTs = ts
+        }
+        if (incoming.length() > 0) {
+            db.setMeta("last_pull", maxTs)
+            notifyListeners()
+        }
+    }
+
+    /** Applies one event exactly once, regardless of how many times it is delivered. */
+    private fun applyEvent(event: JSONObject) {
+        val id = event.optString("id")
+        if (id.isBlank() || db.isEventApplied(id)) return
+        val type = event.optString("type")
+        val payload = event.optJSONObject("payload") ?: JSONObject()
+        val ts = event.optString("created_at", event.optString("timestamp", ""))
+
+        when (type) {
+            "post" -> {
+                val postId = payload.optString("id")
+                if (postId.isNotBlank() && db.getMeta("deleted_post_$postId").isBlank()) {
+                    applyPost(payload)
                 }
-                "news" -> {
-                    val text = payload.optString("text")
-                    if (text.isNotBlank()) db.setNews(text, ts.ifBlank { now() })
+            }
+            "post_delete" -> {
+                val postId = payload.optString("id")
+                if (postId.isNotBlank()) {
+                    db.setMeta("deleted_post_$postId", ts.ifBlank { now() })
+                    db.deletePost(postId)
                 }
-                "user_register" -> {
-                    val username = payload.optString("username")
-                    val mobile = payload.optString("mobile")
+            }
+            "news" -> {
+                val text = payload.optString("text")
+                val newsTs = payload.optString("timestamp", ts)
+                if (text.isNotBlank() && newsTs >= db.getNews().second) {
+                    db.setNews(text, newsTs.ifBlank { now() })
+                }
+            }
+            "user_register" -> {
+                val mobile = payload.optString("mobile")
+                val username = payload.optString("username")
+                if (mobile.isNotBlank() && isNewerUserEvent(mobile, ts)) {
                     AuthManager.upsertRemoteUser(
                         username,
                         mobile,
@@ -248,8 +304,10 @@ object SyncManager {
                         )
                     )
                 }
-                "user_approved" -> {
-                    val mobile = payload.optString("mobile")
+            }
+            "user_approved" -> {
+                val mobile = payload.optString("mobile")
+                if (mobile.isNotBlank() && isNewerUserEvent(mobile, ts)) {
                     val approved = payload.optBoolean("approved")
                     AuthManager.setApproved(mobile, approved)
                     db.addNotification(
@@ -261,23 +319,30 @@ object SyncManager {
                         )
                     )
                 }
-                "user_updated" -> {
-                    val username = payload.optString("username")
-                    val mobile = payload.optString("mobile")
+            }
+            "user_updated" -> {
+                val mobile = payload.optString("mobile")
+                if (mobile.isNotBlank() && isNewerUserEvent(mobile, ts)) {
                     AuthManager.upsertRemoteUser(
-                        username,
+                        payload.optString("username"),
                         mobile,
                         payload.optString("password_hash"),
                         payload.optString("created_at", ts)
                     )
                 }
             }
-            if (ts > maxTs) maxTs = ts
         }
-        if (incoming.length() > 0) {
-            db.setMeta("last_pull", maxTs)
-            notifyListeners()
+        db.markEventApplied(id)
+    }
+
+    private fun isNewerUserEvent(mobile: String, ts: String): Boolean {
+        val key = "user_event_ts_$mobile"
+        val previous = db.getMeta(key)
+        if (ts.isBlank() || ts >= previous) {
+            db.setMeta(key, ts)
+            return true
         }
+        return false
     }
 
     private fun applyPost(payload: JSONObject) {

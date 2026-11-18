@@ -34,13 +34,15 @@ class AdminActivity : AppCompatActivity() {
 
         binding.btnSaveSync.setOnClickListener {
             val url = binding.etSyncUrl.text.toString().trim()
-            if (url.isBlank()) {
-                Toast.makeText(this, "يرجى إدخال رابط خادم المزامنة", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
+            if (url.isBlank() || url.startsWith("مزامنة")) {
+                SyncManager.configure("")
+                updateSyncStatus()
+                Toast.makeText(this, "تم العودة إلى المزامنة التلقائية", Toast.LENGTH_SHORT).show()
+            } else {
+                SyncManager.configure(url)
+                updateSyncStatus()
+                Toast.makeText(this, "تمت إضافة خادم مخصص بجانب المزامنة التلقائية", Toast.LENGTH_SHORT).show()
             }
-            SyncManager.configure(url)
-            updateSyncStatus()
-            Toast.makeText(this, "تم تفعيل المزامنة الفورية", Toast.LENGTH_SHORT).show()
         }
 
         binding.btnOpenPosts.setOnClickListener {
@@ -88,10 +90,8 @@ class AdminActivity : AppCompatActivity() {
     }
 
     private fun updateSyncStatus() {
-        binding.tvSyncStatus.text = if (SyncManager.configured())
-            "المزامنة مفعّلة ✓ — البيانات تُرسل وتُستقبل تلقائياً"
-        else
-            "غير مفعّلة — ضع رابط الخادم ثم اضغط حفظ (راجع SERVER_SETUP.md)"
+        binding.tvSyncStatus.text =
+            "المزامنة تلقائية ✓ — ${SyncManager.syncState()} — جميع الأجهزة تعمل من قاعدة بيانات مشتركة واحدة"
     }
 
     private fun refresh() {
