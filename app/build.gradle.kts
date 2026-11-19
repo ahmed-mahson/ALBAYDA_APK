@@ -52,7 +52,8 @@ dependencies {
     implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5")
 
     // Firebase (real-time sync, offline, auth, push notifications)
-    implementation(platform("com.google.firebase:firebase-bom:34.18.0"))
+    // BoM 33.1.2 is compatible with this project's Kotlin/AGP; 34.x requires newer Kotlin metadata.
+    implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-messaging")
