@@ -59,18 +59,11 @@ dependencies {
     implementation("com.google.firebase:firebase-messaging")
 }
 
-// Apply google-services only when a valid config for this app is present.
-// This keeps CI/local builds working if google-services.json is a placeholder
-// or not yet correctly configured for com.albayda.court.
+// Enable Firebase/Google services configuration at build time when app config is present.
 val googleServicesFile = file("google-services.json")
 if (googleServicesFile.exists()) {
     val gs = googleServicesFile.readText()
-    val isValidForApp = gs.contains("\"package_name\": \"com.albayda.court\"") &&
-        !gs.contains("YOUR_PROJECT_ID") &&
-        !gs.contains("REPLACE_WITH_YOUR_API_KEY") &&
-        !gs.contains("WEB_API_KEY") &&
-        !gs.contains("com.example.app")
-    if (isValidForApp) {
+    if (gs.contains("\"package_name\": \"com.albayda.court\"")) {
         apply(plugin = "com.google.gms.google-services")
     }
 }

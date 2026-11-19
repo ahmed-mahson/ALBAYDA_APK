@@ -7,18 +7,22 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:902451454294:android:اكتب_هنا_APP_ID_الخاص_بتطبيقك",
+        "mobilesdk_app_id": "1:902451454294:android:0000000000000000000000",
         "android_client_info": {
-          "package_name": "اكتب_هنا_اسم_حزمة_تطبيقك_مثل_com.example.app"
+          "package_name": "com.albayda.court"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "اكتب_هنا_WEB_API_KEY_الخاص_بمشروعك"
+          "current_key": "AIzaSy_REPLACE_WITH_REAL_WEB_API_KEY"
         }
       ],
-      "services": {}
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
     }
   ],
   "configuration_version": "1"

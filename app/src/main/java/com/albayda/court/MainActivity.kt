@@ -17,6 +17,7 @@ import androidx.core.content.ContextCompat
 import com.albayda.court.data.AuthManager
 import com.albayda.court.data.SyncManager
 import com.albayda.court.databinding.ActivityMainBinding
+import com.google.firebase.FirebaseApp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 
@@ -32,6 +33,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        try { FirebaseApp.initializeApp(this) } catch (_: Exception) {}
         AuthManager.init(this)
         SyncManager.init(this)
 
