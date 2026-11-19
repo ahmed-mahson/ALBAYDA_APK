@@ -200,7 +200,7 @@ object AuthManager {
     }
 
     fun saveSession(user: User) {
-        prefs.edit().putString("session_user", gson.toJson(user)).putBoolean("biometric_enabled", true).apply()
+        prefs.edit().putString("session_user", gson.toJson(user)).apply()
     }
 
     fun getSession(): User? {
@@ -211,8 +211,6 @@ object AuthManager {
     fun clearSession() {
         prefs.edit().remove("session_user").apply()
     }
-
-    fun isBiometricEnabled(): Boolean = prefs.getBoolean("biometric_enabled", false)
 
     fun getLogs(): List<UserLog> {
         val json = prefs.getString("user_logs", "[]") ?: "[]"

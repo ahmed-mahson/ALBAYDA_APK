@@ -3,7 +3,6 @@
     <!-- لا نضع app_name هنا لأنه محدد في Manifest -->
     <string name="login">تسجيل الدخول</string>
     <string name="register">إنشاء حساب جديد</string>
-    <string name="biometric_login">الدخول بالبصمة</string>
 
     <!-- Provided splash theme strings -->
     <string name="court_title">محكمة البيضاء الابتدائية</string>

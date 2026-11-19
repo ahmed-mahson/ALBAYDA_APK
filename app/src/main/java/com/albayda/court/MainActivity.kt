@@ -1,7 +1,10 @@
 package com.albayda.court
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.EditText
@@ -9,12 +12,18 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.albayda.court.data.AuthManager
 import com.albayda.court.data.SyncManager
 import com.albayda.court.databinding.ActivityMainBinding
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
+    private var tickerRegistration: ListenerRegistration? = null
+    private var firestoreTickerText: String? = null
     private val syncListener: () -> Unit = {
         runOnUiThread { loadNews() }
     }
@@ -32,6 +41,8 @@ class MainActivity : AppCompatActivity() {
         updateWelcome(session?.username)
 
         binding.newsTicker.speedPxPerSec = 160f
+        requestNotificationPermissionIfNeeded()
+        startFirestoreTicker()
         loadNews()
         SyncManager.refresh()
 
@@ -48,10 +59,8 @@ class MainActivity : AppCompatActivity() {
             openExternal("tg://resolve?phone=967771421919", "https://t.me/967771421919")
         }
 
-        binding.ivBell.setOnClickListener { showNotifications(); selectTab(binding.navNotifications) }
         binding.navAdmin.setOnClickListener { startActivity(Intent(this, AdminActivity::class.java)) }
         binding.navAccount.setOnClickListener { showAccount(); selectTab(binding.navAccount) }
-        binding.navNotifications.setOnClickListener { showNotifications(); selectTab(binding.navNotifications) }
         binding.navLogout.setOnClickListener { logout() }
     }
 
@@ -62,11 +71,34 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadNews() {
+        val firestoreNews = firestoreTickerText
+        if (!firestoreNews.isNullOrBlank()) {
+            binding.newsTicker.setNewsText(firestoreNews)
+            return
+        }
         val synced = SyncManager.getNews().first
         val local = getSharedPreferences("app_prefs", MODE_PRIVATE)
             .getString("news_item", "") ?: ""
         val news = synced.ifBlank { local }.ifBlank { "مرحباً بكم في محكمة البيضاء الابتدائية" }
         binding.newsTicker.setNewsText(news)
+    }
+
+    private fun startFirestoreTicker() {
+        try {
+            // Real-time ticker sync from Firestore (settings/ticker.text).
+            // Falls back to existing local/SyncManager news if Firebase is unavailable.
+            val db = FirebaseFirestore.getInstance()
+            tickerRegistration = db.collection("settings").document("ticker")
+                .addSnapshotListener { snapshot, _ ->
+                    val text = snapshot?.getString("text")?.trim().orEmpty()
+                    if (text.isNotBlank()) {
+                        firestoreTickerText = text
+                        runOnUiThread { binding.newsTicker.setNewsText(text) }
+                    }
+                }
+        } catch (_: Exception) {
+            // google-services.json/config may be missing or Firebase not initialized yet.
+        }
     }
 
     private fun openExternal(primary: String, fallback: String) {
@@ -88,36 +120,21 @@ class MainActivity : AppCompatActivity() {
         super.onStop()
     }
 
+    override fun onDestroy() {
+        tickerRegistration?.remove()
+        tickerRegistration = null
+        super.onDestroy()
+    }
+
     private fun updateWelcome(username: String?) {
         binding.tvWelcome.text = "مرحباً بك  ${username?.ifBlank { "مستخدم" } ?: "مستخدم"}"
     }
 
     private fun selectTab(active: View) {
-        val tabs = listOf(binding.navAdmin, binding.navAccount, binding.navNotifications, binding.navLogout)
+        val tabs = listOf(binding.navAdmin, binding.navAccount, binding.navLogout)
         tabs.forEach { tab ->
             tab.alpha = if (tab == active) 1.0f else 0.7f
         }
-    }
-
-    private fun showNotifications() {
-        val notifications = SyncManager.notifications()
-        val news = SyncManager.getNews().first
-        val body = buildString {
-            if (news.isNotBlank()) append("آخر الأخبار: $news\n\n")
-            if (notifications.isEmpty()) {
-                append("لا توجد إشعارات حالياً.")
-            } else {
-                notifications.take(20).forEach {
-                    append("• ${it.title}: ${it.body}\n${it.timestamp.replace('T', ' ')}\n\n")
-                }
-            }
-        }
-        AlertDialog.Builder(this)
-            .setTitle("الإشعارات والتنبيهات")
-            .setMessage(body)
-            .setPositiveButton("إغلاق", null)
-            .show()
-        SyncManager.markNotificationsRead()
     }
 
     private fun showAccount() {
@@ -206,6 +223,14 @@ class MainActivity : AppCompatActivity() {
 
     private fun openSearch(mode: String) {
         startActivity(Intent(this, SearchActivity::class.java).putExtra("MODE", mode))
+    }
+
+    private fun requestNotificationPermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 101)
+        }
     }
 }
 

@@ -4,9 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.biometric.BiometricManager
-import androidx.biometric.BiometricPrompt
-import androidx.core.content.ContextCompat
 import com.albayda.court.data.AuthManager
 import com.albayda.court.databinding.ActivityLoginBinding
 
@@ -25,9 +22,6 @@ class LoginActivity : AppCompatActivity() {
             finish()
             return
         }
-
-        binding.btnBiometric.isEnabled = AuthManager.isBiometricEnabled() || session?.isApproved == true
-        binding.cbRemember.isChecked = true
 
         var passwordVisible = false
         binding.ivEye.setOnClickListener {
@@ -60,41 +54,6 @@ class LoginActivity : AppCompatActivity() {
 
         binding.tvRegister.setOnClickListener {
             startActivity(Intent(this, RegisterActivity::class.java))
-        }
-
-        binding.btnBiometric.setOnClickListener {
-            if (BiometricManager.from(this).canAuthenticate(
-                    BiometricManager.Authenticators.BIOMETRIC_WEAK or
-                        BiometricManager.Authenticators.DEVICE_CREDENTIAL
-                ) == BiometricManager.BIOMETRIC_SUCCESS
-            ) {
-                val prompt = BiometricPrompt.PromptInfo.Builder()
-                    .setTitle("دخول بالبصمة")
-                    .setSubtitle("محكمة البيضاء الابتدائية")
-                    .setAllowedAuthenticators(
-                        BiometricManager.Authenticators.BIOMETRIC_WEAK or
-                            BiometricManager.Authenticators.DEVICE_CREDENTIAL
-                    )
-                    .build()
-                BiometricPrompt(this, ContextCompat.getMainExecutor(this),
-                    object : BiometricPrompt.AuthenticationCallback() {
-                        override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                            val s = AuthManager.getSession()
-                            if (s?.isApproved == true) {
-                                startActivity(Intent(this@LoginActivity, MainActivity::class.java))
-                                finish()
-                            } else {
-                                Toast.makeText(
-                                    this@LoginActivity,
-                                    "سجل الدخول بكلمة المرور واحفظ البيانات أولاً لتفعيل البصمة",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        }
-                    }).authenticate(prompt)
-            } else {
-                Toast.makeText(this, "البصمة غير مفعلة في هذا الجهاز", Toast.LENGTH_SHORT).show()
-            }
         }
     }
 }
