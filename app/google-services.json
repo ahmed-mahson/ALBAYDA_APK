@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "902451454294",
-    "project_id": "albayda-apk",
-    "storage_bucket": "albayda-apk.appspot.com"
+    "project_number": "44637520445",
+    "project_id": "albayda-apk-3d0c3",
+    "storage_bucket": "albayda-apk-3d0c3.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:902451454294:android:0000000000000000000000",
+        "mobilesdk_app_id": "1:44637520445:android:0000000000000000000000",
         "android_client_info": {
           "package_name": "com.albayda.court"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSy_REPLACE_WITH_REAL_WEB_API_KEY"
+          "current_key": "AIzaSyDJN72QJieaXiHILU_Xc9aU1c_PscacbKU"
         }
       ],
       "services": {
