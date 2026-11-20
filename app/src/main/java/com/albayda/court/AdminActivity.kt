@@ -76,6 +76,7 @@ class AdminActivity : AppCompatActivity() {
                 .setNegativeButton("رفض") { _, _ ->
                     AuthManager.rejectUser(u.mobile)
                     SyncManager.notifyUserApproved(u.mobile, false)
+                    SyncManager.notifyUserDeleted(u.mobile)
                     Toast.makeText(this, "تم رفض المستخدم وحذف الطلب", Toast.LENGTH_SHORT).show()
                     refresh()
                 }

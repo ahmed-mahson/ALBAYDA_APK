@@ -136,23 +136,71 @@ object FirebaseSync {
                 }
             }
 
-        // daily_sessions -> offline cache (prepared for real-time/offline use)
-        registrations += db.collection("daily_sessions")
+        // users -> real-time sync of registered users/approvals/updates
+        registrations += db.collection("users")
             .addSnapshotListener(MetadataChanges.INCLUDE) { snapshots, _ ->
                 if (snapshots == null) return@addSnapshotListener
-                cacheDocuments("daily_sessions", snapshots.documents.map { doc ->
+                cacheDocuments("users", snapshots.documents.map { doc ->
                     JSONObject(doc.data ?: emptyMap<String, Any?>()).apply { put("_id", doc.id) }.toString()
                 })
+                runCatching { SyncManager.init(appContext) }
+                runCatching { AuthManager.init(appContext) }
+                for (change in snapshots.documentChanges) {
+                    val doc = change.document
+                    val mobile = firstString(doc.data, "mobile").ifBlank { doc.id }
+                    if (mobile.isBlank()) continue
+                    val ts = firstString(doc.data, "updatedAt", "timestamp", "createdAt", "created_at")
+                        .ifBlank { SyncManager.now() }
+                    val metaKey = "fs_user_event_ts_$mobile"
+                    when (change.type) {
+                        DocumentChange.Type.REMOVED -> {
+                            if (!isNewerFsEvent(metaKey, ts)) continue
+                            runCatching {
+                                val user = AuthManager.findByMobile(mobile)
+                                if (user != null && !AuthManager.isPrimaryAdmin(user)) {
+                                    AuthManager.rejectUser(mobile)
+                                }
+                            }
+                        }
+                        else -> {
+                            if (!isNewerFsEvent(metaKey, ts)) continue
+                            val username = firstString(doc.data, "username")
+                            val passwordHash = firstString(doc.data, "passwordHash", "password_hash")
+                            val createdAt = firstString(doc.data, "createdAt", "created_at")
+                            val isApproved = doc.getBoolean("isApproved") ?: doc.getBoolean("approved") ?: false
+                            val isDeleted = doc.getBoolean("deleted") ?: doc.getBoolean("rejected") ?: false
+                            runCatching {
+                                val existing = AuthManager.findByMobile(mobile)
+                                if (isDeleted) {
+                                    if (existing != null && !AuthManager.isPrimaryAdmin(existing)) {
+                                        AuthManager.rejectUser(mobile)
+                                    }
+                                } else {
+                                    AuthManager.upsertRemoteUser(username, mobile, passwordHash, createdAt)
+                                    if (existing == null || !AuthManager.isPrimaryAdmin(existing)) {
+                                        AuthManager.setApproved(mobile, isApproved)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
+    }
 
-        // cases -> offline cache (prepared for real-time/offline use)
-        registrations += db.collection("cases")
-            .addSnapshotListener(MetadataChanges.INCLUDE) { snapshots, _ ->
-                if (snapshots == null) return@addSnapshotListener
-                cacheDocuments("cases", snapshots.documents.map { doc ->
-                    JSONObject(doc.data ?: emptyMap<String, Any?>()).apply { put("_id", doc.id) }.toString()
-                })
+    private fun isNewerFsEvent(metaKey: String, ts: String): Boolean {
+        return try {
+            SyncManager.init(appContext)
+            val prev = SyncManager.db.getMeta(metaKey)
+            if (ts.isBlank() || ts >= prev) {
+                SyncManager.db.setMeta(metaKey, ts)
+                true
+            } else {
+                false
             }
+        } catch (_: Exception) {
+            true
+        }
     }
 
     private fun firstString(data: Map<String, Any?>?, vararg keys: String): String {
@@ -236,6 +284,77 @@ object FirebaseSync {
         if (postId.isBlank()) return
         runCatching {
             FirebaseFirestore.getInstance().collection("announcements").document(postId).delete()
+        }
+    }
+
+    fun publishUserRegistered(username: String, mobile: String) {
+        if (mobile.isBlank()) return
+        runCatching {
+            AuthManager.init(appContext)
+            val user = AuthManager.findByMobile(mobile)
+            val data = hashMapOf<String, Any>(
+                "mobile" to mobile,
+                "username" to (user?.username ?: username),
+                "passwordHash" to (user?.passwordHash ?: ""),
+                "isApproved" to (user?.isApproved ?: false),
+                "createdAt" to (user?.createdAt ?: SyncManager.now()),
+                "updatedAt" to SyncManager.now(),
+                "deleted" to false
+            )
+            FirebaseFirestore.getInstance().collection("users").document(mobile)
+                .set(data, SetOptions.merge())
+        }
+    }
+
+    fun publishUserApproved(mobile: String, approved: Boolean) {
+        if (mobile.isBlank()) return
+        runCatching {
+            AuthManager.init(appContext)
+            val user = AuthManager.findByMobile(mobile)
+            val data = hashMapOf<String, Any>(
+                "mobile" to mobile,
+                "username" to (user?.username ?: ""),
+                "passwordHash" to (user?.passwordHash ?: ""),
+                "isApproved" to approved,
+                "updatedAt" to SyncManager.now(),
+                "deleted" to false
+            )
+            FirebaseFirestore.getInstance().collection("users").document(mobile)
+                .set(data, SetOptions.merge())
+        }
+    }
+
+    fun publishUserUpdated(username: String, mobile: String, passwordHash: String) {
+        if (mobile.isBlank()) return
+        runCatching {
+            AuthManager.init(appContext)
+            val user = AuthManager.findByMobile(mobile)
+            val data = hashMapOf<String, Any>(
+                "mobile" to mobile,
+                "username" to (user?.username ?: username),
+                "passwordHash" to passwordHash.ifBlank { user?.passwordHash ?: "" },
+                "isApproved" to (user?.isApproved ?: false),
+                "updatedAt" to SyncManager.now(),
+                "deleted" to false
+            )
+            FirebaseFirestore.getInstance().collection("users").document(mobile)
+                .set(data, SetOptions.merge())
+        }
+    }
+
+    fun publishUserDeleted(mobile: String) {
+        if (mobile.isBlank()) return
+        runCatching {
+            // Mark deleted for listeners that prefer flags, and also remove document.
+            val data = hashMapOf<String, Any>(
+                "mobile" to mobile,
+                "deleted" to true,
+                "isApproved" to false,
+                "updatedAt" to SyncManager.now()
+            )
+            val ref = FirebaseFirestore.getInstance().collection("users").document(mobile)
+            ref.set(data, SetOptions.merge())
+            ref.delete()
         }
     }
 

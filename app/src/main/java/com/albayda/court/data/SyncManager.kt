@@ -145,6 +145,7 @@ object SyncManager {
                 .put("created_at", ts),
             ts
         )
+        runCatching { FirebaseSync.publishUserRegistered(username, mobile) }
         refresh()
     }
 
@@ -155,6 +156,7 @@ object SyncManager {
             JSONObject().put("mobile", mobile).put("approved", approved).put("timestamp", ts),
             ts
         )
+        runCatching { FirebaseSync.publishUserApproved(mobile, approved) }
         refresh()
     }
 
@@ -170,6 +172,15 @@ object SyncManager {
                 .put("timestamp", ts),
             ts
         )
+        runCatching { FirebaseSync.publishUserUpdated(username, mobile, passwordHash) }
+        refresh()
+    }
+
+    fun notifyUserDeleted(mobile: String) {
+        val ts = now()
+        // Rejected/deleted users are removed locally; mirror deletion to Firestore sync.
+        runCatching { FirebaseSync.publishUserDeleted(mobile) }
+        db.setMeta("user_event_ts_$mobile", ts)
         refresh()
     }
 
