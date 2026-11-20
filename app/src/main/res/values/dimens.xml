@@ -5,6 +5,11 @@
     <dimen name="header_title">17sp</dimen>
     <dimen name="banner_height">132dp</dimen>
     <dimen name="service_card_height">124dp</dimen>
+    <!-- Home service buttons: heights follow the reference artwork aspect ratios
+         at a typical two-column width (504x299 / 504x310 / 505x233). -->
+    <dimen name="home_card_height">100dp</dimen>
+    <dimen name="home_card_tall_height">103dp</dimen>
+    <dimen name="home_card_short_height">78dp</dimen>
     <dimen name="bottom_nav_height">58dp</dimen>
     <dimen name="screen_padding">12dp</dimen>
     <dimen name="post_picker_height">240dp</dimen>

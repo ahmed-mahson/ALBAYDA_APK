@@ -103,7 +103,7 @@
 
         <ImageView
             android:layout_width="match_parent"
-            android:layout_height="44dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:layout_marginBottom="4dp"
             android:scaleType="fitCenter"
@@ -111,39 +111,26 @@
             android:src="@drawable/ref_services_header"
             android:contentDescription="الخدمات الإلكترونية" />
 
+        <!-- Grid matches the reference screenshot exactly:
+             Row 0: الاستعلام عن قضية (left) | الاستعلام عن الجلسات اليومية (right)
+             Row 1: إنشاء إعلان حضور (left) | الاستعلام عن القضايا بالمحكمة العليا (right)
+             Row 2: (empty left) | منشورات وإعلانات المحكمة (right, shorter card) -->
         <GridLayout
             android:id="@+id/servicesGrid"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:layoutDirection="ltr"
             android:columnCount="2"
             android:rowCount="3"
             android:useDefaultMargins="false">
 
             <FrameLayout
-                android:id="@+id/cardCase"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_columnWeight="1"
-                android:layout_rowWeight="1"
-                android:layout_margin="3dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground">
-                <ImageView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/ref_btn_case"
-                    android:contentDescription="الاستعلام عن قضية" />
-            </FrameLayout>
-
-            <FrameLayout
                 android:id="@+id/cardSessions"
                 android:layout_width="0dp"
-                android:layout_height="0dp"
+                android:layout_height="@dimen/home_card_height"
+                android:layout_row="0"
+                android:layout_column="1"
                 android:layout_columnWeight="1"
-                android:layout_rowWeight="1"
                 android:layout_margin="3dp"
                 android:clickable="true"
                 android:focusable="true"
@@ -151,17 +138,19 @@
                 <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:adjustViewBounds="true"
                     android:scaleType="fitCenter"
                     android:src="@drawable/ref_btn_sessions"
                     android:contentDescription="الاستعلام عن الجلسات اليومية" />
             </FrameLayout>
 
             <FrameLayout
-                android:id="@+id/cardAttendance"
+                android:id="@+id/cardCase"
                 android:layout_width="0dp"
-                android:layout_height="0dp"
+                android:layout_height="@dimen/home_card_height"
+                android:layout_row="0"
+                android:layout_column="0"
                 android:layout_columnWeight="1"
-                android:layout_rowWeight="1"
                 android:layout_margin="3dp"
                 android:clickable="true"
                 android:focusable="true"
@@ -169,17 +158,19 @@
                 <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:adjustViewBounds="true"
                     android:scaleType="fitCenter"
-                    android:src="@drawable/ref_btn_attendance"
-                    android:contentDescription="إنشاء إعلان حضور" />
+                    android:src="@drawable/ref_btn_case"
+                    android:contentDescription="الاستعلام عن قضية" />
             </FrameLayout>
 
             <FrameLayout
                 android:id="@+id/cardSupreme"
                 android:layout_width="0dp"
-                android:layout_height="0dp"
+                android:layout_height="@dimen/home_card_tall_height"
+                android:layout_row="1"
+                android:layout_column="1"
                 android:layout_columnWeight="1"
-                android:layout_rowWeight="1"
                 android:layout_margin="3dp"
                 android:clickable="true"
                 android:focusable="true"
@@ -187,17 +178,19 @@
                 <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:adjustViewBounds="true"
                     android:scaleType="fitCenter"
                     android:src="@drawable/ref_btn_supreme"
                     android:contentDescription="الاستعلام عن القضايا بالمحكمة العليا" />
             </FrameLayout>
 
             <FrameLayout
-                android:id="@+id/cardPosts"
+                android:id="@+id/cardAttendance"
                 android:layout_width="0dp"
-                android:layout_height="0dp"
+                android:layout_height="@dimen/home_card_tall_height"
+                android:layout_row="1"
+                android:layout_column="0"
                 android:layout_columnWeight="1"
-                android:layout_rowWeight="1"
                 android:layout_margin="3dp"
                 android:clickable="true"
                 android:focusable="true"
@@ -205,6 +198,27 @@
                 <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:adjustViewBounds="true"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ref_btn_attendance"
+                    android:contentDescription="إنشاء إعلان حضور" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/cardPosts"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/home_card_short_height"
+                android:layout_row="2"
+                android:layout_column="1"
+                android:layout_columnWeight="1"
+                android:layout_margin="3dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:adjustViewBounds="true"
                     android:scaleType="fitCenter"
                     android:src="@drawable/ref_btn_posts"
                     android:contentDescription="منشورات واعلانات المحكمة" />
@@ -212,11 +226,18 @@
 
             <Space
                 android:layout_width="0dp"
-                android:layout_height="0dp"
+                android:layout_height="@dimen/home_card_short_height"
+                android:layout_row="2"
+                android:layout_column="0"
                 android:layout_columnWeight="1"
-                android:layout_rowWeight="1"
                 android:layout_margin="3dp" />
         </GridLayout>
+
+        <!-- Keeps the grid at artwork size and absorbs remaining vertical space. -->
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
 
         <LinearLayout
             android:layout_width="match_parent"

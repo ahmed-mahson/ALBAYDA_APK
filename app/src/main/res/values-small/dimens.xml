@@ -5,6 +5,9 @@
     <dimen name="header_title">15sp</dimen>
     <dimen name="banner_height">104dp</dimen>
     <dimen name="service_card_height">104dp</dimen>
+    <dimen name="home_card_height">88dp</dimen>
+    <dimen name="home_card_tall_height">91dp</dimen>
+    <dimen name="home_card_short_height">69dp</dimen>
     <dimen name="bottom_nav_height">54dp</dimen>
     <dimen name="screen_padding">8dp</dimen>
     <dimen name="post_picker_height">200dp</dimen>
