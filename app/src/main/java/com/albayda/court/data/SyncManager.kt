@@ -111,6 +111,7 @@ object SyncManager {
             if (imageBytes != null) put("image", Base64.encodeToString(imageBytes, Base64.NO_WRAP))
         }
         queue("post", payload, ts)
+        runCatching { FirebaseSync.publishAnnouncement(post, imageBytes) }
         notifyListeners()
         return id
     }
@@ -119,6 +120,7 @@ object SyncManager {
         db.deletePost(id)
         db.setMeta("deleted_post_$id", now())
         queue("post_delete", JSONObject().put("id", id), now())
+        runCatching { FirebaseSync.deleteAnnouncement(id) }
         refresh()
         notifyListeners()
     }
@@ -127,6 +129,7 @@ object SyncManager {
         val ts = now()
         db.setNews(text, ts)
         queue("news", JSONObject().put("text", text).put("timestamp", ts), ts)
+        runCatching { FirebaseSync.publishTicker(text) }
         notifyListeners()
     }
 
