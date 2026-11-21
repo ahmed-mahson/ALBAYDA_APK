@@ -120,7 +120,8 @@ object DriveCsvSync {
 
         val posts = records.filter { it["record_type"] == "post" }
         for (r in posts) {
-            val postId = r["post_id"].orEmpty().trim().ifBlank { continue }
+            val postId = r["post_id"].orEmpty().trim()
+            if (postId.isBlank()) continue
             val updatedAt = r["updated_at"].orEmpty().ifBlank { r["post_timestamp"].orEmpty() }
             val metaKey = "drive_csv_post_ts_$postId"
             val prev = SyncManager.db.getMeta(metaKey)
