@@ -295,18 +295,18 @@
         android:weightSum="3">
 
         <LinearLayout android:id="@+id/navAdmin" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:orientation="vertical" android:clickable="true" android:focusable="true" android:foreground="?attr/selectableItemBackground">
-            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@android:drawable/ic_menu_manage" app:tint="@color/IconBlue" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="الإدارة" android:textColor="@color/IconBlue" android:textSize="12sp" android:textStyle="bold" />
+            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@android:drawable/ic_menu_manage" app:tint="@color/HeaderTeal" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="الإدارة" android:textColor="@color/HeaderTeal" android:textSize="12sp" android:textStyle="bold" />
         </LinearLayout>
 
         <LinearLayout android:id="@+id/navAccount" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:orientation="vertical" android:clickable="true" android:focusable="true" android:foreground="?attr/selectableItemBackground">
-            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@android:drawable/ic_menu_myplaces" app:tint="@color/IconBlue" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="حسابي" android:textColor="@color/IconBlue" android:textSize="12sp" android:textStyle="bold" />
+            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@android:drawable/ic_menu_myplaces" app:tint="@color/HeaderTeal" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="حسابي" android:textColor="@color/HeaderTeal" android:textSize="12sp" android:textStyle="bold" />
         </LinearLayout>
 
         <LinearLayout android:id="@+id/navLogout" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:orientation="vertical" android:clickable="true" android:focusable="true" android:foreground="?attr/selectableItemBackground">
-            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@android:drawable/ic_lock_power_off" app:tint="@color/IconBlue" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="خروج" android:textColor="@color/IconBlue" android:textSize="12sp" android:textStyle="bold" />
+            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@android:drawable/ic_lock_power_off" app:tint="@color/HeaderTeal" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="خروج" android:textColor="@color/HeaderTeal" android:textSize="12sp" android:textStyle="bold" />
         </LinearLayout>
     </LinearLayout>
 
