@@ -167,7 +167,9 @@ class SearchActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 if (loadCaseTypes) binding.spCaseType.adapter = makeSpinnerAdapter(listOf("نوع القضية (الكل)"))
                 if (loadJudges) binding.spJudge.adapter = makeSpinnerAdapter(listOf("اسم القاضي (الكل)"))
-                Toast.makeText(this@SearchActivity, "تعذر جلب بيانات القضايا: ${e.message}", Toast.LENGTH_LONG).show()
+                val msg = "تعذر جلب بيانات القضايا: ${e.message ?: "خطأ غير معروف"}"
+                Toast.makeText(this@SearchActivity, msg, Toast.LENGTH_LONG).show()
+                addResultText(msg)
             }
         }
     }
@@ -209,6 +211,7 @@ class SearchActivity : AppCompatActivity() {
                 addResultText("حدث خطأ: ${e.message ?: "غير معروف"}")
             } finally {
                 binding.pb.isVisible = false
+                binding.scrollMain.post { binding.scrollMain.smoothScrollTo(0, binding.resultsContainer.top) }
             }
         }
     }
