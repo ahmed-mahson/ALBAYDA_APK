@@ -134,21 +134,28 @@ object SupremeCourtRepository {
         } else text
     } catch (_: Exception) { text }
 
+    private fun normalizeTableLines(text: String): List<String> {
+        // Jina sometimes collapses markdown table rows into a single line: "... | | --- | ... | | next ..."
+        val expanded = text.replace(Regex("\\s*\\|\\s*\\|\\s*(?=[^|\\n]*\\|)"), "|\n|")
+        return expanded.lines().map { it.trim() }.filter { it.startsWith("|") }
+    }
+
     private fun parseMarkdownTable(raw: String): List<SupremeResult> {
         val text = repair(raw)
-        val lines = text.lines().filter { it.trim().startsWith("|") }
+        val lines = normalizeTableLines(text)
         val results = mutableListOf<SupremeResult>()
         var detailsLoaded = 0
         for (line in lines) {
             val cells = line.trim().trim('|').split('|').map { it.trim() }
             if (cells.size < 4) continue
             val first = cells[0]
+            if (first.isBlank() || first.contains("---")) continue
             if (first.contains("الطاعن") || first.contains("الملتمس")) continue
             if (line.contains("__doPostBack") || first.all { it.isDigit() }) continue
-            val sms = cells[2].filter { it.isDigit() }
+            val sms = cells.getOrNull(2)?.filter { it.isDigit() }.orEmpty()
             var pairs = listOf(
                 "الطاعن/الملتمس" to cells[0],
-                "المطعون/الملتمس ضده" to cells[1],
+                "المطعون/الملتمس ضده" to cells.getOrNull(1).orEmpty(),
                 "الرقم الخاص بخدمة الرسائل القصيرة" to sms
             )
             if (sms.length in 3..12 && detailsLoaded < 10) {
@@ -163,12 +170,13 @@ object SupremeCourtRepository {
 
     private fun parseDetailMarkdown(raw: String): List<Pair<String, String>> {
         val text = repair(raw)
-        val rows = text.lines().filter { it.trim().startsWith("|") }
+        val rows = normalizeTableLines(text)
             .map { it.trim().trim('|').split('|').map { c -> c.trim() } }
             .filter { it.size >= 2 }
         if (rows.size < 2) return emptyList()
         val headers = rows.first()
-        val values = rows[1]
+        val dataRows = rows.drop(1).filter { row -> row.any { it.isNotBlank() && !it.contains("---") } }
+        val values = dataRows.firstOrNull() ?: return emptyList()
         return headers.zip(values).filter { it.first.isNotBlank() && !it.first.contains("---") }
     }
 
