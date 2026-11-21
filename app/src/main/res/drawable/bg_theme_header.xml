@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="#031D40" />
+    <gradient
+        android:angle="0"
+        android:startColor="@color/HeaderTeal"
+        android:endColor="@color/HeaderTealDark"
+        android:type="linear" />
 </shape>

@@ -60,4 +60,20 @@
     <color name="teable_footer_bg">#F0F7FD</color>
     <color name="teable_primary">#135BA3</color>
     <color name="teable_border">#C9DCED</color>
+
+    <!-- Court theme (ثيم_تطبيق_المحكمة_كامل.md) -->
+    <color name="HeaderTeal">#14587F</color>
+    <color name="HeaderTealDark">#0E4666</color>
+    <color name="FrameBlue">#2A5F9E</color>
+    <color name="GoldButton">#C99700</color>
+    <color name="BackBlue">#8EC5EE</color>
+    <color name="NewsOrange">#F0A830</color>
+    <color name="IconBlue">#1F4E9E</color>
+    <color name="NavyText">#12306B</color>
+    <color name="CardBg">#F8FBFF</color>
+    <color name="CardBorder">#D5E3F5</color>
+    <color name="TickerBg">#DCEBFA</color>
+    <color name="ScreenBg">#EEF4FB</color>
+    <color name="FieldBorder">#111111</color>
+    <color name="TextDark">#111111</color>
 </resources>

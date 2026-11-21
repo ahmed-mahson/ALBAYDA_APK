@@ -30,12 +30,14 @@ class SearchActivity : AppCompatActivity() {
 
         mode = intent.getStringExtra("MODE") ?: "case"
         binding.tvTitle.text = when (mode) {
-            "case" -> "الاستعلام عن قضية"
-            "sessions" -> "الجلسات اليومية"
-            "supreme" -> "المحكمة العليا"
-            "attendance" -> "إنشاء إعلان حضور"
+            "case" -> "الاستعلام والبحث عن القضايا"
+            "sessions" -> "قائمة الجلسات اليومية"
+            "supreme" -> "الاستعلام والبحث بالمحكمة العليا"
+            "attendance" -> "انشاء اعلان حضور"
             else -> "بحث"
         }
+        binding.btnBack.setOnClickListener { finish() }
+        setHeaderIcon()
         setupDatePicker()
         configureFields()
 
@@ -56,36 +58,80 @@ class SearchActivity : AppCompatActivity() {
 
     private fun configureFields() {
         fun v(view: View, show: Boolean) { view.visibility = if (show) View.VISIBLE else View.GONE }
+        fun pair(field: View, label: View, show: Boolean) { v(field, show); v(label, show) }
         when (mode) {
             "case" -> {
-                v(binding.etCaseNumber, true); v(binding.etPlaintiff, true); v(binding.etDefendant, true)
-                v(binding.spCaseType, true); v(binding.spJudge, true); v(binding.etDate, false); v(binding.etQuery, false)
+                pair(binding.etCaseNumber, binding.lblCaseNumber, true)
+                pair(binding.etPlaintiff, binding.lblPlaintiff, false) // md case search: رقم القضية أو اسم أحد الأطراف, نوع القضية, القاضي المختص
+                pair(binding.etDefendant, binding.lblDefendant, false)
+                pair(binding.spCaseType, binding.lblCaseType, true)
+                pair(binding.spJudge, binding.lblJudge, true)
+                pair(binding.etDate, binding.lblDate, false)
+                pair(binding.etQuery, binding.lblQuery, false)
+                binding.lblCaseNumber.text = "رقم القضية أو اسم أحد الأطراف"
+                binding.lblCaseType.text = "نوع القضية"
+                binding.lblJudge.text = "القاضي المختص"
                 binding.btnSearch.text = "بحث"
                 loadDropdowns(loadCaseTypes = true, loadJudges = true)
             }
             "sessions" -> {
-                v(binding.etCaseNumber, false); v(binding.etPlaintiff, false); v(binding.etDefendant, false)
-                v(binding.spCaseType, false); v(binding.spJudge, true); v(binding.etDate, true); v(binding.etQuery, false)
-                binding.etDate.hint = "تاريخ الجلسة (يوم/شهر/سنة)"
+                pair(binding.etCaseNumber, binding.lblCaseNumber, false)
+                pair(binding.etPlaintiff, binding.lblPlaintiff, false)
+                pair(binding.etDefendant, binding.lblDefendant, false)
+                pair(binding.spCaseType, binding.lblCaseType, false)
+                pair(binding.spJudge, binding.lblJudge, true)
+                pair(binding.etDate, binding.lblDate, true)
+                pair(binding.etQuery, binding.lblQuery, false)
+                binding.lblDate.text = "تاريخ الجلسات"
+                binding.lblJudge.text = "القاضي المختص"
+                binding.etDate.hint = "اختر التاريخ"
                 binding.btnSearch.text = "بحث"
                 loadDropdowns(loadCaseTypes = false, loadJudges = true)
             }
             "supreme" -> {
-                v(binding.etCaseNumber, false); v(binding.etPlaintiff, false); v(binding.etDefendant, false)
-                v(binding.spCaseType, false); v(binding.spJudge, false); v(binding.etDate, false); v(binding.etQuery, true)
-                binding.etQuery.hint = "اسم الطاعن / الملتمس"
+                pair(binding.etCaseNumber, binding.lblCaseNumber, false)
+                pair(binding.etPlaintiff, binding.lblPlaintiff, false)
+                pair(binding.etDefendant, binding.lblDefendant, false)
+                pair(binding.spCaseType, binding.lblCaseType, false)
+                pair(binding.spJudge, binding.lblJudge, false)
+                pair(binding.etDate, binding.lblDate, false)
+                pair(binding.etQuery, binding.lblQuery, true)
+                binding.lblQuery.text = "اسم الطاعن أو الملتمس"
+                binding.etQuery.hint = ""
                 binding.btnSearch.text = "بحث"
             }
             "attendance" -> {
-                v(binding.etCaseNumber, true); v(binding.etPlaintiff, true); v(binding.etDefendant, true)
-                v(binding.spCaseType, true); v(binding.spJudge, true); v(binding.etDate, true); v(binding.etQuery, false)
-                binding.etDate.hint = "تاريخ الجلسة (مثال 18/11/2026)"
-                binding.btnSearch.text = "تنزيل الاعلان pdf"
+                pair(binding.etCaseNumber, binding.lblCaseNumber, true)
+                pair(binding.etPlaintiff, binding.lblPlaintiff, true)
+                pair(binding.etDefendant, binding.lblDefendant, true)
+                pair(binding.spCaseType, binding.lblCaseType, true)
+                pair(binding.spJudge, binding.lblJudge, true)
+                pair(binding.etDate, binding.lblDate, true)
+                pair(binding.etQuery, binding.lblQuery, false)
+                binding.lblCaseNumber.text = "رقم القضية"
+                binding.lblCaseType.text = "نوع القضية"
+                binding.lblPlaintiff.text = "اسم المدعي"
+                binding.lblDefendant.text = "اسم المدعى عليه"
+                binding.lblJudge.text = "القاضي المختص"
+                binding.lblDate.text = "تاريخ الحضور"
+                binding.etDate.hint = "اختر التاريخ"
+                binding.btnSearch.text = "تنزيل الاعلان PDF"
                 loadDropdowns(loadCaseTypes = true, loadJudges = true)
                 applyAttendancePrefillIfAny()
             }
             else -> {}
         }
+    }
+
+    private fun setHeaderIcon() {
+        val iconRes = when (mode) {
+            "case" -> android.R.drawable.ic_menu_search
+            "sessions" -> android.R.drawable.ic_menu_my_calendar
+            "supreme" -> android.R.drawable.ic_menu_compass
+            "attendance" -> android.R.drawable.ic_menu_edit
+            else -> android.R.drawable.ic_menu_info_details
+        }
+        binding.ivHeaderIcon.setImageResource(iconRes)
     }
 
     private fun loadDropdowns(loadCaseTypes: Boolean, loadJudges: Boolean) {
@@ -241,7 +287,7 @@ class SearchActivity : AppCompatActivity() {
         results.forEach { r ->
             val tv = TextView(this).apply {
                 text = "• ${r.caseNumber} | ${r.plaintiff} × ${r.defendant} | ${r.caseType}"
-                setTextColor(getColor(R.color.text_blue))
+                setTextColor(getColor(R.color.NavyText))
                 textSize = 14f
                 setPadding(8, 8, 8, 8)
             }
@@ -305,7 +351,7 @@ class SearchActivity : AppCompatActivity() {
     private fun addResultText(text: String) {
         val tv = TextView(this).apply {
             this.text = text
-            setTextColor(getColor(R.color.text_blue))
+            setTextColor(getColor(R.color.NavyText))
             textSize = 16f
             setPadding(16, 16, 16, 8)
             typeface = android.graphics.Typeface.DEFAULT_BOLD
