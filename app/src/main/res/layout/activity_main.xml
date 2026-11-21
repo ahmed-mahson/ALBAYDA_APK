@@ -141,7 +141,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground">
-                <ImageView android:layout_width="52dp" android:layout_height="52dp" android:src="@drawable/ref_btn_case" android:scaleType="fitCenter" android:contentDescription="الاستعلام عن قضية" />
+                <ImageView android:layout_width="52dp" android:layout_height="52dp" android:src="@drawable/ic_search_doc" android:scaleType="fitCenter" android:contentDescription="الاستعلام عن قضية" />
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="الاستعلام\nعن قضية" android:textColor="@color/NavyText" android:textSize="13sp" android:textStyle="bold" android:gravity="center" />
             </LinearLayout>
 
@@ -160,7 +160,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground">
-                <ImageView android:layout_width="52dp" android:layout_height="52dp" android:src="@drawable/ref_btn_sessions" android:scaleType="fitCenter" android:contentDescription="الاستعلام عن الجلسات اليومية" />
+                <ImageView android:layout_width="52dp" android:layout_height="52dp" android:src="@drawable/ic_calendar" android:scaleType="fitCenter" android:contentDescription="الاستعلام عن الجلسات اليومية" />
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="الاستعلام عن\nالجلسات اليومية" android:textColor="@color/NavyText" android:textSize="13sp" android:textStyle="bold" android:gravity="center" />
             </LinearLayout>
 
@@ -179,7 +179,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground">
-                <ImageView android:layout_width="52dp" android:layout_height="52dp" android:src="@drawable/ref_btn_attendance" android:scaleType="fitCenter" android:contentDescription="إنشاء إعلان حضور" />
+                <ImageView android:layout_width="52dp" android:layout_height="52dp" android:src="@drawable/ic_doc_add" android:scaleType="fitCenter" android:contentDescription="إنشاء إعلان حضور" />
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="إنشاء\nإعلان حضور" android:textColor="@color/NavyText" android:textSize="13sp" android:textStyle="bold" android:gravity="center" />
             </LinearLayout>
 
@@ -198,7 +198,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground">
-                <ImageView android:layout_width="52dp" android:layout_height="52dp" android:src="@drawable/ref_btn_supreme" android:scaleType="fitCenter" android:contentDescription="الاستعلام عن القضايا بالمحكمة العليا" />
+                <ImageView android:layout_width="52dp" android:layout_height="52dp" android:src="@drawable/ic_court" android:scaleType="fitCenter" android:contentDescription="الاستعلام عن القضايا بالمحكمة العليا" />
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="الاستعلام عن القضايا\nبالمحكمة العليا" android:textColor="@color/NavyText" android:textSize="13sp" android:textStyle="bold" android:gravity="center" />
             </LinearLayout>
 
@@ -218,7 +218,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground">
-                <ImageView android:layout_width="52dp" android:layout_height="52dp" android:src="@drawable/ref_btn_posts" android:scaleType="fitCenter" android:contentDescription="منشورات واعلانات المحكمة" />
+                <ImageView android:layout_width="52dp" android:layout_height="52dp" android:src="@drawable/ic_posts" android:scaleType="fitCenter" android:contentDescription="منشورات واعلانات المحكمة" />
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="منشورات وإعلانات\nالمحكمة" android:textColor="@color/NavyText" android:textSize="13sp" android:textStyle="bold" android:gravity="center" />
             </LinearLayout>
         </GridLayout>

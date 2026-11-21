@@ -112,6 +112,7 @@ object SyncManager {
         }
         queue("post", payload, ts)
         runCatching { FirebaseSync.publishAnnouncement(post, imageBytes) }
+        runCatching { DriveCsvSync.pushAsync() }
         notifyListeners()
         return id
     }
@@ -121,6 +122,7 @@ object SyncManager {
         db.setMeta("deleted_post_$id", now())
         queue("post_delete", JSONObject().put("id", id), now())
         runCatching { FirebaseSync.deleteAnnouncement(id) }
+        runCatching { DriveCsvSync.pushAsync() }
         refresh()
         notifyListeners()
     }
@@ -130,6 +132,7 @@ object SyncManager {
         db.setNews(text, ts)
         queue("news", JSONObject().put("text", text).put("timestamp", ts), ts)
         runCatching { FirebaseSync.publishTicker(text) }
+        runCatching { DriveCsvSync.pushAsync() }
         notifyListeners()
     }
 
@@ -146,6 +149,7 @@ object SyncManager {
             ts
         )
         runCatching { FirebaseSync.publishUserRegistered(username, mobile) }
+        runCatching { DriveCsvSync.pushAsync() }
         refresh()
     }
 
@@ -157,6 +161,7 @@ object SyncManager {
             ts
         )
         runCatching { FirebaseSync.publishUserApproved(mobile, approved) }
+        runCatching { DriveCsvSync.pushAsync() }
         refresh()
     }
 
@@ -173,14 +178,16 @@ object SyncManager {
             ts
         )
         runCatching { FirebaseSync.publishUserUpdated(username, mobile, passwordHash) }
+        runCatching { DriveCsvSync.pushAsync() }
         refresh()
     }
 
     fun notifyUserDeleted(mobile: String) {
         val ts = now()
-        // Rejected/deleted users are removed locally; mirror deletion to Firestore sync.
+        // Rejected/deleted users are removed locally; mirror deletion to Firestore/Drive sync.
         runCatching { FirebaseSync.publishUserDeleted(mobile) }
         db.setMeta("user_event_ts_$mobile", ts)
+        runCatching { DriveCsvSync.pushAsync() }
         refresh()
     }
 
@@ -194,7 +201,10 @@ object SyncManager {
 
     fun refresh() {
         if (!::appContext.isInitialized) return
-        executor.execute { runCatching { syncNow() } }
+        executor.execute {
+            runCatching { syncNow() }
+            runCatching { DriveCsvSync.refreshAsync() }
+        }
     }
 
     private fun queue(type: String, payload: JSONObject, timestamp: String) {

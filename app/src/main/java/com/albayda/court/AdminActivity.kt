@@ -7,6 +7,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.albayda.court.data.AuthManager
+import com.albayda.court.data.DriveCsvSync
 import com.albayda.court.data.SyncManager
 import com.albayda.court.data.User
 import com.albayda.court.databinding.ActivityAdminBinding
@@ -30,6 +31,8 @@ class AdminActivity : AppCompatActivity() {
         }
 
         binding.etSyncUrl.setText(SyncManager.endpoint())
+        binding.etDriveCsvFileId.setText(DriveCsvSync.fileId())
+        binding.etDriveCsvWriteUrl.setText(DriveCsvSync.writeUrl())
         updateSyncStatus()
 
         binding.btnSaveSync.setOnClickListener {
@@ -43,6 +46,14 @@ class AdminActivity : AppCompatActivity() {
                 updateSyncStatus()
                 Toast.makeText(this, "تمت إضافة خادم مخصص بجانب المزامنة التلقائية", Toast.LENGTH_SHORT).show()
             }
+        }
+
+        binding.btnSaveDriveCsvSync.setOnClickListener {
+            DriveCsvSync.setFileId(binding.etDriveCsvFileId.text.toString().trim())
+            DriveCsvSync.setWriteUrl(binding.etDriveCsvWriteUrl.text.toString().trim())
+            DriveCsvSync.init(this)
+            DriveCsvSync.refreshAsync { updateSyncStatus() }
+            Toast.makeText(this, "تم حفظ إعدادات مزامنة CSV وبدء المزامنة", Toast.LENGTH_SHORT).show()
         }
 
         binding.btnOpenPosts.setOnClickListener {

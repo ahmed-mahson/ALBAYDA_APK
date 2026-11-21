@@ -125,10 +125,10 @@ class SearchActivity : AppCompatActivity() {
 
     private fun setHeaderIcon() {
         val iconRes = when (mode) {
-            "case" -> android.R.drawable.ic_menu_search
-            "sessions" -> android.R.drawable.ic_menu_my_calendar
-            "supreme" -> android.R.drawable.ic_menu_compass
-            "attendance" -> android.R.drawable.ic_menu_edit
+            "case" -> R.drawable.ic_search_doc
+            "sessions" -> R.drawable.ic_calendar
+            "supreme" -> R.drawable.ic_court
+            "attendance" -> R.drawable.ic_doc_add
             else -> android.R.drawable.ic_menu_info_details
         }
         binding.ivHeaderIcon.setImageResource(iconRes)
