@@ -32,6 +32,7 @@ class MainActivity : AppCompatActivity() {
         try { FirebaseApp.initializeApp(this) } catch (_: Exception) {}
         AuthManager.init(this)
         SyncManager.init(this)
+        pulseLogo()
 
         val session = AuthManager.getSession()
         val isAdmin = AuthManager.isPrimaryAdmin(session)
@@ -201,6 +202,21 @@ class MainActivity : AppCompatActivity() {
         ) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 101)
         }
+    }
+
+    private fun pulseLogo() {
+        val logo = binding.ivLogoHeader
+        logo.animate().cancel()
+        logo.animate()
+            .scaleX(1.08f).scaleY(1.08f).alpha(1f)
+            .setDuration(900)
+            .withEndAction {
+                logo.animate()
+                    .scaleX(1f).scaleY(1f).alpha(0.92f)
+                    .setDuration(900)
+                    .withEndAction { if (!isFinishing) pulseLogo() }
+                    .start()
+            }.start()
     }
 }
 

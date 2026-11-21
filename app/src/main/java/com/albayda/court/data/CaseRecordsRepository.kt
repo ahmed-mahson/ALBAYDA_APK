@@ -463,6 +463,7 @@ object CaseRecordsRepository {
         }
 
         val cnVariants = numberVariants(cnNorm)
+        val cnIsNumberLike = cnNorm.isNotBlank() && cnNorm.any { it.isDigit() }
         // treat query as a number search when it contains digits; otherwise as a name search
         val qIsNumberLike = qNorm.isNotBlank() && qNorm.any { it.isDigit() }
         val qNumberVariants = if (qIsNumberLike) numberVariants(qNorm) else emptyList()
@@ -473,7 +474,9 @@ object CaseRecordsRepository {
             val recPl = r.plaintiff.lowercase(Locale.ROOT)
             val recDe = r.defendant.lowercase(Locale.ROOT)
 
-            val cnOk = cnVariants.isEmpty() || cnVariants.any { recordNumber.contains(it) }
+            val cnOk = if (cnNorm.isBlank()) true
+                else if (cnIsNumberLike) cnVariants.any { recordNumber.contains(it) } || recPl.contains(cnNorm) || recDe.contains(cnNorm)
+                else recPl.contains(cnNorm) || recDe.contains(cnNorm) || recordNumber.contains(cnNorm)
             val qNumberOk = qNumberVariants.isEmpty() || qNumberVariants.any { recordNumber.contains(it) }
             val qNameOk = qName.isBlank() || recPl.contains(qName) || recDe.contains(qName)
             val plOk = plNorm.isBlank() || recPl.contains(plNorm)

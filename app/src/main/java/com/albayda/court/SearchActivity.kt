@@ -114,8 +114,8 @@ class SearchActivity : AppCompatActivity() {
                 binding.lblDefendant.text = "اسم المدعى عليه"
                 binding.lblJudge.text = "القاضي المختص"
                 binding.lblDate.text = "تاريخ الحضور"
-                binding.etDate.hint = "اختر التاريخ"
-                binding.btnSearch.text = "تنزيل الاعلان PDF"
+                binding.etDate.hint = "اختر التاريخ (اختياري)"
+                binding.btnSearch.text = "بحث"
                 loadDropdowns(loadCaseTypes = true, loadJudges = true)
                 applyAttendancePrefillIfAny()
             }
@@ -195,7 +195,7 @@ class SearchActivity : AppCompatActivity() {
                     "case" -> searchCase()
                     "sessions" -> searchSessions()
                     "supreme" -> searchSupreme()
-                    "attendance" -> buildAttendance()
+                    "attendance" -> searchAttendance()
                     else -> addResultText("وضع غير مدعوم")
                 }
             } catch (e: Exception) {
@@ -281,24 +281,15 @@ class SearchActivity : AppCompatActivity() {
         val results = CaseRecordsRepository.searchSessions(records, date, judge)
         if (results.isEmpty()) { addResultText("لا توجد جلسات مسجلة بهذا التاريخ للقاضي المحدد."); return }
         val judgeLabel = if (judge.isBlank()) "جميع القضاة" else CaseRecordsRepository.displayJudge(judge)
-        addResultText("عدد الجلسات: ${results.size} — $judgeLabel — ${CaseRecordsRepository.formatDisplayDate(date)}")
         addSessionsDownloadCard(date, judgeLabel, results)
-        // show compact list
-        results.forEach { r ->
-            val tv = TextView(this).apply {
-                text = "• ${r.caseNumber} | ${r.plaintiff} × ${r.defendant} | ${r.caseType}"
-                setTextColor(getColor(R.color.NavyText))
-                textSize = 14f
-                setPadding(8, 8, 8, 8)
-            }
-            binding.resultsContainer.addView(tv)
-        }
     }
 
     private fun addSessionsDownloadCard(date: String, judgeLabel: String, results: List<CaseRecord>) {
         val card = layoutInflater.inflate(R.layout.item_result_card, binding.resultsContainer, false)
-        card.findViewById<TextView>(R.id.tvMain).text = "قائمة الجلسات"
-        card.findViewById<TextView>(R.id.tvSub).text = "$judgeLabel — $date — عدد القضايا: ${results.size}"
+        card.findViewById<TextView>(R.id.tvMain).text = "قائمة الجلسات اليومية — العدد: ${results.size}"
+        val subTv = card.findViewById<TextView>(R.id.tvSub)
+        subTv.text = "$judgeLabel — ${CaseRecordsRepository.formatDisplayDate(date)}"
+        subTv.visibility = View.VISIBLE
         card.findViewById<View>(R.id.btnDownloadPdf).setOnClickListener {
             try {
                 val pdf = PdfReport.buildSessions(this, date, judgeLabel, results)
@@ -324,28 +315,70 @@ class SearchActivity : AppCompatActivity() {
         }
     }
 
-    private fun buildAttendance() {
+    private suspend fun searchAttendance() {
         val caseNo = binding.etCaseNumber.text.toString().trim()
-        val caseType = selected(binding.spCaseType).ifBlank { "غير متوفر" }
-        val plaintiff = binding.etPlaintiff.text.toString().trim().ifBlank { "غير متوفر" }
-        val defendant = binding.etDefendant.text.toString().trim().ifBlank { "غير متوفر" }
-        val judge = selected(binding.spJudge).ifBlank { "غير متوفر" }
-        val date = cleanDateInput(binding.etDate.text.toString())
-        if (caseNo.isBlank() || date.isBlank()) { addResultText("يرجى إدخال رقم القضية وتاريخ الجلسة."); return }
-        if (CaseRecordsRepository.normalizeDate(date) == null) {
+        val plaintiff = binding.etPlaintiff.text.toString().trim()
+        val defendant = binding.etDefendant.text.toString().trim()
+        val caseType = selected(binding.spCaseType)
+        val judge = selected(binding.spJudge)
+        val dateRaw = cleanDateInput(binding.etDate.text.toString())
+        val date = if (dateRaw.isBlank()) "" else (CaseRecordsRepository.normalizeDate(dateRaw)?.let { CaseRecordsRepository.formatDisplayDate(it) } ?: dateRaw)
+
+        if (caseNo.isBlank() && plaintiff.isBlank() && defendant.isBlank()) {
+            addResultText("يرجى إدخال رقم القضية أو اسم المدعي أو اسم المدعى عليه للبحث.")
+            return
+        }
+        if (dateRaw.isNotBlank() && CaseRecordsRepository.normalizeDate(dateRaw) == null) {
             addResultText("التاريخ غير صحيح. اختر التاريخ بصيغة 18/11/2026.")
             return
         }
-        val data = linkedMapOf(
-            "رقم القضية" to caseNo,
-            "نوع القضية" to caseType,
-            "المدعي" to plaintiff,
-            "المدعى عليه" to defendant,
-            "اسم القاضي" to judge,
-            "تاريخ الجلسة" to date
+
+        val records = CaseRecordsRepository.loadRecords()
+        val results = CaseRecordsRepository.search(
+            records,
+            caseNumber = caseNo,
+            plaintiff = plaintiff,
+            defendant = defendant,
+            caseType = caseType,
+            judge = judge
         )
-        addResultText("تم تجهيز بيانات إعلان الحضور:")
-        addGenericCard("إعلان حضور", data)
+        if (results.isEmpty()) {
+            addResultText("لا توجد نتائج مطابقة.")
+            return
+        }
+
+        results.forEach { r ->
+            val attendanceDate = when {
+                date.isNotBlank() -> date
+                r.nextSession.isNotBlank() -> CaseRecordsRepository.formatDisplayDate(r.nextSession)
+                else -> ""
+            }
+            val data = linkedMapOf(
+                "رقم القضية" to r.caseNumber,
+                "نوع القضية" to CaseRecordsRepository.displayCaseType(r.caseType),
+                "المدعي" to r.plaintiff,
+                "المدعى عليه" to r.defendant,
+                "اسم القاضي" to CaseRecordsRepository.displayJudge(r.judge),
+                "تاريخ الجلسة" to attendanceDate.ifBlank { "-" }
+            )
+            addAttendanceCard(r.caseNumber.ifBlank { "إعلان حضور" }, data)
+        }
+    }
+
+    private fun addAttendanceCard(title: String, data: Map<String, String>) {
+        val card = layoutInflater.inflate(R.layout.item_result_card, binding.resultsContainer, false)
+        card.findViewById<TextView>(R.id.tvMain).text = "إعلان حضور - ${title}"
+        card.findViewById<TextView>(R.id.tvSub).visibility = View.GONE
+        val fileName = buildPdfFileName(title, data)
+        card.findViewById<View>(R.id.btnDownloadPdf).setOnClickListener {
+            try {
+                val pdf = PdfReport.buildAttendance(this, data)
+                PdfReport.saveToDownloads(this, pdf, fileName)
+            } catch (e: Exception) {
+                Toast.makeText(this, "تعذر إنشاء الملف: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
+        binding.resultsContainer.addView(card)
     }
 
     private fun addResultText(text: String) {
@@ -372,7 +405,7 @@ class SearchActivity : AppCompatActivity() {
             "تاريخ الورود" to CaseRecordsRepository.formatDisplayDate(r.receivedDate)
         )
         addGenericCard(
-            r.caseNumber.ifBlank { "سجل" },
+            "قضية رقم ${r.caseNumber.ifBlank { "-" }}",
             data,
             attendanceData = linkedMapOf(
                 "prefill_case_number" to r.caseNumber,
@@ -388,12 +421,7 @@ class SearchActivity : AppCompatActivity() {
     private fun addGenericCard(title: String, data: Map<String, String>, attendanceData: Map<String, String>? = null) {
         val card = layoutInflater.inflate(R.layout.item_result_card, binding.resultsContainer, false)
         card.findViewById<TextView>(R.id.tvMain).text = title
-        val sub = listOfNotNull(
-            data["المدعي"], data["المدعى عليه"],
-            data["القاضي"] ?: data["برئاسة القاضي"] ?: data["القاضي المختص"],
-            data["حالة القضية"] ?: data["آخر قرار للقضية"]
-        ).filter { it.isNotBlank() }.joinToString(" | ")
-        card.findViewById<TextView>(R.id.tvSub).text = sub.ifBlank { data.entries.take(2).joinToString(" | ") { "${it.key}: ${it.value}" } }
+        card.findViewById<TextView>(R.id.tvSub).visibility = View.GONE
 
         val fileName = buildPdfFileName(title, data)
         card.findViewById<View>(R.id.btnDownloadPdf).setOnClickListener {

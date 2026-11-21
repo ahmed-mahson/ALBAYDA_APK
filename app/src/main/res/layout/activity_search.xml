@@ -21,7 +21,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/bg_theme_header"
-            android:padding="12dp"
+            android:padding="8dp"
             android:gravity="center_vertical"
             android:layoutDirection="rtl"
             android:orientation="horizontal">
@@ -56,23 +56,23 @@
         <Button
             android:id="@+id/btnBack"
             android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:layout_marginTop="8dp"
+            android:layout_height="36dp"
+            android:layout_marginTop="4dp"
             android:text="رجوع"
             android:textColor="@color/TextDark"
             android:textStyle="bold"
+            android:textSize="13sp"
             android:background="@drawable/bg_back_button"
             android:backgroundTint="@null"
             app:backgroundTint="@null"
             android:minHeight="0dp"
-            android:paddingStart="20dp"
-            android:paddingEnd="20dp" />
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp" />
 
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1.15"
-            android:minHeight="120dp"
+            android:layout_weight="1"
             android:fillViewport="true">
 
             <LinearLayout
@@ -83,107 +83,28 @@
                 android:paddingTop="4dp"
                 android:paddingBottom="8dp">
 
-                <TextView android:id="@+id/lblCaseNumber" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="رقم القضية أو اسم أحد الأطراف" android:textColor="@color/TextDark" android:textStyle="bold" android:textSize="14sp" android:layout_marginTop="10dp" />
-                <EditText
-                    android:id="@+id/etCaseNumber"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_marginTop="4dp"
-                    android:background="@drawable/bg_input"
-                    android:paddingStart="12dp"
-                    android:paddingEnd="12dp"
-                    android:textColor="@color/TextDark"
-                    android:inputType="text" />
+                <TextView android:id="@+id/lblCaseNumber" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="رقم القضية أو اسم أحد الأطراف" android:textColor="@color/TextDark" android:textStyle="bold" android:textSize="12sp" android:layout_marginTop="4dp" />
+                <EditText android:id="@+id/etCaseNumber" android:layout_width="match_parent" android:layout_height="40dp" android:layout_marginTop="2dp" android:background="@drawable/bg_input" android:paddingStart="10dp" android:paddingEnd="10dp" android:textColor="@color/TextDark" android:textSize="13sp" android:inputType="text" />
 
-                <TextView android:id="@+id/lblPlaintiff" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="اسم المدعي" android:textColor="@color/TextDark" android:textStyle="bold" android:textSize="14sp" android:layout_marginTop="10dp" />
-                <EditText
-                    android:id="@+id/etPlaintiff"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_marginTop="4dp"
-                    android:background="@drawable/bg_input"
-                    android:paddingStart="12dp"
-                    android:paddingEnd="12dp"
-                    android:textColor="@color/TextDark"
-                    android:inputType="textPersonName" />
+                <TextView android:id="@+id/lblPlaintiff" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="اسم المدعي" android:textColor="@color/TextDark" android:textStyle="bold" android:textSize="12sp" android:layout_marginTop="4dp" />
+                <EditText android:id="@+id/etPlaintiff" android:layout_width="match_parent" android:layout_height="40dp" android:layout_marginTop="2dp" android:background="@drawable/bg_input" android:paddingStart="10dp" android:paddingEnd="10dp" android:textColor="@color/TextDark" android:textSize="13sp" android:inputType="textPersonName" />
 
-                <TextView android:id="@+id/lblDefendant" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="اسم المدعى عليه" android:textColor="@color/TextDark" android:textStyle="bold" android:textSize="14sp" android:layout_marginTop="10dp" />
-                <EditText
-                    android:id="@+id/etDefendant"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_marginTop="4dp"
-                    android:background="@drawable/bg_input"
-                    android:paddingStart="12dp"
-                    android:paddingEnd="12dp"
-                    android:textColor="@color/TextDark"
-                    android:inputType="textPersonName" />
+                <TextView android:id="@+id/lblDefendant" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="اسم المدعى عليه" android:textColor="@color/TextDark" android:textStyle="bold" android:textSize="12sp" android:layout_marginTop="4dp" />
+                <EditText android:id="@+id/etDefendant" android:layout_width="match_parent" android:layout_height="40dp" android:layout_marginTop="2dp" android:background="@drawable/bg_input" android:paddingStart="10dp" android:paddingEnd="10dp" android:textColor="@color/TextDark" android:textSize="13sp" android:inputType="textPersonName" />
 
-                <TextView android:id="@+id/lblCaseType" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="نوع القضية" android:textColor="@color/TextDark" android:textStyle="bold" android:textSize="14sp" android:layout_marginTop="10dp" />
-                <Spinner
-                    android:id="@+id/spCaseType"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_marginTop="4dp"
-                    android:background="@drawable/bg_input"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="8dp" />
+                <TextView android:id="@+id/lblCaseType" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="نوع القضية" android:textColor="@color/TextDark" android:textStyle="bold" android:textSize="12sp" android:layout_marginTop="4dp" />
+                <Spinner android:id="@+id/spCaseType" android:layout_width="match_parent" android:layout_height="40dp" android:layout_marginTop="2dp" android:background="@drawable/bg_input" android:paddingStart="6dp" android:paddingEnd="6dp" />
 
-                <TextView android:id="@+id/lblJudge" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="القاضي المختص" android:textColor="@color/TextDark" android:textStyle="bold" android:textSize="14sp" android:layout_marginTop="10dp" />
-                <Spinner
-                    android:id="@+id/spJudge"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_marginTop="4dp"
-                    android:background="@drawable/bg_input"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="8dp" />
+                <TextView android:id="@+id/lblJudge" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="القاضي المختص" android:textColor="@color/TextDark" android:textStyle="bold" android:textSize="12sp" android:layout_marginTop="4dp" />
+                <Spinner android:id="@+id/spJudge" android:layout_width="match_parent" android:layout_height="40dp" android:layout_marginTop="2dp" android:background="@drawable/bg_input" android:paddingStart="6dp" android:paddingEnd="6dp" />
 
-                <TextView android:id="@+id/lblDate" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="التاريخ" android:textColor="@color/TextDark" android:textStyle="bold" android:textSize="14sp" android:layout_marginTop="10dp" />
-                <EditText
-                    android:id="@+id/etDate"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_marginTop="4dp"
-                    android:hint="مثال 18/11/2026"
-                    android:background="@drawable/bg_input"
-                    android:paddingStart="12dp"
-                    android:paddingEnd="12dp"
-                    android:textColor="@color/TextDark"
-                    android:focusable="false"
-                    android:clickable="true"
-                    android:inputType="none"
-                    android:textDirection="ltr"
-                    android:layoutDirection="ltr"
-                    android:gravity="center_vertical|start" />
+                <TextView android:id="@+id/lblDate" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="التاريخ" android:textColor="@color/TextDark" android:textStyle="bold" android:textSize="12sp" android:layout_marginTop="4dp" />
+                <EditText android:id="@+id/etDate" android:layout_width="match_parent" android:layout_height="40dp" android:layout_marginTop="2dp" android:hint="مثال 18/11/2026" android:background="@drawable/bg_input" android:paddingStart="10dp" android:paddingEnd="10dp" android:textColor="@color/TextDark" android:textSize="13sp" android:focusable="false" android:clickable="true" android:inputType="none" android:textDirection="ltr" android:layoutDirection="ltr" android:gravity="center_vertical|start" />
 
-                <TextView android:id="@+id/lblQuery" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="بحث عام" android:textColor="@color/TextDark" android:textStyle="bold" android:textSize="14sp" android:layout_marginTop="10dp" />
-                <EditText
-                    android:id="@+id/etQuery"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_marginTop="4dp"
-                    android:background="@drawable/bg_input"
-                    android:paddingStart="12dp"
-                    android:paddingEnd="12dp"
-                    android:textColor="@color/TextDark"
-                    android:hint="بحث عام / اسم الطاعن (للمحكمة العليا)"
-                    android:inputType="text" />
+                <TextView android:id="@+id/lblQuery" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="بحث عام" android:textColor="@color/TextDark" android:textStyle="bold" android:textSize="12sp" android:layout_marginTop="4dp" />
+                <EditText android:id="@+id/etQuery" android:layout_width="match_parent" android:layout_height="40dp" android:layout_marginTop="2dp" android:background="@drawable/bg_input" android:paddingStart="10dp" android:paddingEnd="10dp" android:textColor="@color/TextDark" android:textSize="13sp" android:hint="بحث عام / اسم الطاعن (للمحكمة العليا)" android:inputType="text" />
 
-                <Button
-                    android:id="@+id/btnSearch"
-                    android:layout_width="match_parent"
-                    android:layout_height="52dp"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginStart="40dp"
-                    android:layout_marginEnd="40dp"
-                    android:text="بحث"
-                    android:textStyle="bold"
-                    android:textSize="18sp"
-                    android:textColor="@color/TextDark"
-                    android:background="@drawable/bg_button_gold"
-                    android:backgroundTint="@null"
-                    app:backgroundTint="@null" />
+                <Button android:id="@+id/btnSearch" android:layout_width="match_parent" android:layout_height="44dp" android:layout_marginTop="8dp" android:layout_marginStart="24dp" android:layout_marginEnd="24dp" android:text="بحث" android:textStyle="bold" android:textSize="16sp" android:textColor="@color/TextDark" android:background="@drawable/bg_button_gold" android:backgroundTint="@null" app:backgroundTint="@null" />
             </LinearLayout>
         </ScrollView>
 

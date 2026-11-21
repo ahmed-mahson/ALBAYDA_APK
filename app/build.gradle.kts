@@ -12,8 +12,8 @@ android {
         applicationId = "com.albayda.court"
         minSdk = 23
         targetSdk = 34
-        versionCode = 404
-        versionName = "4.4-ExactTheme"
+        versionCode = 405
+        versionName = "MAHSON 1.0"
     }
 
     buildFeatures {

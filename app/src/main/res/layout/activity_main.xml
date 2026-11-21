@@ -30,7 +30,10 @@
                 android:layout_height="96dp"
                 android:src="@drawable/logo_court"
                 android:contentDescription="@string/logo_desc"
-                android:scaleType="fitCenter" />
+                android:scaleType="fitCenter"
+                android:elevation="8dp"
+                android:outlineAmbientShadowColor="#D4AF37"
+                android:outlineSpotShadowColor="#D4AF37" />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -43,12 +46,16 @@
                     android:id="@+id/tvHeaderTitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="تقنية معلومات\nمحكمة البيضاء\nالابتدائية"
-                    android:textColor="@color/NavyText"
-                    android:textSize="18sp"
+                    android:text="تقنية معلومات\nمحكمة البيضاء الابتدائية"
+                    android:textColor="#D4AF37"
+                    android:textSize="20sp"
                     android:textStyle="bold"
-                    android:lineSpacingExtra="4dp"
-                    android:gravity="center" />
+                    android:lineSpacingExtra="2dp"
+                    android:gravity="center"
+                    android:shadowColor="#80D4AF37"
+                    android:shadowDx="0"
+                    android:shadowDy="0"
+                    android:shadowRadius="8" />
 
                 <TextView
                     android:id="@+id/tvWelcome"
@@ -97,7 +104,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"
-                    android:textColor="@color/NavyText"
+                    android:textColor="@color/white"
                     android:textSize="13sp"
                     android:textStyle="bold"
                     android:singleLine="true"
@@ -222,6 +229,33 @@
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="منشورات وإعلانات\nالمحكمة" android:textColor="@color/NavyText" android:textSize="13sp" android:textStyle="bold" android:gravity="center" />
             </LinearLayout>
         </GridLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="تصميم وبرمجة"
+            android:textColor="@color/NavyText"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginTop="4dp" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="المهندس/احمد حسين محسون"
+            android:textColor="@color/NavyText"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:gravity="center" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="771421919-7374840710"
+            android:textColor="@color/NavyText"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layoutDirection="ltr" />
 
         <LinearLayout
             android:layout_width="match_parent"
