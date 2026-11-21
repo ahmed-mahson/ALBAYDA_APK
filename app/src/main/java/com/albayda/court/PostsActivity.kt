@@ -11,6 +11,8 @@ import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
 import android.view.View
+import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.albayda.court.data.AuthManager
@@ -49,6 +51,9 @@ class PostsActivity : AppCompatActivity() {
             SyncManager.refresh()
             binding.pbPosts.postDelayed({ binding.pbPosts.visibility = View.GONE }, 1500)
         }
+        binding.navHome.setOnClickListener { finish() }
+        binding.navAdmin.setOnClickListener { startActivity(Intent(this, AdminActivity::class.java)) }
+        binding.navAccount.setOnClickListener { showAccountDialog() }
 
         binding.ivPickPostImage.setOnClickListener {
             if (!isPrimaryAdminNow()) {
@@ -197,8 +202,48 @@ class PostsActivity : AppCompatActivity() {
                 source.copyTo(File(dir, name), overwrite = true)
             }
             Toast.makeText(this, "تم تحميل الصورة بنجاح", Toast.LENGTH_SHORT).show()
-        } catch (_: Exception) {
-            Toast.makeText(this, "تعذر تحميل الصورة", Toast.LENGTH_SHORT).show()
+                } catch (_: Exception) {
+            Toast.makeText(this, "???? ??? ??????", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun showAccountDialog() {
+        val current = AuthManager.getSession() ?: return
+        val view = layoutInflater.inflate(R.layout.dialog_account, null)
+        val tvUsername = view.findViewById<android.widget.TextView>(R.id.tvAccountUsername)
+        val tvMobile = view.findViewById<android.widget.TextView>(R.id.tvAccountMobile)
+        val tvStatus = view.findViewById<android.widget.TextView>(R.id.tvAccountStatus)
+        val etNewUsername = view.findViewById<android.widget.EditText>(R.id.etNewUsername)
+        val etNewPassword = view.findViewById<android.widget.EditText>(R.id.etNewPassword)
+        val btnSave = view.findViewById<android.view.View>(R.id.btnSaveAccount)
+        val btnClose = view.findViewById<android.view.View>(R.id.btnCloseAccount)
+        fun bindInfo() {
+            val user = AuthManager.getSession() ?: current
+            tvUsername.text = "??? ????????: ${user.username}"
+            tvMobile.text = "??? ??????: ${user.mobile}"
+            tvStatus.text = if (user.isApproved) "???? ??????: ?????" else "???? ??????: ??????? ????????"
+            etNewUsername.setText(user.username)
+            etNewUsername.setSelection(etNewUsername.text?.length ?: 0)
+        }
+        bindInfo()
+        val dialog = androidx.appcompat.app.AlertDialog.Builder(this).setView(view).setCancelable(true).create()
+        btnSave.setOnClickListener {
+            val user = AuthManager.getSession() ?: current
+            val newUsername = etNewUsername.text.toString().trim()
+            val newPassword = etNewPassword.text.toString()
+            var changed = false
+            if (newUsername.isNotBlank() && newUsername != user.username) {
+                if (AuthManager.updateUsername(user.mobile, newUsername)) changed = true
+                else { Toast.makeText(this, "???? ????? ??? ????????", Toast.LENGTH_SHORT).show(); return@setOnClickListener }
+            }
+            if (newPassword.isNotBlank()) {
+                if (newPassword.length < 4) { Toast.makeText(this, "???? ?????? ?????", Toast.LENGTH_SHORT).show(); return@setOnClickListener }
+                if (AuthManager.updatePassword(user.mobile, newPassword)) changed = true
+            }
+            if (changed) { Toast.makeText(this, "?? ??? ?????????", Toast.LENGTH_SHORT).show(); bindInfo() }
+            else Toast.makeText(this, "?? ???? ???????", Toast.LENGTH_SHORT).show()
+        }
+        btnClose.setOnClickListener { dialog.dismiss() }
+        dialog.show()
     }
 }

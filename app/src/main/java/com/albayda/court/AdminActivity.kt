@@ -33,6 +33,9 @@ class AdminActivity : AppCompatActivity() {
         binding.btnOpenPosts.setOnClickListener {
             startActivity(Intent(this, PostsActivity::class.java))
         }
+        binding.navHome.setOnClickListener { finish() }
+        binding.navAdmin.setOnClickListener { }
+        binding.navAccount.setOnClickListener { showAccountDialog() }
 
         binding.etNews.setText(SyncManager.getNews().first)
 
@@ -99,5 +102,45 @@ class AdminActivity : AppCompatActivity() {
                 "• ${it.title}\n${it.body}\n${it.timestamp.replace('T', ' ')}"
             }
         }
+    }
+
+    private fun showAccountDialog() {
+        val current = AuthManager.getSession() ?: return
+        val view = layoutInflater.inflate(R.layout.dialog_account, null)
+        val tvUsername = view.findViewById<android.widget.TextView>(R.id.tvAccountUsername)
+        val tvMobile = view.findViewById<android.widget.TextView>(R.id.tvAccountMobile)
+        val tvStatus = view.findViewById<android.widget.TextView>(R.id.tvAccountStatus)
+        val etNewUsername = view.findViewById<android.widget.EditText>(R.id.etNewUsername)
+        val etNewPassword = view.findViewById<android.widget.EditText>(R.id.etNewPassword)
+        val btnSave = view.findViewById<android.view.View>(R.id.btnSaveAccount)
+        val btnClose = view.findViewById<android.view.View>(R.id.btnCloseAccount)
+        fun bindInfo() {
+            val user = AuthManager.getSession() ?: current
+            tvUsername.text = "اسم المستخدم: ${user.username}"
+            tvMobile.text = "رقم الجوال: ${user.mobile}"
+            tvStatus.text = if (user.isApproved) "حالة الحساب: معتمد" else "حالة الحساب: بانتظار الموافقة"
+            etNewUsername.setText(user.username)
+            etNewUsername.setSelection(etNewUsername.text?.length ?: 0)
+        }
+        bindInfo()
+        val dialog = AlertDialog.Builder(this).setView(view).setCancelable(true).create()
+        btnSave.setOnClickListener {
+            val user = AuthManager.getSession() ?: current
+            val newUsername = etNewUsername.text.toString().trim()
+            val newPassword = etNewPassword.text.toString()
+            var changed = false
+            if (newUsername.isNotBlank() && newUsername != user.username) {
+                if (AuthManager.updateUsername(user.mobile, newUsername)) changed = true
+                else { Toast.makeText(this, "تعذر تحديث اسم المستخدم", Toast.LENGTH_SHORT).show(); return@setOnClickListener }
+            }
+            if (newPassword.isNotBlank()) {
+                if (newPassword.length < 4) { Toast.makeText(this, "كلمة المرور قصيرة", Toast.LENGTH_SHORT).show(); return@setOnClickListener }
+                if (AuthManager.updatePassword(user.mobile, newPassword)) changed = true
+            }
+            if (changed) { Toast.makeText(this, "تم حفظ التعديلات", Toast.LENGTH_SHORT).show(); bindInfo() }
+            else Toast.makeText(this, "لا توجد تغييرات", Toast.LENGTH_SHORT).show()
+        }
+        btnClose.setOnClickListener { dialog.dismiss() }
+        dialog.show()
     }
 }

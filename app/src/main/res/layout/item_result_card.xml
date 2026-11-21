@@ -5,9 +5,9 @@
     android:layout_height="wrap_content"
     android:layout_marginBottom="12dp"
     app:cardCornerRadius="16dp"
-    app:cardElevation="2dp"
-    app:cardBackgroundColor="@color/CardBg"
-    app:strokeColor="@color/CardBorder"
+    app:cardElevation="0dp"
+    app:cardBackgroundColor="@color/figma_surface"
+    app:strokeColor="@color/figma_border"
     app:strokeWidth="1dp">
 
     <LinearLayout
@@ -20,16 +20,16 @@
             android:id="@+id/tvMain"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/NavyText"
-            android:textSize="18sp"
+            android:textColor="@color/figma_text"
+            android:textSize="16sp"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tvSub"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/TextDark"
-            android:textSize="14sp"
+            android:textColor="@color/figma_muted"
+            android:textSize="13sp"
             android:layout_marginTop="4dp" />
 
         <LinearLayout
@@ -42,23 +42,25 @@
             <Button
                 android:id="@+id/btnDownloadPdf"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="44dp"
                 android:layout_weight="1"
                 android:text="تحميل PDF"
-                style="@style/Widget.Material3.Button"
-                android:backgroundTint="@color/GoldButton"
-                android:textColor="@color/TextDark" />
+                android:background="@drawable/bg_figma_button"
+                android:backgroundTint="@null"
+                app:backgroundTint="@null"
+                android:textColor="@color/white"
+                android:textStyle="bold" />
 
             <Button
                 android:id="@+id/btnCreateAttendance"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="44dp"
                 android:layout_weight="1"
                 android:layout_marginStart="8dp"
                 android:text="إنشاء إعلان حضور"
                 android:visibility="gone"
                 style="@style/Widget.Material3.Button.OutlinedButton"
-                android:textColor="@color/IconBlue" />
+                android:textColor="@color/figma_teal" />
         </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

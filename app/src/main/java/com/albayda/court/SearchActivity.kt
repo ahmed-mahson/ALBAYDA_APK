@@ -8,6 +8,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
+import com.albayda.court.data.AuthManager
 import com.albayda.court.data.CaseRecord
 import com.albayda.court.data.CaseRecordsRepository
 import com.albayda.court.data.SupremeCourtRepository
@@ -37,6 +38,11 @@ class SearchActivity : AppCompatActivity() {
             else -> "بحث"
         }
         binding.btnBack.setOnClickListener { finish() }
+        binding.navHome.setOnClickListener { finish() }
+        binding.navAccount.setOnClickListener { showAccountDialog() }
+        binding.navAdmin.setOnClickListener {
+            startActivity(android.content.Intent(this, AdminActivity::class.java))
+        }
         setHeaderIcon()
         setupDatePicker()
         configureFields()
@@ -394,9 +400,9 @@ class SearchActivity : AppCompatActivity() {
     private fun addResultText(text: String) {
         val tv = TextView(this).apply {
             this.text = text
-            setTextColor(getColor(R.color.NavyText))
-            textSize = 16f
-            setPadding(16, 16, 16, 8)
+            setTextColor(getColor(R.color.figma_text))
+            textSize = 15f
+            setPadding(12, 12, 12, 8)
             typeface = android.graphics.Typeface.DEFAULT_BOLD
         }
         binding.resultsContainer.addView(tv)
@@ -477,6 +483,49 @@ class SearchActivity : AppCompatActivity() {
             "supreme" -> "معلومات القضية ${safe(caseNo)} بالمحكمة العليا"
             else -> "معلومات القضية ${safe(caseNo)}"
         }
+    }
+
+    private fun showAccountDialog() {
+        AuthManager.init(this)
+        val current = AuthManager.getSession() ?: return
+        val view = layoutInflater.inflate(R.layout.dialog_account, null)
+        val tvUsername = view.findViewById<TextView>(R.id.tvAccountUsername)
+        val tvMobile = view.findViewById<TextView>(R.id.tvAccountMobile)
+        val tvStatus = view.findViewById<TextView>(R.id.tvAccountStatus)
+        val etNewUsername = view.findViewById<EditText>(R.id.etNewUsername)
+        val etNewPassword = view.findViewById<EditText>(R.id.etNewPassword)
+        val btnSave = view.findViewById<View>(R.id.btnSaveAccount)
+        val btnClose = view.findViewById<View>(R.id.btnCloseAccount)
+
+        fun bindInfo() {
+            val user = AuthManager.getSession() ?: current
+            tvUsername.text = "اسم المستخدم: ${user.username}"
+            tvMobile.text = "رقم الجوال: ${user.mobile}"
+            tvStatus.text = if (user.isApproved) "حالة الحساب: معتمد" else "حالة الحساب: بانتظار الموافقة"
+            etNewUsername.setText(user.username)
+            etNewUsername.setSelection(etNewUsername.text?.length ?: 0)
+        }
+        bindInfo()
+
+        val dialog = androidx.appcompat.app.AlertDialog.Builder(this).setView(view).setCancelable(true).create()
+        btnSave.setOnClickListener {
+            val user = AuthManager.getSession() ?: current
+            val newUsername = etNewUsername.text.toString().trim()
+            val newPassword = etNewPassword.text.toString()
+            var changed = false
+            if (newUsername.isNotBlank() && newUsername != user.username) {
+                if (AuthManager.updateUsername(user.mobile, newUsername)) changed = true
+                else { Toast.makeText(this, "تعذر تحديث اسم المستخدم", Toast.LENGTH_SHORT).show(); return@setOnClickListener }
+            }
+            if (newPassword.isNotBlank()) {
+                if (newPassword.length < 4) { Toast.makeText(this, "كلمة المرور قصيرة", Toast.LENGTH_SHORT).show(); return@setOnClickListener }
+                if (AuthManager.updatePassword(user.mobile, newPassword)) changed = true
+            }
+            if (changed) { Toast.makeText(this, "تم حفظ التعديلات", Toast.LENGTH_SHORT).show(); bindInfo() }
+            else Toast.makeText(this, "لا توجد تغييرات", Toast.LENGTH_SHORT).show()
+        }
+        btnClose.setOnClickListener { dialog.dismiss() }
+        dialog.show()
     }
 
     override fun onDestroy() {
