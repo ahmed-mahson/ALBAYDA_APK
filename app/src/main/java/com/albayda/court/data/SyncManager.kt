@@ -111,7 +111,6 @@ object SyncManager {
             if (imageBytes != null) put("image", Base64.encodeToString(imageBytes, Base64.NO_WRAP))
         }
         queue("post", payload, ts)
-        runCatching { FirebaseSync.publishAnnouncement(post, imageBytes) }
         runCatching { DriveCsvSync.pushAsync() }
         notifyListeners()
         return id
@@ -121,7 +120,6 @@ object SyncManager {
         db.deletePost(id)
         db.setMeta("deleted_post_$id", now())
         queue("post_delete", JSONObject().put("id", id), now())
-        runCatching { FirebaseSync.deleteAnnouncement(id) }
         runCatching { DriveCsvSync.pushAsync() }
         refresh()
         notifyListeners()
@@ -131,7 +129,6 @@ object SyncManager {
         val ts = now()
         db.setNews(text, ts)
         queue("news", JSONObject().put("text", text).put("timestamp", ts), ts)
-        runCatching { FirebaseSync.publishTicker(text) }
         runCatching { DriveCsvSync.pushAsync() }
         notifyListeners()
     }
@@ -148,7 +145,6 @@ object SyncManager {
                 .put("created_at", ts),
             ts
         )
-        runCatching { FirebaseSync.publishUserRegistered(username, mobile) }
         runCatching { DriveCsvSync.pushAsync() }
         refresh()
     }
@@ -160,7 +156,6 @@ object SyncManager {
             JSONObject().put("mobile", mobile).put("approved", approved).put("timestamp", ts),
             ts
         )
-        runCatching { FirebaseSync.publishUserApproved(mobile, approved) }
         runCatching { DriveCsvSync.pushAsync() }
         refresh()
     }
@@ -177,15 +172,13 @@ object SyncManager {
                 .put("timestamp", ts),
             ts
         )
-        runCatching { FirebaseSync.publishUserUpdated(username, mobile, passwordHash) }
         runCatching { DriveCsvSync.pushAsync() }
         refresh()
     }
 
     fun notifyUserDeleted(mobile: String) {
         val ts = now()
-        // Rejected/deleted users are removed locally; mirror deletion to Firestore/Drive sync.
-        runCatching { FirebaseSync.publishUserDeleted(mobile) }
+        // Rejected/deleted users are removed locally; mirror deletion to Drive CSV sync.
         db.setMeta("user_event_ts_$mobile", ts)
         runCatching { DriveCsvSync.pushAsync() }
         refresh()
