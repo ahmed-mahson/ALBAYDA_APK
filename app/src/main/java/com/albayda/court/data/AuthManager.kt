@@ -31,6 +31,13 @@ object AuthManager {
     private const val PREF_NAME = "auth_secure_prefs"
     private lateinit var prefs: android.content.SharedPreferences
     private val gson = Gson()
+    @Volatile private var applyingRemote = false
+
+    fun <T> withRemoteApply(block: () -> T): T {
+        val prev = applyingRemote
+        applyingRemote = true
+        try { return block() } finally { applyingRemote = prev }
+    }
 
     fun init(context: Context) {
         try {
@@ -181,6 +188,7 @@ object AuthManager {
             saveUsers(users)
             val u = users[index]
             addLog(UserLog(now(), u.username, u.mobile, if (approve) "اعتماد مستخدم" else "رفض/تعطيل مستخدم", ""))
+            if (!applyingRemote) runCatching { SyncManager.notifyUserApproved(mobile, approve) }
         }
     }
 
@@ -191,6 +199,7 @@ object AuthManager {
             users.removeAll { it.mobile == mobile }
             saveUsers(users)
             addLog(UserLog(now(), u.username, u.mobile, "رفض مستخدم", "تم حذف الطلب"))
+            if (!applyingRemote) runCatching { SyncManager.notifyUserDeleted(mobile) }
         }
     }
 

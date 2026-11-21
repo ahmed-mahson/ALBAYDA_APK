@@ -103,6 +103,7 @@ object SyncManager {
         val path = imagePath ?: saveImage(id, imageBytes)
         val post = CourtPost(id, author, details, path, ts)
         db.insertPost(post)
+        db.setMeta("drive_csv_post_ts_$id", ts)
         val payload = JSONObject().apply {
             put("id", id)
             put("author", author)
@@ -117,9 +118,11 @@ object SyncManager {
     }
 
     fun deletePost(id: String) {
+        val ts = now()
         db.deletePost(id)
-        db.setMeta("deleted_post_$id", now())
-        queue("post_delete", JSONObject().put("id", id), now())
+        db.setMeta("deleted_post_$id", ts)
+        db.setMeta("drive_csv_post_ts_$id", ts)
+        queue("post_delete", JSONObject().put("id", id), ts)
         runCatching { DriveCsvSync.pushAsync() }
         refresh()
         notifyListeners()
@@ -128,6 +131,7 @@ object SyncManager {
     fun setNews(text: String) {
         val ts = now()
         db.setNews(text, ts)
+        db.setMeta("drive_csv_news_ts", ts)
         queue("news", JSONObject().put("text", text).put("timestamp", ts), ts)
         runCatching { DriveCsvSync.pushAsync() }
         notifyListeners()
@@ -136,6 +140,7 @@ object SyncManager {
     fun notifyUserRegistered(username: String, mobile: String) {
         val ts = now()
         val hash = AuthManager.findByMobile(mobile)?.passwordHash.orEmpty()
+        db.setMeta("drive_csv_user_ts_$mobile", ts)
         queue(
             "user_register",
             JSONObject()
@@ -151,6 +156,7 @@ object SyncManager {
 
     fun notifyUserApproved(mobile: String, approved: Boolean) {
         val ts = now()
+        db.setMeta("drive_csv_user_ts_$mobile", ts)
         queue(
             "user_approved",
             JSONObject().put("mobile", mobile).put("approved", approved).put("timestamp", ts),
@@ -163,6 +169,7 @@ object SyncManager {
     /** Broadcasts a username/password change so every device can log in with the new data. */
     fun notifyUserUpdated(username: String, mobile: String, passwordHash: String) {
         val ts = now()
+        db.setMeta("drive_csv_user_ts_$mobile", ts)
         queue(
             "user_updated",
             JSONObject()
@@ -180,6 +187,9 @@ object SyncManager {
         val ts = now()
         // Rejected/deleted users are removed locally; mirror deletion to Drive CSV sync.
         db.setMeta("user_event_ts_$mobile", ts)
+        db.setMeta("drive_csv_user_ts_$mobile", ts)
+        db.setMeta("deleted_user_$mobile", ts)
+        runCatching { DriveCsvSync.markUserDeleted(mobile, ts) }
         runCatching { DriveCsvSync.pushAsync() }
         refresh()
     }

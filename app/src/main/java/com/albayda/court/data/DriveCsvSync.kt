@@ -14,6 +14,9 @@ import java.util.Locale
 import java.util.TimeZone
 import java.util.UUID
 import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Syncs users, posts (announcements), and news ticker with a Google Drive CSV file.
@@ -32,6 +35,8 @@ object DriveCsvSync {
 
     private lateinit var appContext: Context
     private val executor = Executors.newSingleThreadExecutor()
+    private var scheduler: ScheduledExecutorService? = null
+    private val scheduled = AtomicBoolean(false)
     private val iso = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US).apply {
         timeZone = TimeZone.getTimeZone("UTC")
     }
@@ -43,8 +48,21 @@ object DriveCsvSync {
     )
 
     fun init(context: Context) {
-        if (::appContext.isInitialized) return
+        if (::appContext.isInitialized) {
+            schedulePeriodic()
+            return
+        }
         appContext = context.applicationContext
+        schedulePeriodic()
+    }
+
+    private fun schedulePeriodic() {
+        if (scheduled.getAndSet(true)) return
+        scheduler = Executors.newSingleThreadScheduledExecutor().also { s ->
+            s.scheduleWithFixedDelay({
+                runCatching { refreshAsync() }
+            }, 30, 60, TimeUnit.SECONDS)
+        }
     }
 
     fun fileId(): String = prefs().getString(KEY_FILE_ID, DEFAULT_FILE_ID)?.trim().orEmpty().ifBlank { DEFAULT_FILE_ID }
@@ -93,29 +111,32 @@ object DriveCsvSync {
             if (updatedAt.isNotBlank() && prev.isNotBlank() && updatedAt <= prev) continue
             if (updatedAt.isNotBlank()) SyncManager.db.setMeta(metaKey, updatedAt)
 
-            val existing = AuthManager.findByMobile(mobile)
-            if (deleted) {
-                if (existing != null && !AuthManager.isPrimaryAdmin(existing)) {
-                    AuthManager.rejectUser(mobile)
-                    changed = true
-                }
-            } else {
-                AuthManager.upsertRemoteUser(username, mobile, passwordHash, createdAt)
-                val after = AuthManager.findByMobile(mobile)
-                if (after != null && !AuthManager.isPrimaryAdmin(after)) {
-                    AuthManager.setApproved(mobile, isApproved)
-                }
-                // preserve admin flag if explicitly provided and not primary-admin conflict
-                if (isAdmin && after != null && !after.isAdmin) {
-                    val all = AuthManager.getUsers().toMutableList()
-                    val idx = all.indexOfFirst { it.mobile == mobile }
-                    if (idx >= 0) {
-                        all[idx] = all[idx].copy(isAdmin = true, isApproved = true)
-                        saveUsersReflectively(all)
+            val userChanged = AuthManager.withRemoteApply {
+                val existing = AuthManager.findByMobile(mobile)
+                if (deleted) {
+                    if (existing != null && !AuthManager.isPrimaryAdmin(existing)) {
+                        AuthManager.rejectUser(mobile)
+                        true
+                    } else false
+                } else {
+                    AuthManager.upsertRemoteUser(username, mobile, passwordHash, createdAt)
+                    val after = AuthManager.findByMobile(mobile)
+                    if (after != null && !AuthManager.isPrimaryAdmin(after)) {
+                        AuthManager.setApproved(mobile, isApproved)
                     }
+                    // preserve admin flag if explicitly provided and not primary-admin conflict
+                    if (isAdmin && after != null && !after.isAdmin) {
+                        val all = AuthManager.getUsers().toMutableList()
+                        val idx = all.indexOfFirst { it.mobile == mobile }
+                        if (idx >= 0) {
+                            all[idx] = all[idx].copy(isAdmin = true, isApproved = true)
+                            saveUsersReflectively(all)
+                        }
+                    }
+                    true
                 }
-                changed = true
             }
+            if (userChanged) changed = true
         }
 
         val posts = records.filter { it["record_type"] == "post" }
@@ -217,7 +238,36 @@ object DriveCsvSync {
             row["updated_at"] = news.second.ifBlank { nowIso() }
             sb.append(HEADER.joinToString(",") { csvEscape(row[it].orEmpty()) }).append("\n")
         }
+
+        val deletedUsers = deletedUserTombstones()
+        for ((mobile, ts) in deletedUsers) {
+            if (users.any { it.mobile == mobile }) continue
+            val row = mutableMapOf<String, String>()
+            row["record_type"] = "user"
+            row["mobile"] = mobile
+            row["updated_at"] = ts
+            row["deleted"] = "1"
+            sb.append(HEADER.joinToString(",") { csvEscape(row[it].orEmpty()) }).append("\n")
+        }
         return sb.toString()
+    }
+
+    private fun deletedUserTombstones(): Map<String, String> {
+        return try {
+            val raw = SyncManager.db.getMeta("drive_csv_deleted_users", "{}")
+            val obj = JSONObject(raw)
+            obj.keys().asSequence().associateWith { k -> obj.optString(k, "") }.filterValues { it.isNotBlank() }
+        } catch (_: Exception) { emptyMap() }
+    }
+
+    fun markUserDeleted(mobile: String, ts: String = nowIso()) {
+        if (mobile.isBlank()) return
+        try {
+            val raw = SyncManager.db.getMeta("drive_csv_deleted_users", "{}")
+            val obj = JSONObject(raw)
+            obj.put(mobile, ts)
+            SyncManager.db.setMeta("drive_csv_deleted_users", obj.toString())
+        } catch (_: Exception) { }
     }
 
     private fun saveUsersReflectively(users: List<User>) {
