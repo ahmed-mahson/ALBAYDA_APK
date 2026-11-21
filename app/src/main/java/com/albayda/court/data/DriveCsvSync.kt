@@ -32,6 +32,7 @@ object DriveCsvSync {
     private const val KEY_WRITE_URL = "drive_csv_sync_write_url"
     private const val KEY_LAST_PULL = "drive_csv_sync_last_pull"
     private const val DEFAULT_FILE_ID = "1d_3-M6wTNOcUB1bCOTILh4di6XFGlgCT"
+    private const val DEFAULT_WRITE_URL = "https://script.google.com/macros/s/AKfycbxT8sxQuJ5ew0wr1CVs3JdLQ7RdBthM7tYk6Mc1G7oPmAvch9I4mEwnm57RyHH-J0VQaw/exec"
 
     private lateinit var appContext: Context
     private val executor = Executors.newSingleThreadExecutor()
@@ -68,7 +69,7 @@ object DriveCsvSync {
     fun fileId(): String = prefs().getString(KEY_FILE_ID, DEFAULT_FILE_ID)?.trim().orEmpty().ifBlank { DEFAULT_FILE_ID }
     fun setFileId(id: String) { prefs().edit().putString(KEY_FILE_ID, id.trim().ifBlank { DEFAULT_FILE_ID }).apply() }
 
-    fun writeUrl(): String = prefs().getString(KEY_WRITE_URL, "")?.trim().orEmpty()
+    fun writeUrl(): String = prefs().getString(KEY_WRITE_URL, "")?.trim().orEmpty().ifBlank { DEFAULT_WRITE_URL }
     fun setWriteUrl(url: String) { prefs().edit().putString(KEY_WRITE_URL, url.trim()).apply() }
 
     private fun prefs() = appContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
@@ -346,15 +347,37 @@ object DriveCsvSync {
 
     private fun postCsv(endpoint: String, csv: String) {
         try {
-            val conn = URL(endpoint).openConnection() as HttpURLConnection
-            conn.requestMethod = "POST"
-            conn.connectTimeout = 20000
-            conn.readTimeout = 20000
-            conn.doOutput = true
-            conn.setRequestProperty("Content-Type", "text/plain; charset=utf-8")
-            OutputStreamWriter(conn.outputStream, Charsets.UTF_8).use { it.write(csv) }
-            conn.responseCode
-            conn.disconnect()
+            var currentUrl = endpoint
+            var method = "POST"
+            var body: String? = csv
+            for (i in 0..3) {
+                val conn = URL(currentUrl).openConnection() as HttpURLConnection
+                conn.instanceFollowRedirects = false
+                conn.requestMethod = method
+                conn.connectTimeout = 20000
+                conn.readTimeout = 20000
+                conn.setRequestProperty("User-Agent", "Mozilla/5.0")
+                if (body != null) {
+                    conn.doOutput = true
+                    conn.setRequestProperty("Content-Type", "text/plain; charset=utf-8")
+                    OutputStreamWriter(conn.outputStream, Charsets.UTF_8).use { it.write(body) }
+                }
+                val code = conn.responseCode
+                val location = conn.getHeaderField("Location")
+                val response = runCatching {
+                    (if (code in 200..299) conn.inputStream else conn.errorStream)?.bufferedReader()?.use { it.readText() }.orEmpty()
+                }.getOrDefault("")
+                conn.disconnect()
+                if (code in 300..399 && !location.isNullOrBlank()) {
+                    currentUrl = location
+                    method = "GET"
+                    body = null
+                    continue
+                }
+                if (code in 200..299) return
+                // non-success, stop retrying
+                return
+            }
         } catch (_: Exception) { }
     }
 
