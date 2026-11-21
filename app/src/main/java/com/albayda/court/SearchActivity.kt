@@ -311,7 +311,17 @@ class SearchActivity : AppCompatActivity() {
         results.forEachIndexed { idx, r ->
             val map = linkedMapOf<String, String>()
             r.rows.forEach { map[it.first] = it.second }
-            addGenericCard("نتيجة ${idx + 1}", map)
+            val sms = map["الرقم الخاص بخدمة الرسائل القصيرة"]
+                ?: map["الرقم الخاص بخدمة SMS"]
+                ?: map.entries.firstOrNull { it.key.contains("SMS") || it.key.contains("الرسائل") }?.value
+                ?: ""
+            val appellant = map["الطاعن/الملتمس"] ?: map.entries.firstOrNull()?.value.orEmpty()
+            val title = when {
+                sms.isNotBlank() -> "قضية المحكمة العليا - $sms"
+                appellant.isNotBlank() -> "قضية المحكمة العليا - ${appellant.take(40)}"
+                else -> "نتيجة ${idx + 1}"
+            }
+            addGenericCard(title, map)
         }
     }
 
