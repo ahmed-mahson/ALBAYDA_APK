@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://android.com"
-    xmlns:app="http://android.com"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -17,29 +17,57 @@
         android:elevation="6dp"
         android:padding="12dp">
 
-        <FrameLayout
-            android:id="@+id/topHeaderCard"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="0dp"
-            android:elevation="6dp"
-            android:background="@android:color/transparent"
-            android:clipChildren="false"
-            android:clipToPadding="false">
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layoutDirection="rtl">
 
             <ImageView
-                android:id="@+id/ivHeaderArtwork"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:adjustViewBounds="true"
-                android:contentDescription="رأس تطبيق تقنية معلومات ومحكمة البيضاء الابتدائية"
+                android:id="@+id/ivLogoHeader"
+                android:layout_width="96dp"
+                android:layout_height="96dp"
+                android:src="@drawable/logo_court"
+                android:contentDescription="@string/logo_desc"
                 android:scaleType="fitCenter"
-                android:src="@drawable/albayda_court_header_large_unified_glow"
-                android:importantForAccessibility="yes"
-                android:padding="0dp"
-                android:background="@android:color/transparent" />
+                android:elevation="8dp"
+                android:outlineAmbientShadowColor="#D4AF37"
+                android:outlineSpotShadowColor="#D4AF37" />
 
-        </FrameLayout>
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <TextView
+                    android:id="@+id/tvHeaderTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="تقنية معلومات\nمحكمة البيضاء الابتدائية"
+                    android:textColor="#D4AF37"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:lineSpacingExtra="2dp"
+                    android:gravity="center"
+                    android:shadowColor="#80D4AF37"
+                    android:shadowDx="0"
+                    android:shadowDy="0"
+                    android:shadowRadius="8" />
+
+                <TextView
+                    android:id="@+id/tvWelcome"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="مرحباً بك"
+                    android:textColor="@color/IconBlue"
+                    android:textSize="12sp"
+                    android:gravity="center"
+                    android:layout_marginTop="2dp" />
+            </LinearLayout>
+        </LinearLayout>
 
         <!-- News ticker -->
         <LinearLayout
@@ -198,3 +226,88 @@
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground">
                 <ImageView android:layout_width="52dp" android:layout_height="52dp" android:src="@drawable/ic_posts" android:scaleType="fitCenter" android:contentDescription="منشورات واعلانات المحكمة" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="منشورات وإعلانات\nالمحكمة" android:textColor="@color/NavyText" android:textSize="13sp" android:textStyle="bold" android:gravity="center" />
+            </LinearLayout>
+        </GridLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="تصميم وبرمجة"
+            android:textColor="@color/NavyText"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginTop="4dp" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="المهندس/احمد حسين محسون"
+            android:textColor="@color/NavyText"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:gravity="center" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="771421919-7374840710"
+            android:textColor="@color/NavyText"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layoutDirection="ltr" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginTop="2dp">
+
+            <ImageView
+                android:id="@+id/tvWhatsapp"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/ic_whatsapp"
+                android:contentDescription="واتساب"
+                android:padding="2dp" />
+
+            <ImageView
+                android:id="@+id/tvTelegram"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginStart="16dp"
+                android:src="@drawable/ic_telegram"
+                android:contentDescription="تيليجرام"
+                android:padding="2dp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Bottom navigation (white, IconBlue, as per theme) -->
+    <LinearLayout
+        android:id="@+id/bottomNav"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:orientation="horizontal"
+        android:layoutDirection="rtl"
+        android:background="@color/white"
+        android:elevation="8dp"
+        android:weightSum="3">
+
+        <LinearLayout android:id="@+id/navAdmin" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:orientation="vertical" android:clickable="true" android:focusable="true" android:foreground="?attr/selectableItemBackground">
+            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@android:drawable/ic_menu_manage" app:tint="@color/HeaderTeal" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="الإدارة" android:textColor="@color/HeaderTeal" android:textSize="12sp" android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout android:id="@+id/navAccount" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:orientation="vertical" android:clickable="true" android:focusable="true" android:foreground="?attr/selectableItemBackground">
+            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@android:drawable/ic_menu_myplaces" app:tint="@color/HeaderTeal" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="حسابي" android:textColor="@color/HeaderTeal" android:textSize="12sp" android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout android:id="@+id/navLogout" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:orientation="vertical" android:clickable="true" android:focusable="true" android:foreground="?attr/selectableItemBackground">
+            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@android:drawable/ic_lock_power_off" app:tint="@color/HeaderTeal" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="خروج" android:textColor="@color/HeaderTeal" android:textSize="12sp" android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>
