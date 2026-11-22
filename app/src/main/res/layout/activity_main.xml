@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://android.com"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://android.com"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -9,71 +9,80 @@
     android:layoutDirection="rtl">
 
     <!-- Top header card -->
-    <FrameLayout
-        android:id="@+id/topHeaderCard"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="0dp"
-        android:background="@android:color/transparent"
-        android:elevation="6dp"
-        android:clipChildren="false"
-        android:clipToPadding="false">
-
-        <ImageView
-            android:id="@+id/ivLogoHeader"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:adjustViewBounds="true"
-            android:background="@android:color/transparent"
-            android:contentDescription="رأس تطبيق تقنية معلومات ومحكمة البيضاء الابتدائية"
-            android:importantForAccessibility="yes"
-            android:padding="0dp"
-            android:scaleType="fitCenter"
-            android:src="@drawable/albayda_court_header_large_unified_glow" />
-
-    </FrameLayout>
-
-    <!-- News ticker -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="42dp"
-        android:layout_marginTop="8dp"
-        android:orientation="horizontal"
-        android:layoutDirection="rtl"
-        android:background="@drawable/bg_ticker_bg"
-        android:clipToPadding="true">
-
-        <TextView
-            android:id="@+id/tvNewsTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:background="@drawable/bg_news_label"
-            android:gravity="center"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:text="آخر الأخبار"
-            android:textColor="@color/white"
-            android:textStyle="bold"
-            android:textSize="13sp" />
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/white"
+        android:elevation="6dp"
+        android:padding="12dp">
 
         <FrameLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp">
+            android:id="@+id/topHeaderCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="0dp"
+            android:elevation="6dp"
+            android:background="@android:color/transparent"
+            android:clipChildren="false"
+            android:clipToPadding="false">
 
-            <com.albayda.court.util.NewsTicker
-                android:id="@+id/newsTicker"
+            <ImageView
+                android:id="@+id/ivHeaderArtwork"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:textColor="@color/white"
-                android:textSize="13sp"
-                android:textStyle="bold"
-                android:singleLine="true"
-                android:ellipsize="none" />
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
+                android:contentDescription="رأس تطبيق تقنية معلومات ومحكمة البيضاء الابتدائية"
+                android:scaleType="fitCenter"
+                android:src="@drawable/albayda_court_header_large_unified_glow"
+                android:importantForAccessibility="yes"
+                android:padding="0dp"
+                android:background="@android:color/transparent" />
+
         </FrameLayout>
+
+        <!-- News ticker -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="42dp"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal"
+            android:layoutDirection="rtl"
+            android:background="@drawable/bg_ticker_bg"
+            android:clipToPadding="true">
+
+            <TextView
+                android:id="@+id/tvNewsTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_news_label"
+                android:gravity="center"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:text="آخر الأخبار"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                android:textSize="13sp" />
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp">
+
+                <com.albayda.court.util.NewsTicker
+                    android:id="@+id/newsTicker"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:textColor="@color/white"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:singleLine="true"
+                    android:ellipsize="none" />
+            </FrameLayout>
+        </LinearLayout>
     </LinearLayout>
 
     <!-- Main content -->
@@ -111,21 +120,8 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground">
-                <ImageView
-                    android:layout_width="52dp"
-                    android:layout_height="52dp"
-                    android:src="@drawable/ic_search_doc"
-                    android:scaleType="fitCenter"
-                    android:contentDescription="الاستعلام عن قضية" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="الاستعلام\nعن قضية"
-                    android:textColor="@color/NavyText"
-                    android:textSize="13sp"
-                    android:textStyle="bold"
-                    android:gravity="center" />
+                <ImageView android:layout_width="52dp" android:layout_height="52dp" android:src="@drawable/ic_search_doc" android:scaleType="fitCenter" android:contentDescription="الاستعلام عن قضية" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="الاستعلام\nعن قضية" android:textColor="@color/NavyText" android:textSize="13sp" android:textStyle="bold" android:gravity="center" />
             </LinearLayout>
 
             <LinearLayout
@@ -143,21 +139,8 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground">
-                <ImageView
-                    android:layout_width="52dp"
-                    android:layout_height="52dp"
-                    android:src="@drawable/ic_calendar"
-                    android:scaleType="fitCenter"
-                    android:contentDescription="الاستعلام عن الجلسات اليومية" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="الاستعلام عن\nالجلسات اليومية"
-                    android:textColor="@color/NavyText"
-                    android:textSize="13sp"
-                    android:textStyle="bold"
-                    android:gravity="center" />
+                <ImageView android:layout_width="52dp" android:layout_height="52dp" android:src="@drawable/ic_calendar" android:scaleType="fitCenter" android:contentDescription="الاستعلام عن الجلسات اليومية" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="الاستعلام عن\nالجلسات اليومية" android:textColor="@color/NavyText" android:textSize="13sp" android:textStyle="bold" android:gravity="center" />
             </LinearLayout>
 
             <LinearLayout
@@ -175,21 +158,8 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground">
-                <ImageView
-                    android:layout_width="52dp"
-                    android:layout_height="52dp"
-                    android:src="@drawable/ic_doc_add"
-                    android:scaleType="fitCenter"
-                    android:contentDescription="إنشاء إعلان حضور" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="إنشاء\nإعلان حضور"
-                    android:textColor="@color/NavyText"
-                    android:textSize="13sp"
-                    android:textStyle="bold"
-                    android:gravity="center" />
+                <ImageView android:layout_width="52dp" android:layout_height="52dp" android:src="@drawable/ic_doc_add" android:scaleType="fitCenter" android:contentDescription="إنشاء إعلان حضور" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="إنشاء\nإعلان حضور" android:textColor="@color/NavyText" android:textSize="13sp" android:textStyle="bold" android:gravity="center" />
             </LinearLayout>
 
             <LinearLayout
@@ -207,21 +177,8 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground">
-                <ImageView
-                    android:layout_width="52dp"
-                    android:layout_height="52dp"
-                    android:src="@drawable/ic_court"
-                    android:scaleType="fitCenter"
-                    android:contentDescription="الاستعلام عن القضايا بالمحكمة العليا" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="الاستعلام عن القضايا\nبالمحكمة العليا"
-                    android:textColor="@color/NavyText"
-                    android:textSize="13sp"
-                    android:textStyle="bold"
-                    android:gravity="center" />
+                <ImageView android:layout_width="52dp" android:layout_height="52dp" android:src="@drawable/ic_court" android:scaleType="fitCenter" android:contentDescription="الاستعلام عن القضايا بالمحكمة العليا" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="الاستعلام عن القضايا\nبالمحكمة العليا" android:textColor="@color/NavyText" android:textSize="13sp" android:textStyle="bold" android:gravity="center" />
             </LinearLayout>
 
             <LinearLayout
@@ -237,3 +194,7 @@
                 android:padding="10dp"
                 android:background="@drawable/bg_card_theme"
                 android:elevation="3dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+                <ImageView android:layout_width="52dp" android:layout_height="52dp" android:src="@drawable/ic_posts" android:scaleType="fitCenter" android:contentDescription="منشورات واعلانات المحكمة" />
