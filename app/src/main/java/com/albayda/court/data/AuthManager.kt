@@ -215,6 +215,12 @@ object AuthManager {
         return true
     }
 
+    fun removeRemoteUser(mobile: String) {
+        val users = getUsers().filterNot { it.mobile == mobile && !it.isAdmin }
+        saveUsers(users)
+        if (getSession()?.mobile == mobile) clearSession()
+    }
+
     fun addRemoteLog(log: UserLog) {
         val logs = getLogs().toMutableList()
         if (logs.none { it.time == log.time && it.mobile == log.mobile && it.action == log.action && it.details == log.details }) {
