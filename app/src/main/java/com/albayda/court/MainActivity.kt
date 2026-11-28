@@ -48,6 +48,7 @@ class MainActivity : AppCompatActivity() {
         binding.cardAttendance.setOnClickListener { openSearch("attendance") }
         binding.cardSessions.setOnClickListener { openSearch("sessions") }
         binding.cardSupreme.setOnClickListener { openSearch("supreme") }
+        binding.cardAppeal.setOnClickListener { startActivity(Intent(this, AppealCourtSearchActivity::class.java)) }
         binding.cardPosts.setOnClickListener { startActivity(Intent(this, PostsActivity::class.java)) }
 
         binding.tvWhatsapp.setOnClickListener {
