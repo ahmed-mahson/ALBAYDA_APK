@@ -194,6 +194,20 @@ object SyncManager {
         refresh()
     }
 
+    fun notifyUserSuspended(mobile: String, suspended: Boolean) {
+        val ts = now()
+        db.setMeta("user_event_ts_$mobile", ts)
+        queue("user_suspended", JSONObject().put("mobile", mobile).put("suspended", suspended), ts)
+        refresh()
+    }
+
+    fun publishAuditLog(log: UserLog) {
+        val ts = now()
+        queue("user_log", JSONObject().put("time", log.time).put("username", log.username)
+            .put("mobile", log.mobile).put("action", log.action).put("details", log.details), ts)
+        refresh()
+    }
+
     fun notifyUserDeleted(mobile: String) {
         val ts = now()
         // Rejected/deleted users are removed locally; mirror deletion to Drive CSV sync.
@@ -356,6 +370,24 @@ object SyncManager {
                             timestamp = ts.ifBlank { now() }
                         )
                     )
+                }
+            }
+            "user_suspended" -> {
+                val mobile = payload.optString("mobile")
+                if (mobile.isNotBlank() && isNewerUserEvent(mobile, ts)) {
+                    AuthManager.withRemoteApply { AuthManager.setUserSuspended(mobile, payload.optBoolean("suspended")) }
+                }
+            }
+            "user_log" -> {
+                AuthManager.addRemoteLog(UserLog(payload.optString("time", ts), payload.optString("username"),
+                    payload.optString("mobile"), payload.optString("action"), payload.optString("details")))
+            }
+            "admin_notification" -> {
+                val target = payload.optString("target")
+                val sessionMobile = AuthManager.getSession()?.mobile.orEmpty()
+                if (target == "ALL" || target == sessionMobile) {
+                    db.addNotification(SyncNotification(id, payload.optString("title"), payload.optString("body"),
+                        payload.optString("timestamp", ts)))
                 }
             }
             "user_updated" -> {
