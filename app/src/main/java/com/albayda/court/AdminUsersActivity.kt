@@ -26,6 +26,7 @@ class AdminUsersActivity : AppCompatActivity() {
     private lateinit var statsText: TextView
     private var users: List<User> = emptyList()
     private var reportLogs: List<UserLog> = emptyList()
+    private var dateFilter: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -96,6 +97,22 @@ class AdminUsersActivity : AppCompatActivity() {
             singleLine = true
         }
         content.addView(filter, full())
+        val dateActions = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        dateActions.addView(Button(this).apply {
+            text = "تصفية حسب التاريخ"
+            setOnClickListener {
+                val now = java.util.Calendar.getInstance()
+                android.app.DatePickerDialog(this@AdminUsersActivity, { _, year, month, day ->
+                    dateFilter = String.format(Locale.US, "%04d-%02d-%02d", year, month + 1, day)
+                    showLogs(filter.text.toString())
+                }, now.get(java.util.Calendar.YEAR), now.get(java.util.Calendar.MONTH), now.get(java.util.Calendar.DAY_OF_MONTH)).show()
+            }
+        }, LinearLayout.LayoutParams(0, dp(46), 1f))
+        dateActions.addView(Button(this).apply {
+            text = "إلغاء التاريخ"
+            setOnClickListener { dateFilter = ""; showLogs(filter.text.toString()) }
+        }, LinearLayout.LayoutParams(0, dp(46), 1f))
+        content.addView(dateActions, full())
         logsText = label("لا توجد سجلات")
         content.addView(logsText, full())
         filter.addTextChangedListener(object : TextWatcher {
@@ -210,7 +227,8 @@ class AdminUsersActivity : AppCompatActivity() {
 
     private fun showLogs(query: String) {
         reportLogs = AuthManager.getLogs().filter {
-            query.isBlank() || it.mobile.contains(query) || it.username.contains(query, true) || it.action.contains(query, true)
+            (dateFilter.isBlank() || it.time.startsWith(dateFilter)) &&
+                (query.isBlank() || it.mobile.contains(query) || it.username.contains(query, true) || it.action.contains(query, true))
         }
         logsText.text = reportLogs.take(300).joinToString("\n\n") {
             it.time + " | " + it.username + " (" + it.mobile + ")\n" + it.action +
