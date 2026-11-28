@@ -198,6 +198,7 @@ object AuthManager {
         val index = users.indexOfFirst { it.mobile == mobile && !it.isAdmin }
         if (index < 0) return false
         users[index] = users[index].copy(isApproved = !suspended, isSuspended = suspended)
+        if (suspended && getSession()?.mobile == mobile) clearSession()
         saveUsers(users)
         val user = users[index]
         addLog(UserLog(now(), user.username, mobile, if (suspended) "إيقاف مستخدم" else "إعادة تفعيل مستخدم", "بواسطة مسؤول النظام"))
