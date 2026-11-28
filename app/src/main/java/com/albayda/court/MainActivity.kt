@@ -21,8 +21,9 @@ import com.google.firebase.FirebaseApp
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
+    private var notificationDialogShowing = false
     private val syncListener: () -> Unit = {
-        runOnUiThread { if (AuthManager.getSession() == null) logout() else loadNews() }
+        runOnUiThread { if (AuthManager.getSession() == null) logout() else { loadNews(); showIncomingNotifications() } }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,6 +68,21 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         loadNews()
         SyncManager.refresh()
+        showIncomingNotifications()
+    }
+
+    private fun showIncomingNotifications() {
+        if (isFinishing || notificationDialogShowing) return
+        val unread = SyncManager.notifications().filter { !it.isRead }
+        if (unread.isEmpty()) return
+        notificationDialogShowing = true
+        val message = unread.joinToString("\n\n") { it.title + "\n" + it.body + "\n" + it.timestamp.replace('T', ' ') }
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("إشعارات الإدارة")
+            .setMessage(message)
+            .setPositiveButton("تمت القراءة") { _, _ -> SyncManager.markNotificationsRead() }
+            .setOnDismissListener { notificationDialogShowing = false }
+            .show()
     }
 
     private fun loadNews() {
