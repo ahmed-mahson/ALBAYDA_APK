@@ -94,7 +94,7 @@ class AdminUsersActivity : AppCompatActivity() {
         val filter = EditText(this).apply {
             hint = "تصفية بالاسم أو الهاتف أو نوع العملية"
             textSize = 14f
-            singleLine = true
+            setSingleLine(true)
         }
         content.addView(filter, full())
         val dateActions = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
