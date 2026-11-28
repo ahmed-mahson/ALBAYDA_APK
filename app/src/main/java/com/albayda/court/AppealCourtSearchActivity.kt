@@ -75,10 +75,10 @@ class AppealCourtSearchActivity : AppCompatActivity() {
             webChromeClient = WebChromeClient()
             webViewClient = object : WebViewClient() {
                 override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-                    progress.setVisibility(View.VISIBLE)
+                    progress.alpha = 1f
                 }
                 override fun onPageFinished(view: WebView?, url: String?) {
-                    progress.setVisibility(View.GONE)
+                    progress.alpha = 0f
                     selectAppealCourtDefaults()
                 }
                 override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean = false
