@@ -210,10 +210,28 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/cardAppeal"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_columnWeight="1"
+                android:layout_rowWeight="1"
+                android:layout_margin="6dp"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="10dp"
+                android:background="@drawable/bg_card_theme"
+                android:elevation="3dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+                <ImageView android:layout_width="52dp" android:layout_height="52dp" android:src="@drawable/ic_court" android:scaleType="fitCenter" android:contentDescription="الاستعلام عن قضايا محكمة استئناف البيضاء" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="الاستعلام عن قضايا\nمحكمة استئناف البيضاء" android:textColor="@color/NavyText" android:textSize="13sp" android:textStyle="bold" android:gravity="center" />
+            </LinearLayout>
+
+            <LinearLayout
                 android:id="@+id/cardPosts"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:layout_columnSpan="2"
                 android:layout_columnWeight="1"
                 android:layout_rowWeight="1"
                 android:layout_margin="6dp"
