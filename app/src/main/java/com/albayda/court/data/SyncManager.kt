@@ -183,6 +183,17 @@ object SyncManager {
         refresh()
     }
 
+    fun sendAdminNotification(title: String, body: String, targets: List<String>) {
+        val cleanTitle = title.trim()
+        val cleanBody = body.trim()
+        if (cleanTitle.isBlank() || cleanBody.isBlank() || targets.isEmpty()) return
+        val ts = now()
+        targets.distinct().forEach { target ->
+            queue("admin_notification", JSONObject().put("title", cleanTitle).put("body", cleanBody).put("target", target).put("timestamp", ts), ts)
+        }
+        refresh()
+    }
+
     fun notifyUserDeleted(mobile: String) {
         val ts = now()
         // Rejected/deleted users are removed locally; mirror deletion to Drive CSV sync.
