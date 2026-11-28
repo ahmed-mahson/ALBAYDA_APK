@@ -75,7 +75,7 @@ class AdminUsersActivity : AppCompatActivity() {
         search = EditText(this).apply {
             hint = "بحث بالاسم أو رقم الهاتف"
             textSize = 14f
-            singleLine = true
+            setSingleLine(true)
         }
         content.addView(search, full())
         usersList = ListView(this)
