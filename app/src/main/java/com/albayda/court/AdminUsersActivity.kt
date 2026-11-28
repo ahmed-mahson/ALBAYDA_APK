@@ -147,7 +147,8 @@ class AdminUsersActivity : AppCompatActivity() {
         content.addView(actionButton("إرسال إلى مجموعة المستخدمين المعتمدين") {
             val targets = users.filter { !it.isAdmin && it.isApproved && !it.isSuspended }.map { it.mobile }
             send(notificationTitle.text.toString(), notificationBody.text.toString(), targets)
-        }, full())        heading("متابعة حالة الإشعارات")
+        }, full())
+        heading("متابعة حالة الإشعارات")
         notificationReportText = label("لا توجد إشعارات مرسلة بعد")
         content.addView(notificationReportText, full())
     }
