@@ -11,7 +11,6 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Button
 import android.widget.LinearLayout
-import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -19,7 +18,6 @@ import androidx.core.content.ContextCompat
 /** In-app access to the Ministry of Justice's official case lookup and case card. */
 class AppealCourtSearchActivity : AppCompatActivity() {
     private lateinit var webView: WebView
-    private lateinit var progress: ProgressBar
 
     companion object {
         private const val SEARCH_URL = "https://judg.moj.gov.ye/JUDDATALIST/CustomRetCaseMaster"
@@ -57,11 +55,7 @@ class AppealCourtSearchActivity : AppCompatActivity() {
         header.addView(back)
         root.addView(header)
 
-        progress = ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal).apply {
-            isIndeterminate = true
-            progressTintList = ContextCompat.getColorStateList(this@AppealCourtSearchActivity, android.R.color.holo_green_dark)
-        }
-        root.addView(progress, LinearLayout.LayoutParams(-1, dp(3)))
+
 
         webView = WebView(this).apply {
             setBackgroundColor(-1)
@@ -75,10 +69,8 @@ class AppealCourtSearchActivity : AppCompatActivity() {
             webChromeClient = WebChromeClient()
             webViewClient = object : WebViewClient() {
                 override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-                    progress.alpha = 1f
                 }
                 override fun onPageFinished(view: WebView?, url: String?) {
-                    progress.alpha = 0f
                     selectAppealCourtDefaults()
                 }
                 override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean = false
