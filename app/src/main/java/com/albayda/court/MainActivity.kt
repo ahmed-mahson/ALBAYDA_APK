@@ -22,7 +22,7 @@ import com.google.firebase.FirebaseApp
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private val syncListener: () -> Unit = {
-        runOnUiThread { loadNews() }
+        runOnUiThread { if (AuthManager.getSession() == null) logout() else loadNews() }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
