@@ -214,6 +214,7 @@ object SyncManager {
         db.setMeta("user_event_ts_$mobile", ts)
         db.setMeta("drive_csv_user_ts_$mobile", ts)
         db.setMeta("deleted_user_$mobile", ts)
+        queue("user_deleted", JSONObject().put("mobile", mobile), ts)
         runCatching { DriveCsvSync.markUserDeleted(mobile, ts) }
         runCatching { DriveCsvSync.pushAsync() }
         refresh()
@@ -370,6 +371,12 @@ object SyncManager {
                             timestamp = ts.ifBlank { now() }
                         )
                     )
+                }
+            }
+            "user_deleted" -> {
+                val mobile = payload.optString("mobile")
+                if (mobile.isNotBlank() && isNewerUserEvent(mobile, ts)) {
+                    AuthManager.withRemoteApply { AuthManager.removeRemoteUser(mobile) }
                 }
             }
             "user_suspended" -> {
