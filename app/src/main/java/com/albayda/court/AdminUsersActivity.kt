@@ -24,6 +24,7 @@ class AdminUsersActivity : AppCompatActivity() {
     private lateinit var usersList: ListView
     private lateinit var logsText: TextView
     private lateinit var statsText: TextView
+    private lateinit var notificationReportText: TextView
     private var users: List<User> = emptyList()
     private var reportLogs: List<UserLog> = emptyList()
     private var dateFilter: String = ""
@@ -146,9 +147,15 @@ class AdminUsersActivity : AppCompatActivity() {
         content.addView(actionButton("إرسال إلى مجموعة المستخدمين المعتمدين") {
             val targets = users.filter { !it.isAdmin && it.isApproved && !it.isSuspended }.map { it.mobile }
             send(notificationTitle.text.toString(), notificationBody.text.toString(), targets)
-        }, full())
+        }, full())        heading("متابعة حالة الإشعارات")
+        notificationReportText = label("لا توجد إشعارات مرسلة بعد")
+        content.addView(notificationReportText, full())
     }
 
+    private fun showNotificationReports() {
+        val reports = SyncManager.notificationDeliveryReport()
+        notificationReportText.text = reports.take(100).joinToString("\n\n").ifBlank { "لا توجد إشعارات مرسلة بعد" }
+    }
     private fun showUserMenu(user: User) {
         val suspended = user.isSuspended || !user.isApproved
         val actions = arrayOf(
@@ -195,6 +202,7 @@ class AdminUsersActivity : AppCompatActivity() {
         if (targets.isEmpty()) { toast("لا يوجد مستلمون مطابقون"); return }
         SyncManager.sendAdminNotification(title, body, targets)
         AuthManager.auditAdmin("إرسال إشعار", "عدد المستلمين: " + if (targets.firstOrNull() == "ALL") users.size else targets.size)
+        showNotificationReports()
         toast("تم إرسال الإشعار إلى نظام المزامنة")
     }
 
@@ -211,6 +219,7 @@ class AdminUsersActivity : AppCompatActivity() {
             "\nإجمالي السجلات: " + logs.size + "\nالنشاط خلال آخر 30 يوماً: " + recent
         showUsers(search.text.toString())
         showLogs("")
+        showNotificationReports()
     }
 
     private fun visibleUsers(query: String) = users.filter {
