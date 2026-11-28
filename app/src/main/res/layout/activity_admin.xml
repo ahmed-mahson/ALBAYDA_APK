@@ -54,6 +54,18 @@
             android:padding="16dp">
 
             <Button
+                android:id="@+id/btnUserManagement"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp"
+                android:text="إدارة المستخدمين والتقارير والإشعارات"
+                android:background="@drawable/bg_figma_button"
+                android:backgroundTint="@null"
+                app:backgroundTint="@null"
+                android:textColor="@color/white"
+                android:textStyle="bold" />
+
+            <Button
                 android:id="@+id/btnOpenPosts"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
