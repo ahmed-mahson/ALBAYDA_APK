@@ -30,11 +30,14 @@ class AdminActivity : AppCompatActivity() {
         }
 
 
+        binding.btnUserManagement.setOnClickListener {
+            startActivity(Intent(this, AdminUsersActivity::class.java))
+        }
         binding.btnOpenPosts.setOnClickListener {
             startActivity(Intent(this, PostsActivity::class.java))
         }
         binding.navHome.setOnClickListener { finish() }
-        binding.navAdmin.setOnClickListener { }
+        binding.navAdmin.setOnClickListener { AuthManager.auditAdmin("فتح لوحة الإدارة") }
         binding.navAccount.setOnClickListener { showAccountDialog() }
 
         binding.etNews.setText(SyncManager.getNews().first)
