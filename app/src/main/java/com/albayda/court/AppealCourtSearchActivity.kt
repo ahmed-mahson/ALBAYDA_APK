@@ -94,7 +94,7 @@ class AppealCourtSearchActivity : AppCompatActivity() {
         val script = """
             (function() {
               const wanted = ['محافظة البيضاء', 'محكمة استئناف', 'محكمة استئناف البيضاء'];
-              function norm(s) { return (s || '').replace(/\\s+/g, ' ').trim(); }
+              function norm(s) { return (s || '').replace(/\s+/g, ' ').trim(); }
               function choose(text) {
                 for (const sel of Array.from(document.querySelectorAll('select'))) {
                   const opt = Array.from(sel.options).find(o => norm(o.text).includes(text));
