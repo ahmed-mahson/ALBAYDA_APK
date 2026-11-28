@@ -16,7 +16,8 @@ data class User(
     val passwordHash: String,
     val isApproved: Boolean,
     val isAdmin: Boolean,
-    val createdAt: String = ""
+    val createdAt: String = "",
+    val isSuspended: Boolean = false
 )
 
 data class UserLog(
@@ -192,6 +193,49 @@ object AuthManager {
         }
     }
 
+    fun setUserSuspended(mobile: String, suspended: Boolean): Boolean {
+        val users = getUsers().toMutableList()
+        val index = users.indexOfFirst { it.mobile == mobile && !it.isAdmin }
+        if (index < 0) return false
+        users[index] = users[index].copy(isApproved = !suspended, isSuspended = suspended)
+        if (suspended && getSession()?.mobile == mobile) clearSession()
+        saveUsers(users)
+        val user = users[index]
+        addLog(UserLog(now(), user.username, mobile, if (suspended) "إيقاف مستخدم" else "إعادة تفعيل مستخدم", "بواسطة مسؤول النظام"))
+        if (!applyingRemote) runCatching { SyncManager.notifyUserSuspended(mobile, suspended) }
+        return true
+    }
+
+    fun deleteUser(mobile: String): Boolean {
+        val users = getUsers().toMutableList()
+        val user = users.firstOrNull { it.mobile == mobile && !it.isAdmin } ?: return false
+        users.removeAll { it.mobile == mobile }
+        saveUsers(users)
+        addLog(UserLog(now(), user.username, mobile, "حذف حساب مستخدم", "بواسطة مسؤول النظام"))
+        if (!applyingRemote) runCatching { SyncManager.notifyUserDeleted(mobile) }
+        return true
+    }
+
+    fun removeRemoteUser(mobile: String) {
+        val users = getUsers().filterNot { it.mobile == mobile && !it.isAdmin }
+        saveUsers(users)
+        if (getSession()?.mobile == mobile) clearSession()
+    }
+
+    fun addRemoteLog(log: UserLog) {
+        val logs = getLogs().toMutableList()
+        if (logs.none { it.time == log.time && it.mobile == log.mobile && it.action == log.action && it.details == log.details }) {
+            logs.add(0, log)
+            prefs.edit().putString("user_logs", gson.toJson(logs.take(2000))).apply()
+        }
+    }
+
+    fun auditAdmin(action: String, details: String = "") {
+        val admin = getSession() ?: return
+        val log = UserLog(now(), admin.username, admin.mobile, "إجراء إداري: $action", details)
+        addLog(log)
+    }
+
     fun rejectUser(mobile: String) {
         val users = getUsers().toMutableList()
         val u = users.find { it.mobile == mobile }
@@ -231,8 +275,9 @@ object AuthManager {
         logs.add(0, log)
         val trimmed = if (logs.size > 500) logs.take(500) else logs
         prefs.edit().putString("user_logs", gson.toJson(trimmed)).apply()
+        if (!applyingRemote) runCatching { SyncManager.publishAuditLog(log) }
     }
 
-    fun pendingUsers(): List<User> = getUsers().filter { !it.isApproved && !it.isAdmin }
+    fun pendingUsers(): List<User> = getUsers().filter { !it.isApproved && !it.isAdmin && !it.isSuspended }
     fun allNonAdminUsers(): List<User> = getUsers().filter { !it.isAdmin }
 }

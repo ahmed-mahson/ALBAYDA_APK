@@ -183,12 +183,49 @@ object SyncManager {
         refresh()
     }
 
+    fun sendAdminNotification(title: String, body: String, targets: List<String>) {
+        val cleanTitle = title.trim()
+        val cleanBody = body.trim()
+        if (cleanTitle.isBlank() || cleanBody.isBlank() || targets.isEmpty()) return
+        val ts = now()
+        targets.distinct().forEach { target ->
+            val id = queue("admin_notification", JSONObject().put("title", cleanTitle).put("body", cleanBody)
+                .put("target", target).put("timestamp", ts), ts)
+            db.setMeta("admin_sent_" + id, target + "|" + cleanTitle + "|" + ts)
+        }
+        refresh()
+    }
+
+    fun notificationDeliveryReport(): List<String> = db.getMetaEntries("admin_sent_").map { entry ->
+        val id = entry.key.removePrefix("admin_sent_")
+        val parts = entry.value.split("|", limit = 3)
+        val target = parts.getOrNull(0).orEmpty()
+        val title = parts.getOrNull(1).orEmpty()
+        val readCount = db.getMetaEntries("notification_read_" + id + "_").size
+        val total = if (target == "ALL") AuthManager.allNonAdminUsers().size else 1
+        title + " — " + (if (target == "ALL") "الجميع" else target) + " — القراءة: " + readCount + "/" + total
+    }
+    fun notifyUserSuspended(mobile: String, suspended: Boolean) {
+        val ts = now()
+        db.setMeta("user_event_ts_$mobile", ts)
+        queue("user_suspended", JSONObject().put("mobile", mobile).put("suspended", suspended), ts)
+        refresh()
+    }
+
+    fun publishAuditLog(log: UserLog) {
+        val ts = now()
+        queue("user_log", JSONObject().put("time", log.time).put("username", log.username)
+            .put("mobile", log.mobile).put("action", log.action).put("details", log.details), ts)
+        refresh()
+    }
+
     fun notifyUserDeleted(mobile: String) {
         val ts = now()
         // Rejected/deleted users are removed locally; mirror deletion to Drive CSV sync.
         db.setMeta("user_event_ts_$mobile", ts)
         db.setMeta("drive_csv_user_ts_$mobile", ts)
         db.setMeta("deleted_user_$mobile", ts)
+        queue("user_deleted", JSONObject().put("mobile", mobile), ts)
         runCatching { DriveCsvSync.markUserDeleted(mobile, ts) }
         runCatching { DriveCsvSync.pushAsync() }
         refresh()
@@ -200,7 +237,15 @@ object SyncManager {
 
     fun notifications(): List<SyncNotification> = db.getNotifications()
 
-    fun markNotificationsRead() = db.markNotificationsRead()
+    fun markNotificationsRead() {
+        val mobile = AuthManager.getSession()?.mobile.orEmpty()
+        db.getNotifications().filter { !it.isRead }.forEach { notification ->
+            val ts = now()
+            queue("notification_read", JSONObject().put("notification_id", notification.id)
+                .put("mobile", mobile).put("read_at", ts), ts)
+        }
+        db.markNotificationsRead()
+    }
 
     fun refresh() {
         if (!::appContext.isInitialized) return
@@ -210,10 +255,11 @@ object SyncManager {
         }
     }
 
-    private fun queue(type: String, payload: JSONObject, timestamp: String) {
+    private fun queue(type: String, payload: JSONObject, timestamp: String): String {
         val event = SyncEvent(UUID.randomUUID().toString(), type, payload.toString(), timestamp)
         db.queueEvent(event)
         MqttTransport.publish(event.id, event.type, event.payload, event.createdAt)
+        return event.id
     }
 
     /** Replays anything that was created while the broker was unavailable. */
@@ -345,6 +391,37 @@ object SyncManager {
                             timestamp = ts.ifBlank { now() }
                         )
                     )
+                }
+            }
+            "user_deleted" -> {
+                val mobile = payload.optString("mobile")
+                if (mobile.isNotBlank() && isNewerUserEvent(mobile, ts)) {
+                    AuthManager.withRemoteApply { AuthManager.removeRemoteUser(mobile) }
+                }
+            }
+            "user_suspended" -> {
+                val mobile = payload.optString("mobile")
+                if (mobile.isNotBlank() && isNewerUserEvent(mobile, ts)) {
+                    AuthManager.withRemoteApply { AuthManager.setUserSuspended(mobile, payload.optBoolean("suspended")) }
+                }
+            }
+            "user_log" -> {
+                AuthManager.addRemoteLog(UserLog(payload.optString("time", ts), payload.optString("username"),
+                    payload.optString("mobile"), payload.optString("action"), payload.optString("details")))
+            }
+            "notification_read" -> {
+                val notificationId = payload.optString("notification_id")
+                val mobile = payload.optString("mobile")
+                if (notificationId.isNotBlank() && mobile.isNotBlank()) {
+                    db.setMeta("notification_read_" + notificationId + "_" + mobile, payload.optString("read_at", ts))
+                }
+            }
+            "admin_notification" -> {
+                val target = payload.optString("target")
+                val sessionMobile = AuthManager.getSession()?.mobile.orEmpty()
+                if (target == "ALL" || target == sessionMobile) {
+                    db.addNotification(SyncNotification(id, payload.optString("title"), payload.optString("body"),
+                        payload.optString("timestamp", ts)))
                 }
             }
             "user_updated" -> {

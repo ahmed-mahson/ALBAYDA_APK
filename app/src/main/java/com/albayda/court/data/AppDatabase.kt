@@ -186,6 +186,14 @@ class AppDatabase(context: Context) : SQLiteOpenHelper(context, DB_NAME, null, D
         writableDatabase.insertWithOnConflict("meta", null, values, SQLiteDatabase.CONFLICT_REPLACE)
     }
 
+    fun getMetaEntries(prefix: String): Map<String, String> {
+        return readableDatabase.rawQuery("SELECT key, value FROM meta WHERE key LIKE ?", arrayOf(prefix + "%")).use { cursor ->
+            val values = linkedMapOf<String, String>()
+            while (cursor.moveToNext()) values[cursor.getString(0)] = cursor.getString(1) ?: ""
+            values
+        }
+    }
+
     fun isEventApplied(id: String): Boolean {
         if (id.isBlank()) return false
         return readableDatabase.rawQuery(

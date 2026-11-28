@@ -16,6 +16,7 @@ class RegisterActivity : AppCompatActivity() {
         setContentView(binding.root)
         AuthManager.init(this)
         SyncManager.init(this)
+        SyncManager.init(this)
 
         binding.btnRegister.setOnClickListener {
             val username = binding.etUsername.text.toString().trim()

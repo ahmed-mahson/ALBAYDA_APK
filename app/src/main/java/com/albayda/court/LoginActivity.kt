@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.albayda.court.data.AuthManager
+import com.albayda.court.data.SyncManager
 import com.albayda.court.databinding.ActivityLoginBinding
 
 class LoginActivity : AppCompatActivity() {
@@ -15,6 +16,7 @@ class LoginActivity : AppCompatActivity() {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
         AuthManager.init(this)
+        SyncManager.init(this)
 
         val session = AuthManager.getSession()
         if (session != null && session.isApproved) {
