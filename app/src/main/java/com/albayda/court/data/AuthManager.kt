@@ -234,7 +234,6 @@ object AuthManager {
         val admin = getSession() ?: return
         val log = UserLog(now(), admin.username, admin.mobile, "إجراء إداري: $action", details)
         addLog(log)
-        if (!applyingRemote) runCatching { SyncManager.publishAuditLog(log) }
     }
 
     fun rejectUser(mobile: String) {
@@ -276,6 +275,7 @@ object AuthManager {
         logs.add(0, log)
         val trimmed = if (logs.size > 500) logs.take(500) else logs
         prefs.edit().putString("user_logs", gson.toJson(trimmed)).apply()
+        if (!applyingRemote) runCatching { SyncManager.publishAuditLog(log) }
     }
 
     fun pendingUsers(): List<User> = getUsers().filter { !it.isApproved && !it.isAdmin && !it.isSuspended }
