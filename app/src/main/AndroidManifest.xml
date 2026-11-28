@@ -49,6 +49,11 @@
             android:windowSoftInputMode="adjustResize" />
 
         <activity
+            android:name=".AppealCourtSearchActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
             android:name=".AdminActivity"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize" />
